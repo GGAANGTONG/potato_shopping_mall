@@ -5,9 +5,9 @@ import { configModuleValidationSchema } from 'configs/env_validation';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmModuleOptions } from 'configs/typeOrmModuleOption';
 import { OrdersModule } from './orders/orders.module';
-import { PaymentsService } from './payments/payments.service';
-import { PaymentsController } from './payments/payments.controller';
 import { PaymentsModule } from './payments/payments.module';
+import { UsersModule } from './user/users.module';
+import { GoodsModule } from './goods/goods.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -15,10 +15,13 @@ import { PaymentsModule } from './payments/payments.module';
     validationSchema: configModuleValidationSchema
   }),
   TypeOrmModule.forRootAsync(typeOrmModuleOptions),
+
   OrdersModule,
-  PaymentsModule
+  PaymentsModule,
+  UsersModule,
+  GoodsModule,
 ],
-  controllers: [AppController, PaymentsController],
-  providers: [PaymentsService],
+  controllers: [AppController],
+  providers: [],
 })
 export class AppModule {}
