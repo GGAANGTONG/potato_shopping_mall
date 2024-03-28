@@ -4,18 +4,24 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeor
 
 
 @Entity('Carts')
-export class Cart {
+export class Carts {
+
+    @IsNumber()
     @PrimaryGeneratedColumn({ unsigned: true })
     id: number;
 
+    @IsNumber()
     @Column({ unsigned: true })
-    user_Id: number;
+    user_id: number;
 
+    @IsNumber()
     @Column({ unsigned: true })
-    goods_Id: number;
+    goods_id: number;
 
+    @IsNumber()
     @Column({ unsigned: true })
-    order_Id: number;
+    order_id: number;
+
 
     @IsNumber()
     @Column()
@@ -23,12 +29,9 @@ export class Cart {
 
     @IsNumber()
     @Column()
-    ct_totalprice: number;
+    ct_total_price: number;
 
     @CreateDateColumn()
     ct_date: Date;
-
-
-
 
 }

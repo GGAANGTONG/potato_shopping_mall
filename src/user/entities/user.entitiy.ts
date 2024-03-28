@@ -1,37 +1,54 @@
 
 import {
   Column,
-  DeleteDateColumn,
   Entity,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Role } from '../type/user_role.type';
+import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsString, IsStrongPassword } from 'class-validator';
 
 @Entity({
-  name: 'users',
+  name: 'Users',
 })
-export class User {
-  @PrimaryGeneratedColumn()
-  userId: number;
+export class Users {
 
-  @Column({ type: 'varchar', nullable: false })
+  @IsNumber()
+  @PrimaryGeneratedColumn({unsigned: true})
+  id: number;
+
+  @IsString()
+  @IsNotEmpty()
+  @Column({ type: 'varchar'})
   name: string;
 
-  @Column({ type: 'varchar', select: false, nullable: false })
+  @IsStrongPassword(
+    {},
+    {
+      message:
+        "비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다.",
+    },
+  )
+  @IsNotEmpty()
+  @Column({ type: 'varchar', select: false})
   password: string;
 
-  @Column({ type: 'varchar', unique: true, nullable: false })
+  @IsEmail()
+  @IsNotEmpty()
+  @Column({ type: 'varchar', unique: true})
   email: string;
   
-  @Column({ type: 'varchar', nullable: false })
+  @IsString()
+  @IsNotEmpty()
+  @Column({ type: 'varchar'})
   nickname: string;
 
+  @IsString()
   @Column({ type: 'text', nullable: true })
   profile?: string;
 
+  @IsEnum(Role)
   @Column({ type: 'enum', enum: Role, default: Role.User })
   role: Role;
 
-
+//point 컬럼 새로 생성부탁드립니다.
 }
