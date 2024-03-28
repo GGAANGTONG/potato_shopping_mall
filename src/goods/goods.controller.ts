@@ -37,6 +37,11 @@ export class GoodsController {
     return this.goodsService.findAll(g_name, cate_id);
   }
 
+  /**
+   * 상품 하나 상세조회
+   * @param id 
+   * @returns 
+   */
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.goodsService.findOne(+id);
