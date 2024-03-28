@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 
-@Entity({name: "carts"})
+@Entity({ name: "carts" })
 export class Carts {
   @IsNumber()
   @PrimaryGeneratedColumn({ unsigned: true })

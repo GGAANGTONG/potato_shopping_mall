@@ -16,8 +16,8 @@ export class GoodsController {
 
   /**
    * 상품등록
-   * @param createGoodDto 
-   * @returns 
+   * @param createGoodDto
+   * @returns
    */
   @Post()
   create(@Body() createGoodDto: CreateGoodDto) {
