@@ -14,7 +14,9 @@ import { UsersModule } from './user/users.module';
     isGlobal: true,
     validationSchema: configModuleValidationSchema
   }),
-  TypeOrmModule.forRootAsync(typeOrmModuleOptions),
+  TypeOrmModule.forRootAsync(
+    typeOrmModuleOptions
+  ),
 
   OrdersModule,
   PaymentsModule,
