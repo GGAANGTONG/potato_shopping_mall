@@ -20,7 +20,7 @@ export class GoodsService {
     return newGood;
   }
 
-  findAll() {
+  async findAll() {
     return `This action returns all goods`;
   }
 

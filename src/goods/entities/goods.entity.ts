@@ -7,9 +7,11 @@ import {
   JoinColumn,
   ManyToOne,
   OneToOne,
+  OneToMany,
 } from "typeorm";
 import { Categories } from "./categories.entity";
 import { Stocks } from "./stocks.entity";
+import { Orders } from "../../orders/order.entities/orders.entity";
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 @Entity({ name: "goods" })
@@ -52,4 +54,7 @@ export class Goods {
 
   @OneToOne(() => Stocks, (stocks) => stocks.goods)
   stock: Stocks;
+
+  @OneToMany(() => Orders, orders => orders.goods)
+  orders: Orders[];
 }
