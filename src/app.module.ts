@@ -7,7 +7,7 @@ import { typeOrmModuleOptions } from "configs/typeOrmModuleOption";
 import { OrdersModule } from "./orders/orders.module";
 import { PaymentsModule } from "./payments/payments.module";
 import { UsersModule } from "./user/users.module";
-import { GoodsModule } from './goods/goods.module';
+import { GoodsModule } from "./goods/goods.module";
 
 @Module({
   imports: [
@@ -17,12 +17,12 @@ import { GoodsModule } from './goods/goods.module';
     }),
 
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
-
-  OrdersModule,
-  PaymentsModule,
-  UsersModule,
-  GoodsModule,
-],
+    UsersModule,
+    OrdersModule,
+    PaymentsModule,
+    UsersModule,
+    GoodsModule,
+  ],
   controllers: [AppController],
   providers: [],
 })

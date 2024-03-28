@@ -50,6 +50,6 @@ export class Users {
   role: Role;
 
   @IsNumber()
-  @Column({ type: 'int',  default: 1000000 })
+  @Column({ type: "int", default: 1000000 })
   points: number;
 }
