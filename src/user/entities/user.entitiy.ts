@@ -7,9 +7,7 @@ import {
 import { Role } from '../type/user_role.type';
 import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsString, IsStrongPassword } from 'class-validator';
 
-@Entity({
-  name: 'Users',
-})
+@Entity({name: 'users'})
 export class Users {
 
   @IsNumber()

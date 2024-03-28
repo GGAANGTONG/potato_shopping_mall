@@ -4,7 +4,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGenerat
 
 
 
-@Entity('Orders')
+@Entity({name: 'orders'})
 export class Orders {
 
     @IsNumber()

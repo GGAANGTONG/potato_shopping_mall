@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeor
 
 
 
-@Entity('Carts')
+@Entity({name: 'carts'})
 export class Carts {
 
     @IsNumber()

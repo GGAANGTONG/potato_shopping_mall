@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 
 
-@Entity('Ordersdetails')
+@Entity({name: 'ordersdetails'})
 export class Ordersdetails {
 
     @IsNumber()
