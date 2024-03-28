@@ -21,11 +21,11 @@ export class GoodsService {
 
   async findAll(g_name?: string, cate_id?: string) {
     const whereOptions = [];
-    
+
     if (g_name) {
       whereOptions.push({ g_name: g_name });
     }
-    
+
     if (cate_id) {
       whereOptions.push({ category: cate_id });
     }

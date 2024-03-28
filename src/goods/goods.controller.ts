@@ -27,16 +27,15 @@ export class GoodsController {
 
   /**
    * 상품 전체 조회
-   * @returns 
+   * @returns
    */
   @Get()
   findAll(
-    @Query('g_name') g_name?: string, 
-    @Query('cate_id') cate_id?: string
+    @Query("g_name") g_name?: string,
+    @Query("cate_id") cate_id?: string,
   ) {
     return this.goodsService.findAll(g_name, cate_id);
   }
-
 
   @Get(":id")
   findOne(@Param("id") id: string) {
