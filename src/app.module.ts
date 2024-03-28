@@ -5,15 +5,16 @@ import { configModuleValidationSchema } from 'configs/env_validation';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmModuleOptions } from 'configs/typeOrmModuleOption';
 import { OrdersModule } from './orders/orders.module';
+import { PaymentsService } from './payments/payments.service';
+import { PaymentsController } from './payments/payments.controller';
 import { PaymentsModule } from './payments/payments.module';
-import { UsersModule } from './user/users.module';
-import { GoodsModule } from './goods/goods.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
     validationSchema: configModuleValidationSchema
   }),
+
   TypeOrmModule.forRootAsync(
     typeOrmModuleOptions
   ),
@@ -26,4 +27,4 @@ import { GoodsModule } from './goods/goods.module';
   controllers: [AppController],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }
