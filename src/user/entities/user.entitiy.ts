@@ -50,5 +50,7 @@ export class Users {
   @Column({ type: 'enum', enum: Role, default: Role.User })
   role: Role;
 
-//point 컬럼 새로 생성부탁드립니다.
+  @IsNumber()
+  @Column()
+  points: number;
 }
