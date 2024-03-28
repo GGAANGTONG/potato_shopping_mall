@@ -4,7 +4,7 @@ import {
   TypeOrmModuleOptions,
 } from "@nestjs/typeorm";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
-
+import { Users } from "src/user/entities/user.entitiy";
 export const typeOrmModuleOptions: TypeOrmModuleAsyncOptions = {
   imports: [ConfigModule],
   inject: [ConfigService],

@@ -14,11 +14,17 @@ import { PaymentsModule } from './payments/payments.module';
     isGlobal: true,
     validationSchema: configModuleValidationSchema
   }),
-  TypeOrmModule.forRootAsync(typeOrmModuleOptions),
-    OrdersModule,
-    PaymentsModule
-  ],
-  controllers: [AppController, PaymentsController],
-  providers: [PaymentsService],
+
+  TypeOrmModule.forRootAsync(
+    typeOrmModuleOptions
+  ),
+
+  OrdersModule,
+  PaymentsModule,
+  UsersModule,
+  GoodsModule,
+],
+  controllers: [AppController],
+  providers: [],
 })
 export class AppModule { }
