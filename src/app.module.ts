@@ -8,6 +8,8 @@ import { OrdersModule } from './orders/orders.module';
 import { PaymentsService } from './payments/payments.service';
 import { PaymentsController } from './payments/payments.controller';
 import { PaymentsModule } from './payments/payments.module';
+import { UsersModule } from './user/users.module';
+import { GoodsModule } from './goods/goods.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
