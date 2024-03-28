@@ -1,49 +1,57 @@
-import { IsNumber, IsString } from "class-validator";
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 
 
 @Entity('Orders')
-export class Order {
+export class Orders {
+
+    @IsNumber()
     @PrimaryGeneratedColumn({ unsigned: true })
     id: number;
 
+    @IsNumber()
     @Column({ unsigned: true })
-    user_Id: number;
+    user_id: number;
 
     @IsString()
+    @IsNotEmpty()
     @Column()
     o_name: string;
 
     @IsString()
+    @IsNotEmpty()
     @Column()
     o_tel: string;
 
     @IsString()
+    @IsNotEmpty()
     @Column()
     o_addr: string;
 
     @IsNumber()
+    @IsNotEmpty()
     @Column()
     o_count: number;
 
     @IsNumber()
+    @IsNotEmpty()
     @Column()
-    o_totalprice: number;
+    o_total_price: number;
 
     @IsString()
-    @Column()
+    @Column({nullable: true})
     o_req: string;
 
+    //enum으로 바꾸면 좋을 것 같아요
     @IsString()
+    @IsNotEmpty()
     @Column()
     o_status: string;
 
-
     @CreateDateColumn()
     o_date: Date;
-
-
-
-
+    
+    @UpdateDateColumn()
+    updated_at: Date;
 }
