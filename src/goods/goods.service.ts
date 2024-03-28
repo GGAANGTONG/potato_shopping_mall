@@ -7,12 +7,11 @@ import { Repository } from "typeorm";
 
 @Injectable()
 export class GoodsService {
-
   constructor(
     @InjectRepository(Goods)
     private goodsRepository: Repository<Goods>,
   ) {}
-  
+
   async create(createGoodDto: CreateGoodDto) {
     const newGood = this.goodsRepository.create(createGoodDto);
     await this.goodsRepository.save(newGood);
@@ -29,7 +28,7 @@ export class GoodsService {
   }
 
   update(id: number, updateGoodDto: UpdateGoodDto) {
-    return `This action updates a #${id} good`;
+    return `This action updates a #${id}, ${updateGoodDto} good`;
   }
 
   remove(id: number) {

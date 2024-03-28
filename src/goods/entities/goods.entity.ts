@@ -16,9 +16,8 @@ import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 @Entity({ name: "goods" })
 export class Goods {
-
   @IsNumber()
-  @PrimaryGeneratedColumn({unsigned: true})
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
   @IsString()
@@ -55,6 +54,6 @@ export class Goods {
   @OneToOne(() => Stocks, (stocks) => stocks.goods)
   stock: Stocks;
 
-  @OneToMany(() => Orders, orders => orders.goods)
+  @OneToMany(() => Orders, (orders) => orders.goods)
   orders: Orders[];
 }

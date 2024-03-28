@@ -1,4 +1,3 @@
-import { ConfigService } from "@nestjs/config";
 import { IsNumber } from "class-validator";
 import {
   Column,
@@ -7,10 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 
-const configService = new ConfigService();
-@Entity({
-  name: "carts",
-})
+@Entity({ name: "carts" })
 export class Carts {
   @IsNumber()
   @PrimaryGeneratedColumn({ unsigned: true })
