@@ -1,6 +1,7 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { Goods } from "src/goods/entities/goods.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Status } from "../types/order.type";
 
 
 
@@ -45,10 +46,15 @@ export class Orders {
     o_req: string;
 
     //enum으로 바꾸면 좋을 것 같아요
-    @IsString()
+    @IsEnum(Status)
     @IsNotEmpty()
-    @Column()
-    o_status: string;
+    @Column("enum", {
+        name: "status",
+        enum: Object.values(status),
+        default: Status.Orderdone,
+        nullable: false,
+    })
+    status: Status;
 
     @CreateDateColumn()
     o_date: Date;
