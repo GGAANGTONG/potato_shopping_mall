@@ -7,7 +7,7 @@ import { typeOrmModuleOptions } from 'configs/typeOrmModuleOption';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { UsersModule } from './user/users.module';
-import { GoodsModule } from './goods/goods.module';
+// import { GoodsModule } from './goods/goods.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -19,7 +19,7 @@ import { GoodsModule } from './goods/goods.module';
   OrdersModule,
   PaymentsModule,
   UsersModule,
-  GoodsModule,
+  // GoodsModule,
 ],
   controllers: [AppController],
   providers: [],
