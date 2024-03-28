@@ -14,7 +14,9 @@ import { GoodsModule } from './goods/goods.module';
     isGlobal: true,
     validationSchema: configModuleValidationSchema
   }),
-  TypeOrmModule.forRootAsync(typeOrmModuleOptions),
+  TypeOrmModule.forRootAsync(
+    typeOrmModuleOptions
+  ),
 
   OrdersModule,
   PaymentsModule,
