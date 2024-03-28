@@ -1,24 +1,23 @@
-
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Role } from "../type/user_role.type";
 import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Role } from '../type/user_role.type';
-import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsString, IsStrongPassword } from 'class-validator';
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsStrongPassword,
+} from "class-validator";
 
-@Entity({
-  name: 'Users',
-})
+@Entity({ name: "users" })
 export class Users {
-
   @IsNumber()
-  @PrimaryGeneratedColumn({unsigned: true})
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
   @IsString()
   @IsNotEmpty()
-  @Column({ type: 'varchar'})
+  @Column({ type: "varchar" })
   name: string;
 
   @IsStrongPassword(
@@ -29,25 +28,25 @@ export class Users {
     },
   )
   @IsNotEmpty()
-  @Column({ type: 'varchar', select: false})
+  @Column({ type: "varchar", select: false })
   password: string;
 
   @IsEmail()
   @IsNotEmpty()
-  @Column({ type: 'varchar', unique: true})
+  @Column({ type: "varchar", unique: true })
   email: string;
-  
+
   @IsString()
   @IsNotEmpty()
-  @Column({ type: 'varchar'})
+  @Column({ type: "varchar" })
   nickname: string;
 
   @IsString()
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: "text", nullable: true })
   profile?: string;
 
   @IsEnum(Role)
-  @Column({ type: 'enum', enum: Role, default: Role.User })
+  @Column({ type: "enum", enum: Role, default: Role.User })
   role: Role;
 
   @IsNumber()
