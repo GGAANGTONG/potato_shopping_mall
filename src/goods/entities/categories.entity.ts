@@ -4,7 +4,6 @@ import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 @Entity({ name: "categories" })
 export class Categories {
-  
   @IsNumber()
   @PrimaryGeneratedColumn()
   id: number;

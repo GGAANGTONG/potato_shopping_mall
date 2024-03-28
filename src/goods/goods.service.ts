@@ -7,12 +7,11 @@ import { Repository } from "typeorm";
 
 @Injectable()
 export class GoodsService {
-
   constructor(
     @InjectRepository(Goods)
     private goodsRepository: Repository<Goods>,
   ) {}
-  
+
   async create(createGoodDto: CreateGoodDto) {
     const newGood = this.goodsRepository.create(createGoodDto);
     await this.goodsRepository.save(newGood);
@@ -20,8 +19,20 @@ export class GoodsService {
     return newGood;
   }
 
-  async findAll() {
-    return `This action returns all goods`;
+  async findAll(g_name?: string, cate_id?: string) {
+    const whereOptions = [];
+    
+    if (g_name) {
+      whereOptions.push({ g_name: g_name });
+    }
+    
+    if (cate_id) {
+      whereOptions.push({ category: cate_id });
+    }
+
+    return this.goodsRepository.find({
+      where: whereOptions.length > 0 ? whereOptions : {},
+    });
   }
 
   findOne(id: number) {
@@ -29,7 +40,7 @@ export class GoodsService {
   }
 
   update(id: number, updateGoodDto: UpdateGoodDto) {
-    return `This action updates a #${id} good`;
+    return `This action updates a #${id}, ${updateGoodDto} good`;
   }
 
   remove(id: number) {

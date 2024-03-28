@@ -10,7 +10,6 @@ import { IsNumber } from "class-validator";
 
 @Entity({ name: "stocks" })
 export class Stocks {
-
   @IsNumber()
   @PrimaryGeneratedColumn()
   id: number;
