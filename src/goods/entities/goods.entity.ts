@@ -10,31 +10,40 @@ import {
 } from "typeorm";
 import { Categories } from "./categories.entity";
 import { Stocks } from "./stocks.entity";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 @Entity({ name: "goods" })
 export class Goods {
-  @PrimaryGeneratedColumn()
+
+  @IsNumber()
+  @PrimaryGeneratedColumn({unsigned: true})
   id: number;
 
+  @IsString()
   @Column({ type: "varchar", length: 100 })
   g_name: string;
 
+  @IsNumber()
   @Column({ type: "int" })
   g_price: number;
 
+  @IsString()
+  @IsNotEmpty()
   @Column({ type: "varchar", length: 255 })
   g_desc: string;
 
+  @IsString()
   @Column({ type: "varchar", length: 255, nullable: true })
   g_img: string | null;
 
+  @IsString()
   @Column({ type: "varchar", length: 255, nullable: true })
   g_option: string | null;
 
-  @CreateDateColumn({ name: "createdAt" })
+  @CreateDateColumn()
   created_at: Date;
 
-  @UpdateDateColumn({ name: "updatedAt" })
+  @UpdateDateColumn()
   updated_at: Date;
 
   @ManyToOne(() => Categories, (category) => category.goods)
