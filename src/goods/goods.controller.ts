@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from "@nestjs/common";
 import { GoodsService } from "./goods.service";
 import { CreateGoodDto } from "./dto/create-goods.dto";
@@ -24,10 +25,18 @@ export class GoodsController {
     return this.goodsService.create(createGoodDto);
   }
 
+  /**
+   * 상품 전체 조회
+   * @returns 
+   */
   @Get()
-  findAll() {
-    return this.goodsService.findAll();
+  findAll(
+    @Query('g_name') g_name?: string, 
+    @Query('cate_id') cate_id?: string
+  ) {
+    return this.goodsService.findAll(g_name, cate_id);
   }
+
 
   @Get(":id")
   findOne(@Param("id") id: string) {

@@ -19,8 +19,20 @@ export class GoodsService {
     return newGood;
   }
 
-  async findAll() {
-    return `This action returns all goods`;
+  async findAll(g_name?: string, cate_id?: string) {
+    const whereOptions = [];
+    
+    if (g_name) {
+      whereOptions.push({ g_name: g_name });
+    }
+    
+    if (cate_id) {
+      whereOptions.push({ category: cate_id });
+    }
+
+    return this.goodsRepository.find({
+      where: whereOptions.length > 0 ? whereOptions : {},
+    });
   }
 
   findOne(id: number) {
