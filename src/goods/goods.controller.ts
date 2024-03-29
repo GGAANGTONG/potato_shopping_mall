@@ -25,9 +25,12 @@ export class GoodsController {
     return this.goodsService.create(createGoodDto);
   }
 
+
   /**
-   * 상품 전체 조회
-   * @returns
+   * 상품 조회
+   * @param g_name
+   * @param cate_id 
+   * @returns 
    */
   @Get()
   findAll(
@@ -43,10 +46,16 @@ export class GoodsController {
    * @returns 
    */
   @Get(":id")
-  findOne(@Param("id") id: string) {
+  findOne(@Param("id") id: number) {
     return this.goodsService.findOne(+id);
   }
 
+  /**
+   * 상품 정보 수정
+   * @param id 
+   * @param updateGoodDto 
+   * @returns 
+   */
   @Patch(":id")
   update(@Param("id") id: string, @Body() updateGoodDto: UpdateGoodDto) {
     return this.goodsService.update(+id, updateGoodDto);
