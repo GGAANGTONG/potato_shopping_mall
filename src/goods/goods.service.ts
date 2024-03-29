@@ -77,7 +77,17 @@ export class GoodsService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} good`;
+  async remove(id: number) {
+    const good = await this.goodsRepository.findOneBy({ id });
+    if (!good) {
+      throw new NotFoundException("해당 상품을 찾을 수 없습니다.");
+    }
+
+    try {
+      await this.goodsRepository.delete(id);
+      return {'message' : '상품이 성공적으로 삭제되었습니다.', 'data' : good}
+    } catch (error) {
+      throw new InternalServerErrorException('상품 삭제 처리 중 에러가 발생했습니다.');
+    }
   }
 }

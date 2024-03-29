@@ -60,6 +60,11 @@ export class GoodsController {
     return this.goodsService.update(+id, updateGoodDto);
   }
 
+  /**
+   * 상품 정보 삭제
+   * @param id 
+   * @returns 
+   */
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.goodsService.remove(+id);
