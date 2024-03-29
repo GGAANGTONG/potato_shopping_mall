@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { Goods } from "src/goods/entities/goods.entity";
 import {
   Column,
@@ -6,9 +6,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Status } from "../types/order.type";
+import { Reviews } from "./review.entity";
 
 @Entity({ name: "orders" })
 export class Orders {
@@ -50,10 +53,10 @@ export class Orders {
   o_req: string;
 
   //enum으로 바꾸면 좋을 것 같아요
-  @IsString()
+  @IsEnum(Status)
   @IsNotEmpty()
-  @Column()
-  o_status: string;
+  @Column({ type: "enum", enum: Status })
+  o_status: Status;
 
   @CreateDateColumn()
   o_date: Date;
@@ -66,4 +69,7 @@ export class Orders {
   })
   @JoinColumn({ name: "goods_id", referencedColumnName: "id" })
   goods: Goods;
+
+  @OneToOne(() => Reviews, (reviews) => reviews.orders)
+  reviews: Reviews;
 }
