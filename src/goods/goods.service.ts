@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from "@nestjs/common";
 import { CreateGoodDto } from "./dto/create-goods.dto";
 import { UpdateGoodDto } from "./dto/update-goods.dto";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -18,7 +22,9 @@ export class GoodsService {
       await this.goodsRepository.save(newGood);
       return newGood;
     } catch (error) {
-      throw new InternalServerErrorException('상품 생성 중 에러가 발생했습니다.');
+      throw new InternalServerErrorException(
+        "상품 생성 중 에러가 발생했습니다.",
+      );
     }
   }
 
@@ -39,25 +45,25 @@ export class GoodsService {
   /**
    * 상세조회
    * @param id number
-   * @returns 
+   * @returns
    */
   async findOne(id: number): Promise<Goods> {
     const good = await this.goodsRepository.findOneBy({ id });
     if (!good) {
-      throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
+      throw new NotFoundException("해당 상품을 찾을 수 없습니다.");
     }
     return good;
   }
 
   /**
    * 상품 정보 수정
-   * @param id 
-   * @param updateGoodDto 
+   * @param id
+   * @param updateGoodDto
    */
   async update(id: number, updateGoodDto: UpdateGoodDto) {
     const good = await this.goodsRepository.findOneBy({ id });
     if (!good) {
-      throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
+      throw new NotFoundException("해당 상품을 찾을 수 없습니다.");
     }
 
     try {
@@ -65,7 +71,9 @@ export class GoodsService {
       await this.goodsRepository.save(updatedGood);
       return updatedGood;
     } catch (error) {
-      throw new InternalServerErrorException('상품 업데이트 중 에러가 발생했습니다.');
+      throw new InternalServerErrorException(
+        "상품 업데이트 중 에러가 발생했습니다.",
+      );
     }
   }
 
