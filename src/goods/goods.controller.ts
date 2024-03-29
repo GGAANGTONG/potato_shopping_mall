@@ -7,11 +7,11 @@ import {
   Param,
   Delete,
   Query,
-} from '@nestjs/common';
-import { GoodsService } from './goods.service';
-import { CreateGoodDto } from './dto/create-goods.dto';
-import { UpdateGoodDto } from './dto/update-goods.dto';
-@Controller('goods')
+} from "@nestjs/common";
+import { GoodsService } from "./goods.service";
+import { CreateGoodDto } from "./dto/create-goods.dto";
+import { UpdateGoodDto } from "./dto/update-goods.dto";
+@Controller("goods")
 export class GoodsController {
   constructor(private readonly goodsService: GoodsService) {}
 
@@ -33,8 +33,8 @@ export class GoodsController {
    */
   @Get()
   findAll(
-    @Query('g_name') g_name?: string,
-    @Query('cate_id') cate_id?: string,
+    @Query("g_name") g_name?: string,
+    @Query("cate_id") cate_id?: string,
   ) {
     return this.goodsService.findAll(g_name, cate_id);
   }
@@ -44,8 +44,8 @@ export class GoodsController {
    * @param id
    * @returns
    */
-  @Get(':id')
-  findOne(@Param('id') id: number) {
+  @Get(":id")
+  findOne(@Param("id") id: number) {
     return this.goodsService.findOne(+id);
   }
 
@@ -55,13 +55,13 @@ export class GoodsController {
    * @param updateGoodDto
    * @returns
    */
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGoodDto: UpdateGoodDto) {
+  @Patch(":id")
+  update(@Param("id") id: string, @Body() updateGoodDto: UpdateGoodDto) {
     return this.goodsService.update(+id, updateGoodDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete(":id")
+  remove(@Param("id") id: string) {
     return this.goodsService.remove(+id);
   }
 }

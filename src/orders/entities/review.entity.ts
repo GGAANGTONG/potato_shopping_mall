@@ -4,11 +4,11 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
-} from 'typeorm';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Orders } from './orders.entity';
+} from "typeorm";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { Orders } from "./orders.entity";
 
-@Entity({ name: 'reviews' })
+@Entity({ name: "reviews" })
 export class Reviews {
   @IsNumber()
   @PrimaryGeneratedColumn({ unsigned: true })
@@ -25,10 +25,10 @@ export class Reviews {
 
   @IsString()
   @IsNotEmpty()
-  @Column({ type: 'text' })
+  @Column({ type: "text" })
   review: string;
 
   @OneToOne(() => Orders, (orders) => orders.reviews)
-  @JoinColumn({ name: 'orders_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: "orders_id", referencedColumnName: "id" })
   orders: Orders;
 }

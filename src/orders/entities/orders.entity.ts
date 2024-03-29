@@ -1,5 +1,5 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Goods } from 'src/goods/entities/goods.entity';
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { Goods } from "src/goods/entities/goods.entity";
 import {
   Column,
   CreateDateColumn,
@@ -9,11 +9,11 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { Status } from '../types/order.type';
-import { Reviews } from './review.entity';
+} from "typeorm";
+import { Status } from "../types/order.type";
+import { Reviews } from "./review.entity";
 
-@Entity({ name: 'orders' })
+@Entity({ name: "orders" })
 export class Orders {
   @IsNumber()
   @PrimaryGeneratedColumn({ unsigned: true })
@@ -55,7 +55,7 @@ export class Orders {
   //enum으로 바꾸면 좋을 것 같아요
   @IsEnum(Status)
   @IsNotEmpty()
-  @Column({ type: 'enum', enum: Status })
+  @Column({ type: "enum", enum: Status })
   o_status: Status;
 
   @CreateDateColumn()
@@ -65,9 +65,9 @@ export class Orders {
   updated_at: Date;
 
   @ManyToOne(() => Goods, (goods) => goods.orders, {
-    onDelete: 'CASCADE',
+    onDelete: "CASCADE",
   })
-  @JoinColumn({ name: 'goods_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: "goods_id", referencedColumnName: "id" })
   goods: Goods;
 
   @OneToOne(() => Reviews, (reviews) => reviews.orders)

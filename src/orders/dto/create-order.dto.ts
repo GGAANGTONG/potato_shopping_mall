@@ -1,5 +1,5 @@
-import { PickType } from '@nestjs/swagger';
-import { Orders } from '../entities/orders.entity';
+import { PickType } from "@nestjs/swagger";
+import { Orders } from "../entities/orders.entity";
 
 export class CreateOrderDto extends PickType(Orders, [
   'o_name',
