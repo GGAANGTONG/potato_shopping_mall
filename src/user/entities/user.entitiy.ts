@@ -5,6 +5,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   IsStrongPassword,
 } from "class-validator";
@@ -42,6 +43,7 @@ export class Users {
   nickname: string;
 
   @IsString()
+  @IsOptional()
   @Column({ type: "text", nullable: true })
   profile?: string;
 
