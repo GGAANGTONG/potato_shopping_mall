@@ -35,13 +35,21 @@ export class GoodsService {
       const goodData = { g_name, g_price, g_desc, g_img, g_option };
       const newGood = this.goodsRepository.create(goodData);
       newGood.category = existedCategory;
-      await this.goodsRepository.save(newGood);
+      const savedGood = await this.goodsRepository.save(newGood);
+
+      const initialStock = this.stocksRepository.create({
+        count: 0, 
+        goods: savedGood 
+      });
+      await this.stocksRepository.save(initialStock);
+      
       return newGood;
     } catch (error) {
       throw new InternalServerErrorException(
         '상품 생성 중 에러가 발생했습니다.',
       );
     }
+
   }
 
   /**
