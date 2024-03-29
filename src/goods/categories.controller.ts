@@ -6,17 +6,16 @@ import {
   Patch,
   Param,
   Delete,
-  Query,
-} from "@nestjs/common";
-import { CategoriesService } from "./categories.service";
-import { CreateCategoryDto } from "./dto/create-categories.dto";
+} from '@nestjs/common';
+import { CategoriesService } from './categories.service';
+import { CreateCategoryDto } from './dto/create-categories.dto';
 
-@Controller("categories")
+@Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   /**
-   * 상품 카테고리등록
+   * 상품 카테고리 등록
    * @param createCategoryDto
    * @returns
    */
@@ -27,16 +26,11 @@ export class CategoriesController {
 
   /**
    * 상품 카테고리 조회
-   * @param g_name
-   * @param cate_id
    * @returns
    */
   @Get()
-  findAll(
-    @Query("g_name") g_name?: string,
-    @Query("cate_id") cate_id?: string,
-  ) {
-    return this.categoriesService.findAll(g_name, cate_id);
+  findAll() {
+    return this.categoriesService.findAll();
   }
 
   /**
@@ -44,8 +38,8 @@ export class CategoriesController {
    * @param id
    * @returns
    */
-  @Get(":id")
-  findOne(@Param("id") id: number) {
+  @Get(':id')
+  findOne(@Param('id') id: number) {
     return this.categoriesService.findOne(+id);
   }
 
@@ -55,9 +49,9 @@ export class CategoriesController {
    * @param updateCategoryDto
    * @returns
    */
-  @Patch(":id")
+  @Patch(':id')
   update(
-    @Param("id") id: string,
+    @Param('id') id: string,
     @Body() createCategoryDto: CreateCategoryDto,
   ) {
     return this.categoriesService.update(+id, createCategoryDto);
@@ -68,8 +62,8 @@ export class CategoriesController {
    * @param id
    * @returns
    */
-  @Delete(":id")
-  remove(@Param("id") id: string) {
+  @Delete(':id')
+  remove(@Param('id') id: string) {
     return this.categoriesService.remove(+id);
   }
 }
