@@ -18,7 +18,7 @@ export class Stocks {
   @Column({ type: 'int' })
   count: number;
 
-  @OneToOne(() => Goods, (goods) => goods.stock)
+  @OneToOne(() => Goods, (goods) => goods.stock, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'goods_id' })
   goods: Goods;
 }
