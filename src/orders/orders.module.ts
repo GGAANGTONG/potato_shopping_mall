@@ -8,6 +8,7 @@ import { Ordersdetails } from "./entities/ordersdetails.entity";
 import { Goods } from "src/goods/entities/goods.entity";
 import { Categories } from "src/goods/entities/categories.entity";
 import { Stocks } from "src/goods/entities/stocks.entity";
+import { Reviews } from "./entities/review.entity";
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { Stocks } from "src/goods/entities/stocks.entity";
       Goods,
       Categories,
       Stocks,
+      Reviews,
     ]),
   ],
   providers: [OrdersService],
