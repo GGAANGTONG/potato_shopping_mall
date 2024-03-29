@@ -15,7 +15,6 @@ import { Sign_inDto } from "./dto/sign_in.dto";
 import { Users } from "./entities/user.entitiy";
 import { updateDto } from "./dto/update.dto";
 
-
 @Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -28,9 +27,11 @@ export class UserController {
 
   @Post("login")
   async signin(@Body() sign_inDto: Sign_inDto, @Res() res) {
+    const user = await this.userService.sign_in(sign_inDto);
+    res.cookie("authorization", `Bearer ${user.accessToken}`);
     return res.status(HttpStatus.OK).json({
       message: "로그인 완료 ",
-      access_token: await this.userService.sign_in(sign_inDto),
+      user,
     });
   }
 

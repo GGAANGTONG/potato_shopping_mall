@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  Res,
   UnauthorizedException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -51,16 +52,21 @@ export class UserService {
     if (!compared_password) {
       throw new UnauthorizedException("비밀번호를 확인하세요.");
     }
+    const payload = { sub: user.id };
 
-    const payload = { email: user.email, sub: user.id };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+      expiresIn: "7d",
+    });
+
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_REFRESH_TOKEN_SECRET,
       expiresIn: "7d",
     });
+
     return {
-      access_token: `Bearer ${accessToken}`,
-      refresh_token: `Bearer ${refreshToken}`,
+      accessToken,
+      refreshToken,
     };
   }
 
@@ -119,6 +125,6 @@ export class UserService {
   }
 
   async findByEmail(email: string) {
-    return await this.usersRepository.findOneBy({ email });
+    return await this.usersRepository.findOne({ where: { email } });
   }
 }

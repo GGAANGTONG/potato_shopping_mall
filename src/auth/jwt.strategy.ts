@@ -1,25 +1,44 @@
 import _ from "lodash";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { UserService } from "src/user/users.service";
+import { Request as RequestType } from "express";
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
+export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([JwtStrategy.extractJWT]),
       ignoreExpiration: false,
-      secretOrKey: configService.get("JWT_SECRET_KEY"),
+      secretOrKey: configService.get("JWT_SECRET"),
     });
   }
-
+  private static extractJWT(req: RequestType): string | null {
+    const { authorization } = req.cookies;
+    console.log(authorization);
+    if (authorization) {
+      const [tokenType, token] = authorization.split(" ");
+      if (tokenType !== "Bearer")
+        throw new BadRequestException("토큰 타입이 일치하지 않습니다.");
+      if (token) {
+        console.log(1, token);
+        return token;
+      }
+      return null;
+    }
+  }
   async validate(payload: any) {
     const user = await this.userService.findByEmail(payload.email);
+    console.log(user);
     if (_.isNil(user)) {
       throw new NotFoundException("해당하는 사용자를 찾을 수 없습니다.");
     }

@@ -12,10 +12,10 @@ import {
 import { GoodsService } from "./goods.service";
 import { CreateGoodDto } from "./dto/create-goods.dto";
 import { UpdateGoodDto } from "./dto/update-goods.dto";
-import { RolesGuard } from "src/auth/roles.guard";
+import { AuthGuard } from "@nestjs/passport";
 
+@UseGuards(AuthGuard("jwt"))
 @Controller("goods")
-@UseGuards(RolesGuard)
 export class GoodsController {
   constructor(private readonly goodsService: GoodsService) {}
 
@@ -24,6 +24,7 @@ export class GoodsController {
    * @param createGoodDto
    * @returns
    */
+
   @Post()
   create(@Body() createGoodDto: CreateGoodDto) {
     return this.goodsService.create(createGoodDto);
