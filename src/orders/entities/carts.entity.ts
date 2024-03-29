@@ -34,6 +34,4 @@ export class Carts {
 
   @CreateDateColumn()
   ct_date: Date;
-
-
 }
