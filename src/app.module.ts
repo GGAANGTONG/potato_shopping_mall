@@ -26,4 +26,4 @@ import { GoodsModule } from "./goods/goods.module";
   controllers: [AppController],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

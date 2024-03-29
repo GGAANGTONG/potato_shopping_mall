@@ -6,10 +6,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { Status } from "../types/order.type";
+import { Reviews } from "./review.entity";
 
 @Entity({ name: "orders" })
 export class Orders {
@@ -67,4 +69,7 @@ export class Orders {
   })
   @JoinColumn({ name: "goods_id", referencedColumnName: "id" })
   goods: Goods;
+
+  @OneToOne(() => Reviews, (reviews) => reviews.orders)
+  reviews: Reviews;
 }
