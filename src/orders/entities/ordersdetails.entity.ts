@@ -1,7 +1,7 @@
-import { IsNumber } from "class-validator";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { IsNumber } from 'class-validator';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: "ordersdetails" })
+@Entity({ name: 'ordersdetails' })
 export class Ordersdetails {
   @IsNumber()
   @PrimaryGeneratedColumn({ unsigned: true })
