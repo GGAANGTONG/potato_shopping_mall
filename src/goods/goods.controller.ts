@@ -55,8 +55,8 @@ export class GoodsController {
    * @param updateGoodDto
    * @returns
    */
-  @Patch(":id")
-  update(@Param("id") id: string, @Body() updateGoodDto: UpdateGoodDto) {
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateGoodDto: UpdateGoodDto) {
     return this.goodsService.update(+id, updateGoodDto);
   }
 
@@ -65,8 +65,8 @@ export class GoodsController {
    * @param id
    * @returns
    */
-  @Delete(":id")
-  remove(@Param("id") id: string) {
+  @Delete(':id')
+  remove(@Param('id') id: string) {
     return this.goodsService.remove(+id);
   }
 }
