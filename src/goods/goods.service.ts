@@ -85,9 +85,11 @@ export class GoodsService {
 
     try {
       await this.goodsRepository.delete(id);
-      return {'message' : '상품이 성공적으로 삭제되었습니다.', 'data' : good}
+      return { message: "상품이 성공적으로 삭제되었습니다.", data: good };
     } catch (error) {
-      throw new InternalServerErrorException('상품 삭제 처리 중 에러가 발생했습니다.');
+      throw new InternalServerErrorException(
+        "상품 삭제 처리 중 에러가 발생했습니다.",
+      );
     }
   }
 }

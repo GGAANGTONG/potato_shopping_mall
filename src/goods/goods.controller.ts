@@ -62,8 +62,8 @@ export class GoodsController {
 
   /**
    * 상품 정보 삭제
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
   @Delete(":id")
   remove(@Param("id") id: string) {

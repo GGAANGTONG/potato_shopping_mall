@@ -31,7 +31,9 @@ export class CategoriesService {
     const query = this.categoriesRepository.createQueryBuilder("categories");
 
     if (g_name) {
-      query.andWhere("categories.g_name LIKE :g_name", { g_name: `%${g_name}%` });
+      query.andWhere("categories.g_name LIKE :g_name", {
+        g_name: `%${g_name}%`,
+      });
     }
 
     if (cate_id) {
@@ -66,7 +68,10 @@ export class CategoriesService {
     }
 
     try {
-      const updatedCategory = this.categoriesRepository.merge(category, createCategoryDto);
+      const updatedCategory = this.categoriesRepository.merge(
+        category,
+        createCategoryDto,
+      );
       await this.categoriesRepository.save(updatedCategory);
       return updatedCategory;
     } catch (error) {
@@ -84,9 +89,11 @@ export class CategoriesService {
 
     try {
       await this.categoriesRepository.delete(id);
-      return {'message' : '상품이 성공적으로 삭제되었습니다.', 'data' : category}
+      return { message: "상품이 성공적으로 삭제되었습니다.", data: category };
     } catch (error) {
-      throw new InternalServerErrorException('상품 삭제 처리 중 에러가 발생했습니다.');
+      throw new InternalServerErrorException(
+        "상품 삭제 처리 중 에러가 발생했습니다.",
+      );
     }
   }
 }

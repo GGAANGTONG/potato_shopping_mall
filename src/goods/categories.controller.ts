@@ -56,14 +56,17 @@ export class CategoriesController {
    * @returns
    */
   @Patch(":id")
-  update(@Param("id") id: string, @Body() createCategoryDto: CreateCategoryDto) {
+  update(
+    @Param("id") id: string,
+    @Body() createCategoryDto: CreateCategoryDto,
+  ) {
     return this.categoriesService.update(+id, createCategoryDto);
   }
 
   /**
    * 상품 카테고리 정보 삭제
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
   @Delete(":id")
   remove(@Param("id") id: string) {
