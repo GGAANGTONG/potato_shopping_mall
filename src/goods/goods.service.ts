@@ -38,18 +38,17 @@ export class GoodsService {
       const savedGood = await this.goodsRepository.save(newGood);
 
       const initialStock = this.stocksRepository.create({
-        count: 0, 
-        goods: savedGood 
+        count: 0,
+        goods: savedGood,
       });
       await this.stocksRepository.save(initialStock);
-      
+
       return newGood;
     } catch (error) {
       throw new InternalServerErrorException(
         '상품 생성 중 에러가 발생했습니다.',
       );
     }
-
   }
 
   /**
