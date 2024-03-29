@@ -2,12 +2,12 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-} from "@nestjs/common";
-import { CreateGoodDto } from "./dto/create-goods.dto";
-import { UpdateGoodDto } from "./dto/update-goods.dto";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Goods } from "./entities/goods.entity";
-import { Repository } from "typeorm";
+} from '@nestjs/common';
+import { CreateGoodDto } from './dto/create-goods.dto';
+import { UpdateGoodDto } from './dto/update-goods.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Goods } from './entities/goods.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class GoodsService {
@@ -23,20 +23,20 @@ export class GoodsService {
       return newGood;
     } catch (error) {
       throw new InternalServerErrorException(
-        "상품 생성 중 에러가 발생했습니다.",
+        '상품 생성 중 에러가 발생했습니다.',
       );
     }
   }
 
   async findAll(g_name?: string, cate_id?: string) {
-    const query = this.goodsRepository.createQueryBuilder("goods");
+    const query = this.goodsRepository.createQueryBuilder('goods');
 
     if (g_name) {
-      query.andWhere("goods.g_name LIKE :g_name", { g_name: `%${g_name}%` });
+      query.andWhere('goods.g_name LIKE :g_name', { g_name: `%${g_name}%` });
     }
 
     if (cate_id) {
-      query.andWhere("goods.cate_id = :cate_id", { cate_id });
+      query.andWhere('goods.cate_id = :cate_id', { cate_id });
     }
 
     return query.getMany();
@@ -50,7 +50,7 @@ export class GoodsService {
   async findOne(id: number): Promise<Goods> {
     const good = await this.goodsRepository.findOneBy({ id });
     if (!good) {
-      throw new NotFoundException("해당 상품을 찾을 수 없습니다.");
+      throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
     }
     return good;
   }
@@ -63,7 +63,7 @@ export class GoodsService {
   async update(id: number, updateGoodDto: UpdateGoodDto) {
     const good = await this.goodsRepository.findOneBy({ id });
     if (!good) {
-      throw new NotFoundException("해당 상품을 찾을 수 없습니다.");
+      throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
     }
 
     try {
@@ -72,7 +72,7 @@ export class GoodsService {
       return updatedGood;
     } catch (error) {
       throw new InternalServerErrorException(
-        "상품 업데이트 중 에러가 발생했습니다.",
+        '상품 업데이트 중 에러가 발생했습니다.',
       );
     }
   }
