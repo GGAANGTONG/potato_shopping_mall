@@ -19,10 +19,10 @@ import { Reviews } from "./entities/review.entity";
       Goods,
       Categories,
       Stocks,
-      Reviews
+      Reviews,
     ]),
   ],
   providers: [OrdersService],
   controllers: [OrdersController],
 })
-export class OrdersModule { }
+export class OrdersModule {}
