@@ -8,6 +8,7 @@ import { UpdateGoodDto } from './dto/update-goods.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Goods } from './entities/goods.entity';
 import { Categories } from './entities/categories.entity';
+import { Stocks } from './entities/stocks.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -17,6 +18,8 @@ export class GoodsService {
     private goodsRepository: Repository<Goods>,
     @InjectRepository(Categories)
     private categoriesRepository: Repository<Categories>,
+    @InjectRepository(Stocks)
+    private stocksRepository: Repository<Stocks>,
   ) {}
 
   async create(createGoodDto: CreateGoodDto) {
@@ -51,12 +54,14 @@ export class GoodsService {
     const query = this.goodsRepository
       .createQueryBuilder('goods')
       .leftJoinAndSelect('goods.category', 'category')
+      .leftJoinAndSelect('goods.stock', 'stocks')
       .select([
         'goods.id',
         'goods.g_name',
         'goods.g_price',
         'goods.g_desc',
         'category.c_name',
+        'stocks.count',
       ]);
 
     if (g_name) {
@@ -78,7 +83,7 @@ export class GoodsService {
   async findOne(id: number): Promise<Goods> {
     const good = await this.goodsRepository.findOne({
       where: { id },
-      relations: ['category'],
+      relations: ['category', 'stock'],
     });
     if (!good) {
       throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
