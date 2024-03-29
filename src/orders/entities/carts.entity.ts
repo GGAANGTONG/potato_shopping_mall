@@ -1,12 +1,12 @@
-import { IsNumber } from "class-validator";
+import { IsNumber } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-} from "typeorm";
+} from 'typeorm';
 
-@Entity({ name: "carts" })
+@Entity({ name: 'carts' })
 export class Carts {
   @IsNumber()
   @PrimaryGeneratedColumn({ unsigned: true })
