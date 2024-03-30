@@ -5,6 +5,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   IsStrongPassword,
 } from 'class-validator';
@@ -42,7 +43,8 @@ export class Users {
   nickname: string;
 
   @IsString()
-  @Column({ type: 'text', nullable: true })
+  @IsOptional()
+  @Column({ type: "text", nullable: true })
   profile?: string;
 
   @IsEnum(Role)
@@ -50,6 +52,6 @@ export class Users {
   role: Role;
 
   @IsNumber()
-  @Column()
+  @Column({ type: "int", default: 1000000 })
   points: number;
 }

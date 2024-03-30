@@ -20,6 +20,7 @@ export class GoodsController {
    * @param createGoodDto
    * @returns
    */
+
   @Post()
   create(@Body() createGoodDto: CreateGoodDto) {
     return this.goodsService.create(createGoodDto);
