@@ -56,6 +56,4 @@ export class UserController {
     await this.userService.remove(id);
     return { message: "삭제 되었습니다" };
   }
-
-  
 }
