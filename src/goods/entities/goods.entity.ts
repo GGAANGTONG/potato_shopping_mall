@@ -56,4 +56,5 @@ export class Goods {
 
   @OneToMany(() => Orders, (orders) => orders.goods)
   orders: Orders[];
+  
 }
