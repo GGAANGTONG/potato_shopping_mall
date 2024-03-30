@@ -26,7 +26,7 @@ export class UserController {
   }
 
   @Post("login")
-  async signin(@Body() signInDto: SignInDto, @Res() res) {
+  async signIn(@Body() signInDto: SignInDto, @Res() res) {
     const user = await this.userService.signIn(signInDto);
     res.cookie("authorization", `Bearer ${user.accessToken}`);
     return res.status(HttpStatus.OK).json({
@@ -46,8 +46,8 @@ export class UserController {
   }
 
   @Patch("update/:id")
-  async update(@Param("id") id: number, @Body() UpdateDto: UpdateDto) {
-    await this.userService.update(+id, UpdateDto);
+  async update(@Param("id") id: number, @Body() updateDto: UpdateDto) {
+    await this.userService.update(+id, updateDto);
     return { message: "수정되었습니다" };
   }
 
