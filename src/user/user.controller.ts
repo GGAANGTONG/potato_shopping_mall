@@ -11,9 +11,9 @@ import {
 } from "@nestjs/common";
 import { UserService } from "./users.service";
 import { SignUpDto } from "./dto/signup.dto";
-import { Sign_inDto } from "./dto/sign_in.dto";
+import { SignInDto } from "./dto/sign_in.dto";
 import { Users } from "./entities/user.entitiy";
-import { updateDto } from "./dto/update.dto";
+import { UpdateDto } from "./dto/update.dto";
 
 @Controller("users")
 export class UserController {
@@ -26,8 +26,8 @@ export class UserController {
   }
 
   @Post("login")
-  async signin(@Body() sign_inDto: Sign_inDto, @Res() res) {
-    const user = await this.userService.sign_in(sign_inDto);
+  async signin(@Body() signInDto: SignInDto, @Res() res) {
+    const user = await this.userService.signIn(signInDto);
     res.cookie("authorization", `Bearer ${user.accessToken}`);
     return res.status(HttpStatus.OK).json({
       message: "로그인 완료 ",
@@ -46,7 +46,7 @@ export class UserController {
   }
 
   @Patch("update/:id")
-  async update(@Param("id") id: number, @Body() UpdateDto: updateDto) {
+  async update(@Param("id") id: number, @Body() UpdateDto: UpdateDto) {
     await this.userService.update(+id, UpdateDto);
     return { message: "수정되었습니다" };
   }

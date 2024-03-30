@@ -11,17 +11,17 @@ export class ReviewService {
   /**
    * 리뷰 작성
    * @param stars
-   * @param orders_id
+   * @param ordersId
    * @param review
    * @returns
    */
   async createReview(
-    orders_id: number,
+    ordersId: number,
     stars: string,
     review: string,
   ): Promise<Reviews> {
     const newReview = await this.reviewRepository.create({
-      orders_id,
+      orders_id: ordersId,
       stars,
       review,
     });
@@ -31,26 +31,26 @@ export class ReviewService {
 
   /**
    * 작성한 리뷰 조회
-   * @param orders_id
+   * @param ordersId
    * @returns
    */
-  async getReviewByOrderId(orders_id: number): Promise<Reviews | undefined> {
-    return await this.reviewRepository.findOne({ where: { orders_id } });
+  async getReviewByOrderId(ordersId: number): Promise<Reviews | undefined> {
+    return await this.reviewRepository.findOne({ where: { orders_id: ordersId } });
   }
 
   /**
    * 리뷰 수정
    * @param stars
-   * @param orders_id
+   * @param ordersId
    * @param review
    * @returns
    */
   async updateReviewByOrderId(
-    orders_id: number,
+    ordersId: number,
     stars: string,
     review: string,
   ): Promise<Reviews | undefined> {
-    const existingReview = await this.getReviewByOrderId(orders_id);
+    const existingReview = await this.getReviewByOrderId(ordersId);
     if (existingReview) {
       existingReview.stars = stars;
       existingReview.review = review;
@@ -59,8 +59,8 @@ export class ReviewService {
     return undefined;
   }
 
-  async deleteReviewByOrderId(orders_id: number): Promise<boolean> {
-    const deleteResult = await this.reviewRepository.delete({ orders_id });
+  async deleteReviewByOrderId(ordersId: number): Promise<boolean> {
+    const deleteResult = await this.reviewRepository.delete({ orders_id: ordersId });
     return deleteResult.affected !== 0;
   }
 }

@@ -16,7 +16,7 @@ export class OrdersService {
   ) {}
 
   async purchase(
-    user_id: number,
+    userId: number,
     createOrderDto: CreateOrderDto, //포스트맨의 body,
   ) {
     const queryRunner = await this.dataSource.createQueryRunner();
@@ -29,7 +29,9 @@ export class OrdersService {
           id: goods_id,
         },
       });
-      // ======굿즈 있는지 없는지 따라 유효성 검사 필요
+      if(!goods) {
+        throw new BadRequestException('존재하지 않는 상품입니다.')
+      }
 
       const quantity = await queryRunner.manager.findOne(Stocks, {
         where: {
@@ -44,10 +46,13 @@ export class OrdersService {
 
       const user = await queryRunner.manager.findOne(Users, {
         where: {
-          id: user_id,
+          id: userId,
         },
       });
-      // ======유저 있는지 없는지 따라 유효성 검사 필요
+
+      if(!user) {
+        throw new BadRequestException('존재하지 않는 유저입니다.')
+      }
 
       const paying = goods.g_price * o_count;
       const afterPaidPoints = user.points - paying;
@@ -61,7 +66,7 @@ export class OrdersService {
       await queryRunner.manager.save(Users, user);
 
       const newOrder = this.ordersRepository.create({
-        user_id,
+        user_id: userId,
         o_name: user.name,
         o_tel,
         o_addr,
@@ -83,11 +88,4 @@ export class OrdersService {
     }
   }
 
-  async findAll() {
-    return `This action returns all goods`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} good`;
-  }
 }

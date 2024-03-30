@@ -4,7 +4,7 @@ import { OrdersController } from './orders.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Carts } from './entities/carts.entity';
 import { Orders } from './entities/orders.entity';
-import { Ordersdetails } from './entities/ordersdetails.entity';
+import { OrdersDetails } from './entities/ordersdetails.entity';
 import { Goods } from 'src/goods/entities/goods.entity';
 import { Categories } from 'src/goods/entities/categories.entity';
 import { Stocks } from 'src/goods/entities/stocks.entity';
@@ -18,7 +18,7 @@ import { ReviewController } from './review.controller';
     TypeOrmModule.forFeature([
       Carts,
       Orders,
-      Ordersdetails,
+      OrdersDetails,
       Goods,
       Categories,
       Stocks,

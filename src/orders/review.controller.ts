@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Get,
-  Put,
   Delete,
   Param,
   Body,
@@ -14,37 +13,37 @@ import { ReviewService } from './review.service';
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
-  @Post(':orders_id')
+  @Post(':ordersId')
   async createReview(
-    @Param('orders_id') orderId: number,
+    @Param('ordersId') ordersId: number,
     @Body() body: { stars: string; review: string },
   ) {
     return await this.reviewService.createReview(
-      orderId,
+      ordersId,
       body.stars,
       body.review,
     );
   }
 
-  @Get(':orders_id')
-  async getReviewByOrderId(@Param('orders_id') orderId: number) {
-    return await this.reviewService.getReviewByOrderId(orderId);
+  @Get(':ordersId')
+  async getReviewByOrderId(@Param('ordersId') ordersId: number) {
+    return await this.reviewService.getReviewByOrderId(ordersId);
   }
 
-  @Patch(':orders_id')
+  @Patch(':ordersId')
   async updateReviewByOrderId(
-    @Param('orders_id') orderId: number,
+    @Param('ordersId') ordersId: number,
     @Body() body: { stars: string; review: string },
   ) {
     return await this.reviewService.updateReviewByOrderId(
-      orderId,
+      ordersId,
       body.stars,
       body.review,
     );
   }
 
-  @Delete(':orders_id')
-  async deleteReviewByOrderId(@Param('orders_id') orderId: number) {
-    return await this.reviewService.deleteReviewByOrderId(orderId);
+  @Delete(':ordersId')
+  async deleteReviewByOrderId(@Param('ordersId') ordersId: number) {
+    return await this.reviewService.deleteReviewByOrderId(ordersId);
   }
 }
