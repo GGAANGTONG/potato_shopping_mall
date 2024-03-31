@@ -23,6 +23,10 @@ export class Orders {
   @Column({ unsigned: true })
   user_id: number;
 
+  @IsNumber()
+  @Column({ unsigned: true })
+  goods_id: number;
+
   @IsString()
   @IsNotEmpty()
   @Column()
@@ -55,7 +59,7 @@ export class Orders {
   //enum으로 바꾸면 좋을 것 같아요
   @IsEnum(Status)
   @IsNotEmpty()
-  @Column({ type: 'enum', enum: Status })
+  @Column({ type: 'enum', enum: Status, default: '주문완료' })
   o_status: Status;
 
   @CreateDateColumn()
