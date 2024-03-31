@@ -25,6 +25,7 @@ export class OrdersService {
     try {
       const { o_tel, o_addr, o_count, o_req, goods_id } = createOrderDto;
       const goods = await queryRunner.manager.findOne(Goods, {
+        relations: ['stock'],
         where: {
           id: goods_id,
         },
@@ -33,12 +34,7 @@ export class OrdersService {
         throw new BadRequestException('존재하지 않는 상품입니다.')
       }
 
-      const quantity = await queryRunner.manager.findOne(Stocks, {
-        where: {
-          id: goods_id,
-        },
-      });
-      const count = quantity.count - o_count;
+      const count = goods.stock.count - o_count;
 
       if (count < 0) {
         throw new BadRequestException('재고가 없습니다.');
@@ -60,9 +56,8 @@ export class OrdersService {
         throw new BadRequestException('포인트가 부족합니다.');
       }
 
-      quantity.count = count;
       user.points = afterPaidPoints;
-      await queryRunner.manager.save(Stocks, quantity);
+      await queryRunner.manager.update(Stocks, {goods}, {count});
       await queryRunner.manager.save(Users, user);
 
       const newOrder = this.ordersRepository.create({
@@ -73,6 +68,7 @@ export class OrdersService {
         o_req,
         o_count,
         o_total_price: paying,
+        goods_id: goods.id
       });
 
       await this.ordersRepository.save(newOrder);

@@ -25,7 +25,6 @@ export class ReviewService {
       stars,
       review,
     });
-    console.log(newReview);
     return await this.reviewRepository.save(newReview);
   }
 

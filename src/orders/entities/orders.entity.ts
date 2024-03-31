@@ -23,6 +23,10 @@ export class Orders {
   @Column({ unsigned: true })
   user_id: number;
 
+  @IsNumber()
+  @Column({ unsigned: true })
+  goods_id: number;
+
   @IsString()
   @IsNotEmpty()
   @Column()
