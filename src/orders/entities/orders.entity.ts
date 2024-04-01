@@ -1,17 +1,20 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Goods } from 'src/goods/entities/goods.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Status } from '../types/order.type';
 import { Reviews } from './review.entity';
+import { Ordersdetails } from './ordersdetails.entity';
+import { Carts } from './carts.entity';
+import { Users } from 'src/user/entities/user.entitiy';
 
 @Entity({ name: 'orders' })
 export class Orders {
@@ -68,11 +71,17 @@ export class Orders {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @ManyToOne(() => Goods, (goods) => goods.orders, {
+  @ManyToOne(() => Users, (users) => users.orders, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'goods_id', referencedColumnName: 'id' })
-  goods: Goods;
+  @JoinColumn({ name: 'ordersdetails_id', referencedColumnName: 'id' })
+  users: Users;
+
+  @OneToMany(() => Ordersdetails, (ordersdetails) => ordersdetails.orders)
+  ordersdetails: Ordersdetails[];
+
+  @OneToMany(() => Carts, (carts) => carts.orders)
+  carts: Carts[];
 
   @OneToOne(() => Reviews, (reviews) => reviews.orders)
   reviews: Reviews;
