@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { Categories } from './categories.entity';
 import { Stocks } from './stocks.entity';
-import { Orders } from '../../orders/entities/orders.entity';
+import { OrdersDetails } from '../../orders/entities/ordersdetails.entity';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 @Entity({ name: 'goods' })
@@ -54,6 +54,6 @@ export class Goods {
   @OneToOne(() => Stocks, (stocks) => stocks.goods)
   stock: Stocks;
 
-  @OneToMany(() => Orders, (orders) => orders.goods)
-  orders: Orders[];
+  @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.goods)
+  ordersdetails: OrdersDetails[];
 }
