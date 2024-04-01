@@ -24,13 +24,13 @@ export class OrdersDetails {
   @ManyToOne(() => Orders, (orders) => orders.ordersdetails, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'ordersdetails_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'orders_id', referencedColumnName: 'id' })
   orders: Orders;
 
   @ManyToOne(() => Goods, (goods) => goods.ordersdetails, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'ordersdetails_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'goods_id', referencedColumnName: 'id' })
   goods: Goods;
   // ----------------진영님이랑 굿즈 관계설정*----------------------
 }

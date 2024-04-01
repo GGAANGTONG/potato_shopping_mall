@@ -12,9 +12,9 @@ import {
 } from 'typeorm';
 import { Status } from '../types/order.type';
 import { Reviews } from './review.entity';
-import { Ordersdetails } from './ordersdetails.entity';
 import { Carts } from './carts.entity';
 import { Users } from 'src/user/entities/user.entitiy';
+import { OrdersDetails } from './ordersdetails.entity';
 
 @Entity({ name: 'orders' })
 export class Orders {
@@ -25,10 +25,6 @@ export class Orders {
   @IsNumber()
   @Column({ unsigned: true })
   user_id: number;
-
-  @IsNumber()
-  @Column({ unsigned: true })
-  goods_id: number;
 
   @IsString()
   @IsNotEmpty()
@@ -74,11 +70,11 @@ export class Orders {
   @ManyToOne(() => Users, (users) => users.orders, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'ordersdetails_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'users_id', referencedColumnName: 'id' })
   users: Users;
 
-  @OneToMany(() => Ordersdetails, (ordersdetails) => ordersdetails.orders)
-  ordersdetails: Ordersdetails[];
+  @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.orders)
+  ordersdetails: OrdersDetails[];
 
   @OneToMany(() => Carts, (carts) => carts.orders)
   carts: Carts[];
