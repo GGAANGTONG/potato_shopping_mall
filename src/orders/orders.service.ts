@@ -13,7 +13,7 @@ export class OrdersService {
     @InjectRepository(Orders)
     private ordersRepository: Repository<Orders>,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async purchase(
     userId: number,
@@ -30,7 +30,7 @@ export class OrdersService {
           id: goods_id,
         },
       });
-      if(!goods) {
+      if (!goods) {
         throw new BadRequestException('존재하지 않는 상품입니다.')
       }
 
@@ -46,7 +46,7 @@ export class OrdersService {
         },
       });
 
-      if(!user) {
+      if (!user) {
         throw new BadRequestException('존재하지 않는 유저입니다.')
       }
 
@@ -57,7 +57,7 @@ export class OrdersService {
       }
 
       user.points = afterPaidPoints;
-      await queryRunner.manager.update(Stocks, {goods}, {count});
+      await queryRunner.manager.update(Stocks, { goods }, { count });
       await queryRunner.manager.save(Users, user);
 
       const newOrder = this.ordersRepository.create({
@@ -68,7 +68,7 @@ export class OrdersService {
         o_req,
         o_count,
         o_total_price: paying,
-        goods_id: goods.id
+        //goods_id 삭제함
       });
 
       await this.ordersRepository.save(newOrder);
