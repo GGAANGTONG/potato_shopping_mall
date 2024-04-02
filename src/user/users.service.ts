@@ -5,6 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
+
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Users } from "./entities/user.entitiy";
@@ -14,6 +15,8 @@ import { SignUpDto } from "./dto/signup.dto";
 import { Sign_inDto } from "./dto/sign_in.dto";
 import { updateDto } from "./dto/update.dto";
 import { JwtService } from "@nestjs/jwt";
+import { firstValueFrom } from "rxjs";
+import { HttpService } from "@nestjs/axios";
 
 @Injectable()
 export class UserService {
@@ -21,6 +24,7 @@ export class UserService {
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
     private readonly jwtService: JwtService,
+    private http: HttpService,
   ) {}
 
   async register(signUpDto: SignUpDto): Promise<Users> {
@@ -125,5 +129,44 @@ export class UserService {
 
   async findByEmail(email: string) {
     return await this.usersRepository.findOne({ where: { email } });
+  }
+
+  //카카오
+
+  async kakaoLogin(
+    KAKAO_REST_API_KEY: string,
+    KAKAO_REDIRECT_URI: string,
+    code: string,
+  ) {
+    const config = {
+      grant_type: "authorization_code",
+      client_id: KAKAO_REST_API_KEY,
+      redirect_uri: KAKAO_REDIRECT_URI,
+      code,
+    };
+    const params = new URLSearchParams(config).toString();
+    const tokenHeaders = {
+      "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+    };
+    const tokenUrl = `https://kauth.kakao.com/oauth/token?${params}`;
+
+    const tokenRes = await firstValueFrom(
+      this.http.post(tokenUrl, "", { headers: tokenHeaders }),
+    );
+
+    // 'any' 타입으로 응답을 단언하여 'access_token'에 접근
+    const accessToken = (tokenRes as any).data.access_token;
+
+    // accessToken을 사용하여 사용자 정보를 가져오는 부분
+    const userInfoUrl = `https://kapi.kakao.com/v2/user/me`;
+    const userInfoHeaders = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+
+    // 사용자 정보 요청 및 응답 처리
+    const userInfoRes = await firstValueFrom(
+      this.http.get(userInfoUrl, { headers: userInfoHeaders }),
+    );
+    return userInfoRes;
   }
 }

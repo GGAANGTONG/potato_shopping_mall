@@ -5,6 +5,7 @@ import { UserService } from "./users.service";
 import { Users } from "./entities/user.entitiy";
 import { JwtModule } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
+import { HttpModule } from "@nestjs/axios";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ConfigService } from "@nestjs/config";
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([Users]),
+    HttpModule,
   ],
   controllers: [UserController],
   providers: [UserService],

@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Role } from "../type/user_role.type";
 import {
   IsEmail,
@@ -9,6 +9,10 @@ import {
   IsString,
   IsStrongPassword,
 } from "class-validator";
+
+import { Like } from "src/like/entities/like.entity";
+import { Grade } from "../type/user_grade.type";
+// import { Orders } from "src/orders/entities/orders.entity";
 
 @Entity({ name: "users" })
 export class Users {
@@ -51,7 +55,17 @@ export class Users {
   @Column({ type: "enum", enum: Role, default: Role.User })
   role: Role;
 
+  @IsEnum(Grade)
+  @Column({ type: "enum", enum: Grade, default: Grade.CUSTUMER })
+  grade: Grade;
+
   @IsNumber()
   @Column({ type: "int", default: 1000000 })
   points: number;
+
+  @OneToMany(() => Like, (like) => like.user)
+  like: Like[];
+
+  // @OneToMany(() => Orders, (order) => order.user)
+  // order: Orders[];
 }
