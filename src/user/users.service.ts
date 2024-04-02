@@ -12,8 +12,8 @@ import { Users } from "./entities/user.entitiy";
 import { compare, hash } from "bcrypt";
 import _ from "lodash";
 import { SignUpDto } from "./dto/signup.dto";
-import { Sign_inDto } from "./dto/sign_in.dto";
-import { updateDto } from "./dto/update.dto";
+import { SignInDto } from "./dto/sign_in.dto";
+import { UpdateDto } from "./dto/update.dto";
 import { JwtService } from "@nestjs/jwt";
 import { firstValueFrom } from "rxjs";
 import { HttpService } from "@nestjs/axios";
@@ -28,14 +28,14 @@ export class UserService {
   ) {}
 
   async register(signUpDto: SignUpDto): Promise<Users> {
-    const find_email = await this.findByEmail(signUpDto.email);
-    if (find_email) {
+    const findEmail = await this.findByEmail(signUpDto.email);
+    if (findEmail) {
       throw new ConflictException("이미 가입된 이메일 입니다.");
     }
-    const hashed_password = await hash(signUpDto.password, 10);
+    const hashedPassword = await hash(signUpDto.password, 10);
     const user = await this.usersRepository.save({
       email: signUpDto.email,
-      password: hashed_password,
+      password: hashedPassword,
       name: signUpDto.name,
       nickname: signUpDto.nickname,
       profile: signUpDto.profile,
@@ -43,16 +43,16 @@ export class UserService {
     return user;
   }
 
-  async sign_in(sign_inDto: Sign_inDto) {
+  async signIn(signInDto: SignInDto) {
     const user = await this.usersRepository.findOne({
       select: ["id", "email", "password", "nickname", "profile", "name"],
-      where: { email: sign_inDto.email },
+      where: { email: signInDto.email },
     });
     if (_.isNull(user)) {
       throw new UnauthorizedException("이메일을 확인하세요.");
     }
-    const compared_password = await compare(sign_inDto.password, user.password);
-    if (!compared_password) {
+    const comparedPassword = await compare(signInDto.password, user.password);
+    if (!comparedPassword) {
       throw new UnauthorizedException("비밀번호를 확인하세요.");
     }
     const payload = { email: user.email, sub: user.id };
@@ -93,7 +93,7 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, updateDto: updateDto) {
+  async update(id: number, updateDto: UpdateDto) {
     const user = await this.usersRepository.findOne({
       where: { id },
     });

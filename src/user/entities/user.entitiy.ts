@@ -8,7 +8,7 @@ import {
   IsOptional,
   IsString,
   IsStrongPassword,
-} from "class-validator";
+} from 'class-validator';
 
 import { Like } from "src/like/entities/like.entity";
 import { Grade } from "../type/user_grade.type";
@@ -22,28 +22,28 @@ export class Users {
 
   @IsString()
   @IsNotEmpty()
-  @Column({ type: "varchar" })
+  @Column({ type: 'varchar' })
   name: string;
 
   @IsStrongPassword(
     {},
     {
       message:
-        "비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다.",
+        '비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다.',
     },
   )
   @IsNotEmpty()
-  @Column({ type: "varchar", select: false })
+  @Column({ type: 'varchar', select: false })
   password: string;
 
   @IsEmail()
   @IsNotEmpty()
-  @Column({ type: "varchar", unique: true })
+  @Column({ type: 'varchar', unique: true })
   email: string;
 
   @IsString()
   @IsNotEmpty()
-  @Column({ type: "varchar" })
+  @Column({ type: 'varchar' })
   nickname: string;
 
   @IsString()
@@ -52,7 +52,7 @@ export class Users {
   profile?: string;
 
   @IsEnum(Role)
-  @Column({ type: "enum", enum: Role, default: Role.User })
+  @Column({ type: 'enum', enum: Role, default: Role.User })
   role: Role;
 
   @IsEnum(Grade)

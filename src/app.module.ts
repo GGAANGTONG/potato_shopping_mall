@@ -1,15 +1,17 @@
-import { Module } from "@nestjs/common";
-import { AppController } from "./app.controller";
-import { ConfigModule } from "@nestjs/config";
-import { configModuleValidationSchema } from "configs/env_validation";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { typeOrmModuleOptions } from "configs/typeOrmModuleOption";
-import { OrdersModule } from "./orders/orders.module";
-import { PaymentsModule } from "./payments/payments.module";
-import { UsersModule } from "./user/users.module";
-import { GoodsModule } from "./goods/goods.module";
-import { AuthModule } from "./auth/auth.module";
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { ConfigModule } from '@nestjs/config';
+import { configModuleValidationSchema } from 'src/configs/env_validation';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { typeOrmModuleOptions } from 'src/configs/typeOrmModuleOption';
+import { OrdersModule } from './orders/orders.module';
+import { PaymentsModule } from './payments/payments.module';
+import { UsersModule } from './user/users.module';
+import { GoodsModule } from './goods/goods.module';
+import { AuthModule } from './auth/auth.module';
 import { LikeModule } from "./like/like.module";
+import { RedisModule } from './redis/redis.module';
+import { BoardsModule } from './boards/boards.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { LikeModule } from "./like/like.module";
     UsersModule,
     GoodsModule,
     LikeModule,
+    RedisModule,
+    BoardsModule,
   ],
   controllers: [AppController],
   providers: [],

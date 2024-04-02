@@ -1,12 +1,15 @@
-import { IsNumber } from "class-validator";
+import { IsNumber } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
-} from "typeorm";
+} from 'typeorm';
+import { Orders } from './orders.entity';
 
-@Entity({ name: "carts" })
+@Entity({ name: 'carts' })
 export class Carts {
   @IsNumber()
   @PrimaryGeneratedColumn({ unsigned: true })
@@ -34,4 +37,10 @@ export class Carts {
 
   @CreateDateColumn()
   ct_date: Date;
+
+  @ManyToOne(() => Orders, (orders) => orders.carts, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'ordersdetails_id', referencedColumnName: 'id' })
+  orders: Orders;
 }
