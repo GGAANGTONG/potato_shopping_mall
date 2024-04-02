@@ -5,24 +5,27 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Users } from './entities/user.entitiy';
 import { compare, hash } from 'bcrypt';
 import _ from 'lodash';
 import { SignUpDto } from './dto/signup.dto';
-import { SignInDto } from './dto/sign_in.dto';
-import { UpdateDto } from './dto/update.dto';
+
 import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
+import { Point } from '../point/entities/point.entity';
+import { SignInDto } from './dto/sign_in.dto';
+import { UpdateDto } from './dto/update.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
+    @InjectRepository(Point)
+    private pointsRepository: Repository<Point>,
     private readonly jwtService: JwtService,
     private http: HttpService,
   ) {}
@@ -40,6 +43,14 @@ export class UserService {
       nickname: signUpDto.nickname,
       profile: signUpDto.profile,
     });
+
+    //포인트 등록
+
+    const point = this.pointsRepository.create({
+      user: user,
+      possession: 1000000,
+    });
+    await this.pointsRepository.save(point);
     return user;
   }
 
@@ -167,6 +178,19 @@ export class UserService {
     const userInfoRes = await firstValueFrom(
       this.http.get(userInfoUrl, { headers: userInfoHeaders }),
     );
-    return userInfoRes;
+    console.log(userInfoRes);
+    // const data = userInfoRes.data;
+    // // 사용자 정보를 로컬 DB에 저장
+    // let user = await this.usersRepository.findOne({
+    //   where: { email: data.email },
+    // });
+    // if (!user) {
+    //   user = new Users();
+    //   user.email = data.kakao_account.email;
+    //   user.nickname = data.properties.nickname;
+    //   // 기타 필요한 정보 추가 가능
+    //   await this.usersRepository.save(user);
+    // }
+    // return user;
   }
 }

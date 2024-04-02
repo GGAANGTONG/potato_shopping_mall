@@ -6,9 +6,11 @@ import { Users } from './entities/user.entitiy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
+import { Point } from '../point/entities/point.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Users, Point]),
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
         signOptions: { expiresIn: '1h' },
@@ -16,7 +18,6 @@ import { HttpModule } from '@nestjs/axios';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Users]),
     HttpModule,
   ],
   controllers: [UserController],

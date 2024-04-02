@@ -73,10 +73,12 @@ export class UserController {
   async getKakaoInfo(@Query() query: { code }) {
     const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
     const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
+
     await this.userService.kakaoLogin(
       KAKAO_REST_API_KEY,
       KAKAO_REDIRECT_URI,
       query.code,
     );
+    return { message: '로그인 되었습니다' };
   }
 }

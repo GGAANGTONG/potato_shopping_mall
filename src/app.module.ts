@@ -10,6 +10,7 @@ import { UsersModule } from './user/users.module';
 import { GoodsModule } from './goods/goods.module';
 import { AuthModule } from './auth/auth.module';
 import { LikeModule } from './like/like.module';
+import { PointModule } from './point/point.module';
 import { RedisModule } from './redis/redis.module';
 import { BoardsModule } from './boards/boards.module';
 
@@ -27,6 +28,7 @@ import { BoardsModule } from './boards/boards.module';
     UsersModule,
     GoodsModule,
     LikeModule,
+    PointModule,
     RedisModule,
     BoardsModule,
   ],
