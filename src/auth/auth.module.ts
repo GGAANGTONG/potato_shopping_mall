@@ -6,6 +6,7 @@ import { JwtStrategy } from "./jwt.strategy";
 import { Users } from "src/user/entities/user.entitiy";
 import { UsersModule } from "src/user/users.module";
 import { UserService } from "src/user/users.service";
+import { HttpModule } from "@nestjs/axios";
 
 @Module({
   imports: [
@@ -17,8 +18,9 @@ import { UserService } from "src/user/users.service";
     }),
     TypeOrmModule.forFeature([Users]),
     UsersModule,
+    HttpModule,
   ],
-  providers: [JwtStrategy, UserService],
+  providers: [JwtStrategy, UserService, HttpModule],
   controllers: [],
 })
 export class AuthModule {}

@@ -54,6 +54,10 @@ export class Goods {
   @OneToOne(() => Stocks, (stocks) => stocks.goods)
   stock: Stocks;
 
+  @OneToMany(() => Orders, (orders) => orders.goods)
+  orders: Orders[];
+  
   @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.goods)
   ordersdetails: OrdersDetails[];
+
 }
