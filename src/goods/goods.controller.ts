@@ -7,10 +7,12 @@ import {
   Param,
   Delete,
   Query,
-} from '@nestjs/common';
-import { GoodsService } from './goods.service';
-import { CreateGoodDto } from './dto/create-goods.dto';
-import { UpdateGoodDto } from './dto/update-goods.dto';
+  UseGuards,
+} from "@nestjs/common";
+import { GoodsService } from "./goods.service";
+import { CreateGoodDto } from "./dto/create-goods.dto";
+import { UpdateGoodDto } from "./dto/update-goods.dto";
+
 @Controller('goods')
 export class GoodsController {
   constructor(private readonly goodsService: GoodsService) {}

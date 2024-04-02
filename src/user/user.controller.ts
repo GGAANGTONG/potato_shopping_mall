@@ -3,10 +3,12 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpStatus,
   Param,
   Patch,
   Post,
+  Query,
   Res,
 } from "@nestjs/common";
 import { UserService } from "./users.service";
@@ -55,5 +57,26 @@ export class UserController {
   async remove(@Param("id") id: number) {
     await this.userService.remove(id);
     return { message: "삭제 되었습니다" };
+  }
+
+  @Get("/oauth")
+  @Header("Content-Type", "text/html")
+  redirectToKakaoAuth(@Res() res) {
+    const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
+    const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
+    const kakaoAuthURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}`;
+
+    res.redirect(HttpStatus.TEMPORARY_REDIRECT, kakaoAuthURL);
+  }
+
+  @Get("/oauth/callback")
+  async getKakaoInfo(@Query() query: { code }) {
+    const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
+    const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
+    await this.userService.kakaoLogin(
+      KAKAO_REST_API_KEY,
+      KAKAO_REDIRECT_URI,
+      query.code,
+    );
   }
 }
