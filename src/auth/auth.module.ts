@@ -14,7 +14,7 @@ import { PointModule } from "src/point/point.module";
   imports: [
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>("JWT_SECRET"),
+        secret: config.get<string>('JWT_SECRET'),
       }),
       inject: [ConfigService],
     }),

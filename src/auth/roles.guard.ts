@@ -1,10 +1,10 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { AuthGuard } from "@nestjs/passport";
-import { Role } from "src/user/type/user_role.type";
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
+import { Role } from 'src/user/type/user_role.type';
 
 @Injectable()
-export class RolesGuard extends AuthGuard("jwt") implements CanActivate {
+export class RolesGuard extends AuthGuard('jwt') implements CanActivate {
   constructor(private reflector: Reflector) {
     super();
   }
@@ -16,7 +16,7 @@ export class RolesGuard extends AuthGuard("jwt") implements CanActivate {
       return false;
     }
 
-    const requiredRoles = this.reflector.getAllAndOverride<Role[]>("roles", [
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>('roles', [
       context.getHandler(),
       context.getClass(),
     ]);

@@ -1,18 +1,18 @@
-import { NestFactory } from "@nestjs/core";
-import { ValidationPipe } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { AppModule } from "./app.module";
-import cookieParser from "cookie-parser";
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AppModule } from './app.module';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
 
   const configService = app.get(ConfigService);
-  const PORT = configService.get("SERVER_PORT");
+  const PORT = configService.get('SERVER_PORT');
 
-  app.setGlobalPrefix("api", { exclude: ["/health-check"] });
+  app.setGlobalPrefix('api', { exclude: ['/health-check'] });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -24,13 +24,13 @@ async function bootstrap() {
 
   //Swagger
   const config = new DocumentBuilder()
-    .setTitle("Welcome to Potato Shopping Mall!")
-    .setDescription("We have everything for You!")
-    .setVersion("1.0")
-    .addBearerAuth({ type: "http", scheme: "bearer", bearerFormat: "JWT" })
+    .setTitle('Welcome to Potato Shopping Mall!')
+    .setDescription('We have everything for You!')
+    .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("api", app, document);
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(PORT);
 }

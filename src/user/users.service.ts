@@ -4,20 +4,20 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
-} from "@nestjs/common";
-
+} from '@nestjs/common';
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Users } from "./entities/user.entitiy";
 import { compare, hash } from "bcrypt";
 import _ from "lodash";
 import { SignUpDto } from "./dto/signup.dto";
-import { Sign_inDto } from "./dto/sign_in.dto";
-import { updateDto } from "./dto/update.dto";
+
 import { JwtService } from "@nestjs/jwt";
 import { firstValueFrom } from "rxjs";
 import { HttpService } from "@nestjs/axios";
 import { Point } from "src/point/entities/point.entity";
+import { SignInDto } from './dto/sign_in.dto';
+import { UpdateDto } from './dto/update.dto';
 
 @Injectable()
 export class UserService {
@@ -30,16 +30,14 @@ export class UserService {
   ) {}
 
   async register(signUpDto: SignUpDto): Promise<Users> {
-    const find_email = await this.findByEmail(signUpDto.email);
-    if (find_email) {
-      throw new ConflictException("이미 가입된 이메일 입니다.");
+    const findEmail = await this.findByEmail(signUpDto.email);
+    if (findEmail) {
+      throw new ConflictException('이미 가입된 이메일 입니다.');
     }
-
-    const hashed_password = await hash(signUpDto.password, 10);
-
+    const hashedPassword = await hash(signUpDto.password, 10);
     const user = await this.usersRepository.save({
       email: signUpDto.email,
-      password: hashed_password,
+      password: hashedPassword,
       name: signUpDto.name,
       nickname: signUpDto.nickname,
       profile: signUpDto.profile,
@@ -55,28 +53,28 @@ export class UserService {
     return user;
   }
 
-  async sign_in(sign_inDto: Sign_inDto) {
+  async signIn(signInDto: SignInDto) {
     const user = await this.usersRepository.findOne({
-      select: ["id", "email", "password", "nickname", "profile", "name"],
-      where: { email: sign_inDto.email },
+      select: ['id', 'email', 'password', 'nickname', 'profile', 'name'],
+      where: { email: signInDto.email },
     });
     if (_.isNull(user)) {
-      throw new UnauthorizedException("이메일을 확인하세요.");
+      throw new UnauthorizedException('이메일을 확인하세요.');
     }
-    const compared_password = await compare(sign_inDto.password, user.password);
-    if (!compared_password) {
-      throw new UnauthorizedException("비밀번호를 확인하세요.");
+    const comparedPassword = await compare(signInDto.password, user.password);
+    if (!comparedPassword) {
+      throw new UnauthorizedException('비밀번호를 확인하세요.');
     }
     const payload = { email: user.email, sub: user.id };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_ACCESS_TOKEN_SECRET,
-      expiresIn: "7d",
+      expiresIn: '7d',
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_REFRESH_TOKEN_SECRET,
-      expiresIn: "7d",
+      expiresIn: '7d',
     });
 
     return {
@@ -88,7 +86,7 @@ export class UserService {
   async findAll(): Promise<Users[]> {
     const users = await this.usersRepository.find({
       order: {
-        id: "asc",
+        id: 'asc',
       },
     });
 
@@ -100,12 +98,12 @@ export class UserService {
       id,
     });
     if (_.isNil(user)) {
-      throw new NotFoundException("해당 유저가 없습니다");
+      throw new NotFoundException('해당 유저가 없습니다');
     }
     return user;
   }
 
-  async update(id: number, updateDto: updateDto) {
+  async update(id: number, updateDto: UpdateDto) {
     const user = await this.usersRepository.findOne({
       where: { id },
     });
@@ -113,11 +111,11 @@ export class UserService {
     const { nickname, profile, password } = updateDto;
 
     if (_.isNil(user)) {
-      throw new NotFoundException("해당 유저가 없습니다");
+      throw new NotFoundException('해당 유저가 없습니다');
     }
 
     if (!nickname && !profile) {
-      throw new BadRequestException("수정할 값을 입력해주세요.");
+      throw new BadRequestException('수정할 값을 입력해주세요.');
     }
 
     if (nickname) user.nickname = nickname;
@@ -133,7 +131,7 @@ export class UserService {
     const user = await this.usersRepository.findOneBy({ id });
 
     if (_.isNil(user)) {
-      throw new NotFoundException("해당 유저가 없습니다");
+      throw new NotFoundException('해당 유저가 없습니다');
     }
 
     await this.usersRepository.remove(user);
@@ -151,19 +149,19 @@ export class UserService {
     code: string,
   ) {
     const config = {
-      grant_type: "authorization_code",
+      grant_type: 'authorization_code',
       client_id: KAKAO_REST_API_KEY,
       redirect_uri: KAKAO_REDIRECT_URI,
       code,
     };
     const params = new URLSearchParams(config).toString();
     const tokenHeaders = {
-      "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+      'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
     };
     const tokenUrl = `https://kauth.kakao.com/oauth/token?${params}`;
 
     const tokenRes = await firstValueFrom(
-      this.http.post(tokenUrl, "", { headers: tokenHeaders }),
+      this.http.post(tokenUrl, '', { headers: tokenHeaders }),
     );
 
     // 'any' 타입으로 응답을 단언하여 'access_token'에 접근

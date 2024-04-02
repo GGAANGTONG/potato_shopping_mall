@@ -1,3 +1,4 @@
+
 import { Module } from "@nestjs/common";
 import { UserController } from "./user.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
@@ -9,17 +10,18 @@ import { HttpModule } from "@nestjs/axios";
 import { Point } from "src/point/entities/point.entity";
 import { PointModule } from "src/point/point.module";
 
+
 @Module({
   imports: [
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
-        signOptions: { expiresIn: "1h" },
-        secret: config.get<string>("JWT_REFRESH_TOKEN_SECRET"),
+        signOptions: { expiresIn: '1h' },
+        secret: config.get<string>('JWT_REFRESH_TOKEN_SECRET'),
       }),
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([Users, Point]),
-    HttpModule,
+    HttpModule, 
     PointModule,
   ],
   controllers: [UserController],
