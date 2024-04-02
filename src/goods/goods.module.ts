@@ -9,7 +9,7 @@ import { Stocks } from './entities/stocks.entity';
 import { StocksService } from './stocks.service';
 import { StocksController } from './stocks.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Orders } from 'src/orders/entities/orders.entity';
+import { Orders } from '../orders/entities/orders.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Goods, Categories, Stocks, Orders])],
