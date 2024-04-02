@@ -18,7 +18,7 @@ import { PointModule } from "src/point/point.module";
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Users,Point]),
+    TypeOrmModule.forFeature([Users, Point]),
     UsersModule,
     HttpModule,
     PointModule,

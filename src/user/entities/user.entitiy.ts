@@ -42,7 +42,7 @@ export class Users {
   @Column({ type: "varchar", unique: true })
   email: string;
 
-  @IsString()     
+  @IsString()
   @IsNotEmpty()
   @Column({ type: "varchar" })
   nickname: string;
@@ -69,7 +69,7 @@ export class Users {
 
   @OneToMany(() => Point, (point) => point.user)
   point: Point[];
-  
+
   // @OneToMany(() => Orders, (order) => order.user)
   // order: Orders[];
 }

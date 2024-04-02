@@ -1,11 +1,17 @@
+import { IsNotEmpty, IsNumber } from "class-validator";
+import { Users } from "src/user/entities/user.entitiy";
 
-import { IsNotEmpty, IsNumber } from 'class-validator';
-import { Users } from 'src/user/entities/user.entitiy';
-
-import { Column, CreateDateColumn,  Entity, JoinColumn, ManyToOne,  PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
 @Entity({
-  name: 'point',
+  name: "point",
 })
 export class Point {
   @IsNumber()
@@ -14,7 +20,7 @@ export class Point {
 
   @IsNotEmpty()
   @IsNumber()
-  @Column({ type: 'int',  })
+  @Column({ type: "int" })
   possession: number;
 
   @CreateDateColumn()
@@ -22,15 +28,10 @@ export class Point {
 
   @IsNotEmpty()
   @IsNumber()
-  @Column('int', { name: 'userId' })
+  @Column("int", { name: "userId" })
   userId: number;
 
-
   @ManyToOne(() => Users, (user) => user.point)
-  @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: "userId", referencedColumnName: "id" }])
   user: Users;
-
-
 }
-
-

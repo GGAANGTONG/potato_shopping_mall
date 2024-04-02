@@ -48,10 +48,10 @@ export class UserService {
     //포인트 등록
 
     const point = this.pointsRepository.create({
-      user:user,
-      possession:1000000,
+      user: user,
+      possession: 1000000,
     });
-    await this. pointsRepository.save(point)
+    await this.pointsRepository.save(point);
     return user;
   }
 
@@ -179,7 +179,7 @@ export class UserService {
     const userInfoRes = await firstValueFrom(
       this.http.get(userInfoUrl, { headers: userInfoHeaders }),
     );
-
+    console.log(userInfoRes);
     // const data = userInfoRes.data;
     // // 사용자 정보를 로컬 DB에 저장
     // let user = await this.usersRepository.findOne({
