@@ -5,11 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Carts } from './entities/carts.entity';
 import { Orders } from './entities/orders.entity';
 import { OrdersDetails } from './entities/ordersdetails.entity';
-import { Goods } from 'src/goods/entities/goods.entity';
-import { Categories } from 'src/goods/entities/categories.entity';
-import { Stocks } from 'src/goods/entities/stocks.entity';
+import { Goods } from '../goods/entities/goods.entity';
+import { Categories } from '../goods/entities/categories.entity';
+import { Stocks } from '../goods/entities/stocks.entity';
 import { Reviews } from './entities/review.entity';
-import { Users } from 'src/user/entities/user.entitiy';
+import { Users } from '../user/entities/user.entitiy';
 import { ReviewService } from './review.service';
 import { ReviewController } from './review.controller';
 
@@ -29,4 +29,4 @@ import { ReviewController } from './review.controller';
   providers: [OrdersService, ReviewService],
   controllers: [OrdersController, ReviewController],
 })
-export class OrdersModule {}
+export class OrdersModule { }

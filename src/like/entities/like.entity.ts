@@ -5,12 +5,12 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-} from "typeorm";
-import { IsNotEmpty, IsNumber } from "class-validator";
-import { Users } from "src/user/entities/user.entitiy";
+} from 'typeorm';
+import { IsNotEmpty, IsNumber } from 'class-validator';
+import { Users } from 'src/user/entities/user.entitiy';
 // import { Goods } from "src/goods/entities/goods.entity";
 
-@Entity({ name: "likes" })
+@Entity({ name: 'likes' })
 export class Like {
   @IsNumber()
   @PrimaryGeneratedColumn({ unsigned: true })
@@ -18,18 +18,18 @@ export class Like {
 
   @IsNumber()
   @IsNotEmpty()
-  @Column({ type: "int" })
+  @Column({ type: 'int' })
   usersId: number;
 
   @IsNumber()
   @IsNotEmpty()
-  @Column({ type: "int" })
+  @Column({ type: 'int' })
   goodsId: number;
 
   @CreateDateColumn()
   created_at: Date;
 
-  @JoinColumn([{ name: "userId", referencedColumnName: "id" }])
+  @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
   @ManyToOne(() => Users, (user) => user.like)
   user: Users;
 

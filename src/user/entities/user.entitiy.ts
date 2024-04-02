@@ -1,5 +1,5 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Role } from "../type/user_role.type";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Role } from '../type/user_role.type';
 import {
   IsEmail,
   IsEnum,
@@ -10,12 +10,12 @@ import {
   IsStrongPassword,
 } from 'class-validator';
 
-import { Like } from "src/like/entities/like.entity";
-import { Grade } from "../type/user_grade.type";
-import { Orders } from "src/orders/entities/orders.entity";
+import { Like } from 'src/like/entities/like.entity';
+import { Grade } from '../type/user_grade.type';
+import { Orders } from 'src/orders/entities/orders.entity';
 // import { Orders } from "src/orders/entities/orders.entity";
 
-@Entity({ name: "users" })
+@Entity({ name: 'users' })
 export class Users {
   @IsNumber()
   @PrimaryGeneratedColumn({ unsigned: true })
@@ -49,7 +49,7 @@ export class Users {
 
   @IsString()
   @IsOptional()
-  @Column({ type: "text", nullable: true })
+  @Column({ type: 'text', nullable: true })
   profile?: string;
 
   @IsEnum(Role)
@@ -57,11 +57,11 @@ export class Users {
   role: Role;
 
   @IsEnum(Grade)
-  @Column({ type: "enum", enum: Grade, default: Grade.CUSTUMER })
+  @Column({ type: 'enum', enum: Grade, default: Grade.CUSTUMER })
   grade: Grade;
 
   @IsNumber()
-  @Column({ type: "int", default: 1000000 })
+  @Column({ type: 'int', default: 1000000 })
   points: number;
 
   @OneToMany(() => Like, (like) => like.user)
