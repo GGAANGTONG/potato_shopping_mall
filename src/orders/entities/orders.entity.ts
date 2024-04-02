@@ -13,7 +13,7 @@ import {
 import { Status } from '../types/order.type';
 import { Reviews } from './review.entity';
 import { Carts } from './carts.entity';
-import { Users } from 'src/user/entities/user.entitiy';
+import { Users } from '../../user/entities/user.entitiy';
 import { OrdersDetails } from './ordersdetails.entity';
 
 @Entity({ name: 'orders' })
