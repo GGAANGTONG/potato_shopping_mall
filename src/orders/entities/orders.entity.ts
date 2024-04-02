@@ -67,11 +67,11 @@ export class Orders {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @ManyToOne(() => Users, (users) => users.orders, {
+  @ManyToOne(() => Users, (user) => user.orders, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'users_id', referencedColumnName: 'id' })
-  users: Users;
+  user: Users;
 
   @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.orders)
   ordersdetails: OrdersDetails[];
