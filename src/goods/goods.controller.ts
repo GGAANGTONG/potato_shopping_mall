@@ -14,7 +14,7 @@ import { UpdateGoodDto } from './dto/update-goods.dto';
 
 @Controller('goods')
 export class GoodsController {
-  constructor(private readonly goodsService: GoodsService) { }
+  constructor(private readonly goodsService: GoodsService) {}
 
   /**
    * 상품등록

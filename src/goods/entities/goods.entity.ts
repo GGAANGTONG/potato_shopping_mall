@@ -56,5 +56,4 @@ export class Goods {
 
   @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.goods)
   ordersdetails: OrdersDetails[];
-
 }
