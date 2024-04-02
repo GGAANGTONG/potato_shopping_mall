@@ -10,6 +10,7 @@ import { UsersModule } from "./user/users.module";
 import { GoodsModule } from "./goods/goods.module";
 import { AuthModule } from "./auth/auth.module";
 import { LikeModule } from "./like/like.module";
+import { PointModule } from './point/point.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { LikeModule } from "./like/like.module";
     UsersModule,
     GoodsModule,
     LikeModule,
+    PointModule,
   ],
   controllers: [AppController],
   providers: [],

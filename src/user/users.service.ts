@@ -17,6 +17,7 @@ import { updateDto } from "./dto/update.dto";
 import { JwtService } from "@nestjs/jwt";
 import { firstValueFrom } from "rxjs";
 import { HttpService } from "@nestjs/axios";
+import { Point } from "src/point/entities/point.entity";
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,7 @@ export class UserService {
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
     private readonly jwtService: JwtService,
+    private pointsRepository: Repository<Point>,
     private http: HttpService,
   ) {}
 
@@ -32,7 +34,9 @@ export class UserService {
     if (find_email) {
       throw new ConflictException("이미 가입된 이메일 입니다.");
     }
+
     const hashed_password = await hash(signUpDto.password, 10);
+
     const user = await this.usersRepository.save({
       email: signUpDto.email,
       password: hashed_password,
@@ -40,6 +44,14 @@ export class UserService {
       nickname: signUpDto.nickname,
       profile: signUpDto.profile,
     });
+
+    //포인트 등록
+
+    const point = this.pointsRepository.create({
+      user:user,
+      possession:1000000,
+    });
+    await this. pointsRepository.save(point)
     return user;
   }
 
@@ -167,6 +179,19 @@ export class UserService {
     const userInfoRes = await firstValueFrom(
       this.http.get(userInfoUrl, { headers: userInfoHeaders }),
     );
-    return userInfoRes;
+
+    // const data = userInfoRes.data;
+    // // 사용자 정보를 로컬 DB에 저장
+    // let user = await this.usersRepository.findOne({
+    //   where: { email: data.email },
+    // });
+    // if (!user) {
+    //   user = new Users();
+    //   user.email = data.kakao_account.email;
+    //   user.nickname = data.properties.nickname;
+    //   // 기타 필요한 정보 추가 가능
+    //   await this.usersRepository.save(user);
+    // }
+    // return user;
   }
 }

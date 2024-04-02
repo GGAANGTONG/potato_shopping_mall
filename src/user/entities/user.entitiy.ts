@@ -12,6 +12,7 @@ import {
 
 import { Like } from "src/like/entities/like.entity";
 import { Grade } from "../type/user_grade.type";
+import { Point } from "src/point/entities/point.entity";
 // import { Orders } from "src/orders/entities/orders.entity";
 
 @Entity({ name: "users" })
@@ -41,7 +42,7 @@ export class Users {
   @Column({ type: "varchar", unique: true })
   email: string;
 
-  @IsString()
+  @IsString()     
   @IsNotEmpty()
   @Column({ type: "varchar" })
   nickname: string;
@@ -66,6 +67,9 @@ export class Users {
   @OneToMany(() => Like, (like) => like.user)
   like: Like[];
 
+  @OneToMany(() => Point, (point) => point.user)
+  point: Point[];
+  
   // @OneToMany(() => Orders, (order) => order.user)
   // order: Orders[];
 }

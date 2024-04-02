@@ -13,6 +13,7 @@ import { Categories } from "./categories.entity";
 import { Stocks } from "./stocks.entity";
 import { Orders } from "../../orders/entities/orders.entity";
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+// import { Like } from "src/like/entities/like.entity";
 
 @Entity({ name: "goods" })
 export class Goods {
@@ -56,5 +57,7 @@ export class Goods {
 
   @OneToMany(() => Orders, (orders) => orders.goods)
   orders: Orders[];
-  
+
+  // @OneToMany((type) => Like, (like) => like.goods)
+  // like: Like[];
 }
