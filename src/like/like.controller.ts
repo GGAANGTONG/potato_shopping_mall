@@ -1,17 +1,17 @@
-import { Controller, Post, Body } from "@nestjs/common";
-import { LikeService } from "./like.service";
-import { CreateLikeDto } from "./dto/create-like.dto";
+import { Controller, Post, Body } from '@nestjs/common';
+import { LikeService } from './like.service';
+import { CreateLikeDto } from './dto/create-like.dto';
 // import { UpdateLikeDto } from './dto/update-like.dto';
 
-@Controller("like")
+@Controller('like')
 export class LikeController {
   constructor(private readonly likeService: LikeService) {}
 
-  @Post("create")
+  @Post('create')
   async create(@Body() createLikeDto: CreateLikeDto) {
     const new_like = await this.likeService.create(createLikeDto);
     return {
-      message: "생성 되었습니다",
+      message: '생성 되었습니다',
       data: new_like,
     };
   }

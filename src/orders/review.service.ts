@@ -34,7 +34,9 @@ export class ReviewService {
    * @returns
    */
   async getReviewByOrderId(ordersId: number): Promise<Reviews | undefined> {
-    return await this.reviewRepository.findOne({ where: { orders_id: ordersId } });
+    return await this.reviewRepository.findOne({
+      where: { orders_id: ordersId },
+    });
   }
 
   /**
@@ -59,7 +61,9 @@ export class ReviewService {
   }
 
   async deleteReviewByOrderId(ordersId: number): Promise<boolean> {
-    const deleteResult = await this.reviewRepository.delete({ orders_id: ordersId });
+    const deleteResult = await this.reviewRepository.delete({
+      orders_id: ordersId,
+    });
     return deleteResult.affected !== 0;
   }
 }
