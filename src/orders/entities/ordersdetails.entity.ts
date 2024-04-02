@@ -1,5 +1,11 @@
 import { IsNumber } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Orders } from './orders.entity';
 import { Goods } from 'src/goods/entities/goods.entity';
 

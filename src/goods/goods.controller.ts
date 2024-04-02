@@ -7,15 +7,14 @@ import {
   Param,
   Delete,
   Query,
-  UseGuards,
-} from "@nestjs/common";
-import { GoodsService } from "./goods.service";
-import { CreateGoodDto } from "./dto/create-goods.dto";
-import { UpdateGoodDto } from "./dto/update-goods.dto";
+} from '@nestjs/common';
+import { GoodsService } from './goods.service';
+import { CreateGoodDto } from './dto/create-goods.dto';
+import { UpdateGoodDto } from './dto/update-goods.dto';
 
 @Controller('goods')
 export class GoodsController {
-  constructor(private readonly goodsService: GoodsService) {}
+  constructor(private readonly goodsService: GoodsService) { }
 
   /**
    * 상품등록

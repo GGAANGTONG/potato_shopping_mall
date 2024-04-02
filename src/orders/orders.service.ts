@@ -13,7 +13,7 @@ export class OrdersService {
     @InjectRepository(Orders)
     private ordersRepository: Repository<Orders>,
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   async purchase(
     userId: number,
@@ -31,7 +31,7 @@ export class OrdersService {
         },
       });
       if (!goods) {
-        throw new BadRequestException('존재하지 않는 상품입니다.')
+        throw new BadRequestException('존재하지 않는 상품입니다.');
       }
 
       const count = goods.stock.count - o_count;
@@ -47,7 +47,7 @@ export class OrdersService {
       });
 
       if (!user) {
-        throw new BadRequestException('존재하지 않는 유저입니다.')
+        throw new BadRequestException('존재하지 않는 유저입니다.');
       }
 
       const paying = goods.g_price * o_count;
@@ -83,5 +83,4 @@ export class OrdersService {
       throw err;
     }
   }
-
 }
