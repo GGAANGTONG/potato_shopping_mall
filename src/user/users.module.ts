@@ -1,13 +1,12 @@
-
-import { Module } from "@nestjs/common";
-import { UserController } from "./user.controller";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { UserService } from "./users.service";
-import { Users } from "./entities/user.entitiy";
-import { JwtModule } from "@nestjs/jwt";
-import { ConfigService } from "@nestjs/config";
-import { HttpModule } from "@nestjs/axios";
-import { Point } from "../point/entities/point.entity";
+import { Module } from '@nestjs/common';
+import { UserController } from './user.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserService } from './users.service';
+import { Users } from './entities/user.entitiy';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
+import { Point } from '../point/entities/point.entity';
 
 @Module({
   imports: [
@@ -19,7 +18,7 @@ import { Point } from "../point/entities/point.entity";
       }),
       inject: [ConfigService],
     }),
-    HttpModule, 
+    HttpModule,
   ],
   controllers: [UserController],
   providers: [UserService],

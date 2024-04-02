@@ -79,6 +79,6 @@ export class UserController {
       KAKAO_REDIRECT_URI,
       query.code,
     );
-    return { message: "로그인 되었습니다" };
+    return { message: '로그인 되었습니다' };
   }
 }

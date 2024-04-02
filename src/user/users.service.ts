@@ -5,17 +5,17 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Users } from "./entities/user.entitiy";
-import { compare, hash } from "bcrypt";
-import _ from "lodash";
-import { SignUpDto } from "./dto/signup.dto";
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Users } from './entities/user.entitiy';
+import { compare, hash } from 'bcrypt';
+import _ from 'lodash';
+import { SignUpDto } from './dto/signup.dto';
 
-import { JwtService } from "@nestjs/jwt";
-import { firstValueFrom } from "rxjs";
-import { HttpService } from "@nestjs/axios";
-import { Point } from "../point/entities/point.entity";
+import { JwtService } from '@nestjs/jwt';
+import { firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
+import { Point } from '../point/entities/point.entity';
 import { SignInDto } from './dto/sign_in.dto';
 import { UpdateDto } from './dto/update.dto';
 

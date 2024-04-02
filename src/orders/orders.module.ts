@@ -29,4 +29,4 @@ import { ReviewController } from './review.controller';
   providers: [OrdersService, ReviewService],
   controllers: [OrdersController, ReviewController],
 })
-export class OrdersModule { }
+export class OrdersModule {}

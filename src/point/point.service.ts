@@ -1,9 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 // import { CreatePointDto } from "./dto/create-point.dto";
 // import { UpdatePointDto } from "./dto/update-point.dto";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Point } from "./entities/point.entity";
-import { Repository } from "typeorm";
+import { InjectRepository } from '@nestjs/typeorm';
+import { Point } from './entities/point.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class PointService {

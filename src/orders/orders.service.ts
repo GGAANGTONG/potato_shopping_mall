@@ -13,7 +13,7 @@ export class OrdersService {
     @InjectRepository(Orders)
     private ordersRepository: Repository<Orders>,
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   async purchase(
     userId: number,
