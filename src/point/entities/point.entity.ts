@@ -28,7 +28,7 @@ export class Point {
 
   @IsNotEmpty()
   @IsNumber()
-  @Column("int", { name: "userId" })
+  @Column("int", { name: "userId",unsigned: true })
   userId: number;
 
   @ManyToOne(() => Users, (user) => user.point)
