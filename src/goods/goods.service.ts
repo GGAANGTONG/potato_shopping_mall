@@ -39,14 +39,14 @@ export class GoodsService {
     }
 
     try {
-      let fileUrl = '';
+      let fileKey = '';
       // 상품 이미지 버킷에 업로드
       if (file) {
-        const fileKey = await this.s3FileService.uploadFile(file);
-        fileUrl = `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${fileKey}`;
+        fileKey = await this.s3FileService.uploadFile(file);
+        //fileUrl = `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${fileKey}`;
       }
       const { g_name, g_price, g_desc, g_option } = createGoodDto;
-      const goodData = { g_name, g_price, g_desc, g_img: fileUrl, g_option };
+      const goodData = { g_name, g_price, g_desc, g_img: fileKey, g_option };
       const newGood = this.goodsRepository.create(goodData);
       newGood.category = existedCategory;
 
@@ -141,6 +141,16 @@ export class GoodsService {
     const good = await this.goodsRepository.findOneBy({ id });
     if (!good) {
       throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
+    }
+
+    if (good.g_img) {
+      try {
+        await this.s3FileService.deleteFile(good.g_img);
+      } catch (error) {
+        throw new InternalServerErrorException(
+          '파일 삭제 처리 중 에러가 발생했습니다.'
+        );
+      }
     }
 
     try {
