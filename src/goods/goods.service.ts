@@ -148,7 +148,7 @@ export class GoodsService {
         await this.s3FileService.deleteFile(good.g_img);
       } catch (error) {
         throw new InternalServerErrorException(
-          '파일 삭제 처리 중 에러가 발생했습니다.'
+          '파일 삭제 처리 중 에러가 발생했습니다.',
         );
       }
     }
