@@ -9,13 +9,16 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { SignUpDto } from './dto/signup.dto';
 import { SignInDto } from './dto/sign_in.dto';
 import { Users } from './entities/user.entitiy';
 import { UpdateDto } from './dto/update.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('users')
 export class UserController {
@@ -59,6 +62,21 @@ export class UserController {
     return { message: '삭제 되었습니다' };
   }
 
+  //포인트 조회
+  @UseGuards(AuthGuard('jwt'))
+  @Get('point')
+  async getPoint(@Req() req) {
+    const user = req.user;
+    const point = await this.userService.getPoint(user.id);
+    return point;
+  }
+
+  @Get('point/:userId')
+  async getPointDetails(@Param('userId') userId: number): Promise<any> {
+    const details = await this.userService.getPointDetails(userId);
+    return details;
+  }
+
   @Get('/oauth')
   @Header('Content-Type', 'text/html')
   redirectToKakaoAuth(@Res() res) {
@@ -79,6 +97,6 @@ export class UserController {
       KAKAO_REDIRECT_URI,
       query.code,
     );
-    return { message: "로그인 되었습니다" };
+    return { message: '로그인 되었습니다' };
   }
 }
