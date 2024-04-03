@@ -13,6 +13,7 @@ import { Categories } from './categories.entity';
 import { Stocks } from './stocks.entity';
 import { OrdersDetails } from '../../orders/entities/ordersdetails.entity';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Carts } from '../../orders/entities/carts.entity';
 
 @Entity({ name: 'goods' })
 export class Goods {
@@ -56,4 +57,7 @@ export class Goods {
 
   @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.goods)
   ordersdetails: OrdersDetails[];
+  
+  @OneToMany(() => Carts, (carts) => carts.goods)
+  carts: Carts[];
 }
