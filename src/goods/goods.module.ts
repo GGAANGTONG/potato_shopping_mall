@@ -13,9 +13,11 @@ import { Orders } from '../orders/entities/orders.entity';
 import { Like } from 'src/like/entities/like.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Goods, Categories, Stocks, Orders, Like])],
+  imports: [
+    TypeOrmModule.forFeature([Goods, Categories, Stocks, Orders, Like]),
+  ],
   controllers: [GoodsController, CategoriesController, StocksController],
   providers: [GoodsService, CategoriesService, StocksService],
-  exports: [GoodsService]
+  exports: [GoodsService],
 })
-export class GoodsModule { }
+export class GoodsModule {}

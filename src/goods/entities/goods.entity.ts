@@ -57,7 +57,7 @@ export class Goods {
 
   @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.goods)
   ordersdetails: OrdersDetails[];
-  
+
   @OneToMany(() => Carts, (carts) => carts.goods)
   carts: Carts[];
 }
