@@ -10,6 +10,7 @@ import { Goods } from './entities/goods.entity';
 import { Categories } from './entities/categories.entity';
 import { Stocks } from './entities/stocks.entity';
 import { Repository } from 'typeorm';
+import { S3FileService } from '../configs/s3_fileupload';
 
 @Injectable()
 export class GoodsService {
@@ -20,9 +21,16 @@ export class GoodsService {
     private categoriesRepository: Repository<Categories>,
     @InjectRepository(Stocks)
     private stocksRepository: Repository<Stocks>,
+    private readonly s3FileService: S3FileService,
   ) {}
 
-  async create(createGoodDto: CreateGoodDto) {
+  /**
+   * 상품등록
+   * @param file
+   * @param createGoodDto
+   * @returns
+   */
+  async create(file: Express.Multer.File, createGoodDto: CreateGoodDto) {
     const existedCategory = await this.categoriesRepository.findOneBy({
       id: createGoodDto.category,
     });
@@ -31,12 +39,21 @@ export class GoodsService {
     }
 
     try {
-      const { g_name, g_price, g_desc, g_img, g_option } = createGoodDto;
-      const goodData = { g_name, g_price, g_desc, g_img, g_option };
+      let fileUrl = '';
+      // 상품 이미지 버킷에 업로드
+      if (file) {
+        const fileKey = await this.s3FileService.uploadFile(file);
+        fileUrl = `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${fileKey}`;
+      }
+      const { g_name, g_price, g_desc, g_option } = createGoodDto;
+      const goodData = { g_name, g_price, g_desc, g_img: fileUrl, g_option };
       const newGood = this.goodsRepository.create(goodData);
       newGood.category = existedCategory;
+
+      // 상품 정보 저장
       const savedGood = await this.goodsRepository.save(newGood);
 
+      // 초기 재고 정보 저장
       const initialStock = this.stocksRepository.create({
         count: 0,
         goods: savedGood,
