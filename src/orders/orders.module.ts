@@ -12,6 +12,10 @@ import { Reviews } from './entities/review.entity';
 import { Users } from '../user/entities/user.entitiy';
 import { ReviewService } from './review.service';
 import { ReviewController } from './review.controller';
+import { CartService } from './carts.service';
+import { CartController } from './carts.controller';
+import { Payments } from '../payments/entities/payments.entity';
+import { Like } from 'src/like/entities/like.entity';
 
 @Module({
   imports: [
@@ -24,9 +28,12 @@ import { ReviewController } from './review.controller';
       Stocks,
       Reviews,
       Users,
+      Payments,
+      Like,
+
     ]),
   ],
-  providers: [OrdersService, ReviewService],
-  controllers: [OrdersController, ReviewController],
+  providers: [OrdersService, ReviewService, CartService],
+  controllers: [OrdersController, ReviewController, CartController],
 })
 export class OrdersModule {}
