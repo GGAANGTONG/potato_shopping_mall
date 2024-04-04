@@ -6,18 +6,18 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Users } from './entities/user.entitiy';
 import { compare, hash } from 'bcrypt';
 import _ from 'lodash';
 import { SignUpDto } from './dto/signup.dto';
+
 import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { Point } from '../point/entities/point.entity';
 import { SignInDto } from './dto/sign_in.dto';
 import { UpdateDto } from './dto/update.dto';
-import { S3FileService } from '../common/utils/s3_fileupload';
 
 @Injectable()
 export class UserService {
@@ -28,33 +28,20 @@ export class UserService {
     private pointsRepository: Repository<Point>,
     private readonly jwtService: JwtService,
     private http: HttpService,
-    private dataSource: DataSource,
-    private readonly s3FileService: S3FileService,
   ) {}
 
-  async register(
-    signUpDto: SignUpDto,
-    file: Express.Multer.File,
-  ): Promise<Users> {
+  async register(signUpDto: SignUpDto): Promise<Users> {
     const findEmail = await this.findByEmail(signUpDto.email);
     if (findEmail) {
       throw new ConflictException('이미 가입된 이메일 입니다.');
     }
     const hashedPassword = await hash(signUpDto.password, 10);
-
-    let fileKey = '';
-    // 상품 이미지 버킷에 업로드
-    if (file) {
-      fileKey = await this.s3FileService.uploadFile(file);
-      //fileUrl = `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${fileKey}`;
-    }
-
     const user = await this.usersRepository.save({
       email: signUpDto.email,
       password: hashedPassword,
       name: signUpDto.name,
       nickname: signUpDto.nickname,
-      profile: fileKey,
+      profile: signUpDto.profile,
     });
 
     //포인트 등록
@@ -115,56 +102,6 @@ export class UserService {
       throw new NotFoundException('해당 유저가 없습니다');
     }
     return user;
-  }
-  /// 포인트 조회
-  async getPoint(userId: number) {
-    // 사용자의 포인트 합계를 조회
-    const { sum } = await this.dataSource
-      .getRepository(Point)
-      .createQueryBuilder('point')
-      .select('SUM(point.possession)', 'sum')
-      .where('point.userId = :id', { id: userId })
-      .getRawOne();
-    console.log(sum);
-    // 사용자 정보를 조회
-    const user = await this.dataSource
-      .getRepository(Users)
-      .findOneBy({ id: userId });
-
-    if (!user) {
-      throw new Error('유저가 없습니다');
-    }
-
-    // 사용자 정보와 포인트 합계를 함께 반환
-    return {
-      userId: userId,
-      email: user.email,
-      name: user.name,
-      nickname: user.nickname,
-      point: user.points,
-    };
-  }
-
-  /// 포인트 조회
-
-  async getPointDetails(userId: number) {
-    // 사용자의 포인트 상세 기록을 조회
-    const pointDetails = await this.dataSource
-      .getRepository(Point)
-      .createQueryBuilder('point')
-      .where('point.userId = :id', { id: userId })
-      .getMany(); // 모든 포인트 기록을 가져옴
-
-    // 사용자 정보를 조회
-    const user = await this.dataSource
-      .getRepository(Users)
-      .findOneBy({ id: userId });
-
-    if (!user) {
-      throw new Error('유저가 없습니다');
-    }
-
-    return pointDetails;
   }
 
   async update(id: number, updateDto: UpdateDto) {
@@ -241,20 +178,19 @@ export class UserService {
     const userInfoRes = await firstValueFrom(
       this.http.get(userInfoUrl, { headers: userInfoHeaders }),
     );
-
-    const data = userInfoRes.data;
-    console.log(1, data);
-    // 사용자 정보를 로컬 DB에 저장
-    let user = await this.usersRepository.findOne({
-      where: { email: data.kakao_account.email },
-    });
-    if (!user) {
-      user = new Users();
-      user.email = data.kakao_account.email;
-      user.name = data.properties.nickname;
-      user.nickname = data.properties.nickname;
-      await this.usersRepository.save(user);
-    }
-    return user;
+    console.log(userInfoRes);
+    // const data = userInfoRes.data;
+    // // 사용자 정보를 로컬 DB에 저장
+    // let user = await this.usersRepository.findOne({
+    //   where: { email: data.email },
+    // });
+    // if (!user) {
+    //   user = new Users();
+    //   user.email = data.kakao_account.email;
+    //   user.nickname = data.properties.nickname;
+    //   // 기타 필요한 정보 추가 가능
+    //   await this.usersRepository.save(user);
+    // }
+    // return user;
   }
 }

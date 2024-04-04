@@ -12,32 +12,4 @@ export class CreateOrderDto extends PickType(Orders, [
   @IsNumber()
   goods_id: number;
 
-  @IsString()
-  @IsNotEmpty()
-  @Column()
-  p_name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Column()
-  p_tel: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Column()
-  p_addr: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @Column()
-  p_count: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @Column()
-  p_total_price: number;
-
-  @IsBoolean()
-  @Column()
-  paid: boolean;
 }
