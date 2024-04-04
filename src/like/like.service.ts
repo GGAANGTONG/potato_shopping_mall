@@ -3,8 +3,8 @@ import { CreateLikeDto } from './dto/create-like.dto';
 import { Like } from './entities/like.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserService } from 'src/user/users.service';
-import { GoodsService } from 'src/goods/goods.service';
+import { UserService } from '../user/users.service';
+import { GoodsService } from '../goods/goods.service';
 // import { UpdateLikeDto } from './dto/update-like.dto';
 
 @Injectable()

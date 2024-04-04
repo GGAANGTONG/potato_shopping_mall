@@ -25,7 +25,7 @@ export class UserController {
   async register(@Body() signUpDto: SignUpDto, @Res() res) {
     await this.userService.register(signUpDto);
     res.send('회원가입되었습니다. 로그인해주세요!');
-  }
+  } //1
 
   @Post('login')
   async signIn(@Body() signInDto: SignInDto, @Res() res) {

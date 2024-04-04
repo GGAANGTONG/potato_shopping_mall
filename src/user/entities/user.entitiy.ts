@@ -73,4 +73,10 @@ export class Users {
 
   @OneToMany(() => Orders, (orders) => orders.user)
   orders: Orders[];
+
+  @OneToMany(() => Comments, (comments) => comments.user)
+  comments: Comments[]
+
+  @OneToMany(() => Boards, (boards) => boards.user)
+  boards: Boards[]
 }
