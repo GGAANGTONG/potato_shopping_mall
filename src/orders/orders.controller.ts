@@ -13,7 +13,6 @@ import {
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Status } from './types/order.type';
 
 @Controller('orders')
 export class OrdersController {
