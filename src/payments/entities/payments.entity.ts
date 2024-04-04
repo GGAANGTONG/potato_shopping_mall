@@ -42,10 +42,5 @@ export class Payments {
     @Column({ type: 'enum', enum: PayStatus, default: '결제완료' })
     p_status: PayStatus;
 
-    @IsBoolean()
-    @IsNotEmpty()
-    @Column({ default: false })
-    paid: boolean;
-
 
 }
