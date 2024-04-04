@@ -13,7 +13,7 @@ export class CommentsController {
     return this.commentsService.create(userId, createCommentDto);
   }
 
-  //유저용
+  //유저용, 해당 유저만 볼 수 있도록 로직을 더 넣어야 하나
   @Get()
   findAllByUserId(@Request() req, @Query() board_id?: number) {
     const userId = req.user.id

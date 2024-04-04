@@ -2,7 +2,6 @@ import { Body, Controller, Post, UseInterceptors, Request, UploadedFile, Get, Pa
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Users } from 'src/user/entities/user.entitiy';
 import { ResizeImagePipe } from 'src/common/pipe/resize-image.pipe';
 import { UpdateBoardDto } from './dto/update-board.dto';
 

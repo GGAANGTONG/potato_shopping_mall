@@ -81,6 +81,10 @@ export class BoardsService {
       throw new BadRequestException('잘못된 요청입니다!')
     };
 
+    if(!board_id) {
+      throw new BadRequestException('게시글을 지정해 주세요.')
+    };
+
     const board = await this.boardsRepository.findOne({
       relations: ['comments'],
       where: {
@@ -136,6 +140,10 @@ export class BoardsService {
     if(!userId) {
       throw new BadRequestException('잘못된 요청입니다!')
     }
+
+    if(!board_id) {
+      throw new BadRequestException('게시글을 지정해 주세요.')
+    };
 
     const board = await this.boardsRepository.findOne({
       where: {
