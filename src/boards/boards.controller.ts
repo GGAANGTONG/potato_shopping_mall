@@ -4,6 +4,7 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Users } from 'src/user/entities/user.entitiy';
 import { ResizeImagePipe } from 'src/common/pipe/resize-image.pipe';
+import { UpdateBoardDto } from './dto/update-board.dto';
 
 @Controller('boards')
 export class BoardsController {
@@ -20,51 +21,33 @@ export class BoardsController {
 
   //어드민 전용 Role = admin Only
   @Get()
-  async findAll() {
+  findAll() {
   return this.boardsService.findAll();
   }
 
   //어드민은 다른 유저 정보를 입력하면 볼 수 있게 할까?
   @Get('QnAs')
-  async findAllByUserId(@Request() req) {
+  findAllByUserId(@Request() req) {
   const userId = req.user.id
   return this.boardsService.findAllByUserId(userId)
   }
 
   //어드민말고는 userId 관련해서 유효성 제약을 걸어야 할까?
   @Get('QnA')
-  async findOneByBoardId(@Request() req,@Param() board_id: number) {
+  findOneByBoardId(@Request() req,@Param() board_id: number) {
   const userId = req.user.id
   return this.boardsService.findOneByBoardId(userId, board_id)
   }
 
-  // @Patch()
-  // async update(@Request() req, @Body() updateBoardDto: UpdateBoardDto) {
-  //   const userId = req.user.id
-  //   return this.boardsService.update(userId, updateBoardDto)
-  // }
+  @Patch()
+  update(@UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File, @Request() req, @Body() updateBoardDto: UpdateBoardDto) {
+    const userId = req.user.id
+    return this.boardsService.update(file, userId, updateBoardDto)
+  }
   
-  @Delete()
-  async remove(@Request() req, @Body() board_id: number) {
+  @Delete(':board_id')
+  remove(@Request() req, @Param() board_id: number) {
     const userId = req.user.id
     return this.boardsService.remove(userId, board_id)
   }
-  // @Post('QnAs')
-  // async findAllByUserId(@Request() req, @Body() id:number) {
-  //   const searcherId = req.user.id
-  //   return this.boardsService.findAllByUserId(searcherId, id)
-  // }
-
-  // @Post('QnA')
-  // async findOneByBoardId(@Request() req, @Body() user_id?: number, board_id: number) {
-  //   const searcherId = req.user.id
-  //   const user = {
-  //     user_id?: number
-  //   }
-  //   return this.boardsService.findOneByUserId(searcherId, user_id?, board_id)
-  // }
-
-  //update
-
-  //remove
 }

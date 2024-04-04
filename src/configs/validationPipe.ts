@@ -1,4 +1,4 @@
-import { ArgumentMetadata, ValidationPipe } from "@nestjs/common";
+import { ArgumentMetadata, BadRequestException, ValidationPipe } from "@nestjs/common";
 
 export async function validation(Dto, dto) {
   const validatonPipe = new ValidationPipe({
@@ -12,6 +12,6 @@ export async function validation(Dto, dto) {
     data: '',
   };
   await validatonPipe.transform(dto, metadata).catch((err) => {
-    expect(err).toEqual(err);
+    throw new BadRequestException('잘못된 요청입니다!')
   });
 }

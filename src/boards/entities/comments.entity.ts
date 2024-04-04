@@ -40,4 +40,5 @@ export class Comments {
   @JoinColumn({name: 'user_id', referencedColumnName: 'id'})
   user: Users
 
+
 }

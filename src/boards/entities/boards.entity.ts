@@ -1,4 +1,4 @@
-import { IsNumber, IsNotEmpty, IsString } from "class-validator";
+import { IsNumber, IsNotEmpty, IsString, IsOptional } from "class-validator";
 import { Users } from "src/user/entities/user.entitiy";
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { Comments } from "./comments.entity";
@@ -25,6 +25,11 @@ export class Boards {
   @Column({type: 'text'})
   content: string
 
+  @IsString()
+  @IsOptional()
+  @Column({ type: 'text', nullable: true })
+  profile?: string;
+
   @CreateDateColumn()
   created_at: Date;
 
@@ -37,4 +42,6 @@ export class Boards {
 
   @OneToMany(() => Comments, (comments) => comments.board)
   comments:Comments[]
+
+
 }
