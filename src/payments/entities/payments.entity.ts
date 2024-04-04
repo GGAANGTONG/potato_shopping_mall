@@ -1,5 +1,6 @@
-import { IsBoolean, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { PayStatus } from "../types/payments.type";
 
 @Entity({ name: 'payments' })
 export class Payments {
@@ -36,10 +37,10 @@ export class Payments {
     @Column()
     p_total_price: number;
 
-    @IsBoolean()
+    @IsEnum(PayStatus)
     @IsNotEmpty()
-    @Column({ default: false })
-    paid: boolean;
+    @Column({ type: 'enum', enum: PayStatus, default: '결제완료' })
+    p_status: PayStatus;
 
 
 }
