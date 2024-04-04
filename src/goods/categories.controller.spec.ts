@@ -111,6 +111,7 @@ describe('CategoriesController', () => {
       c_name: '국밥',
       c_desc: undefined,
     };
+    console.log(id)
 
     await validation(CreateCategoryDto, createCategoryDto).catch((err) =>
       expect(err),

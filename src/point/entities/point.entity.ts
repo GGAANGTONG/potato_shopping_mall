@@ -40,7 +40,6 @@ export class Point {
   @Column({ type: 'int' })
   possession: number;
 
-
   @ManyToOne(() => Users, (user) => user.point)
   @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
   user: Users;
