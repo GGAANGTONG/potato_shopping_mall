@@ -7,7 +7,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Orders } from './orders.entity';
+import { Goods } from '../../goods/entities/goods.entity';
 
 @Entity({ name: 'carts' })
 export class Carts {
@@ -24,10 +24,6 @@ export class Carts {
   goods_id: number;
 
   @IsNumber()
-  @Column({ unsigned: true })
-  order_id: number;
-
-  @IsNumber()
   @Column()
   ct_count: number;
 
@@ -38,9 +34,9 @@ export class Carts {
   @CreateDateColumn()
   ct_date: Date;
 
-  @ManyToOne(() => Orders, (orders) => orders.carts, {
+  @ManyToOne(() => Goods, (goods) => goods.carts, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'ordersdetails_id', referencedColumnName: 'id' })
-  orders: Orders;
+  @JoinColumn({ name: 'goods_id', referencedColumnName: 'id' })
+  goods: Goods;
 }

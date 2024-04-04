@@ -7,10 +7,13 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { GoodsService } from './goods.service';
 import { CreateGoodDto } from './dto/create-goods.dto';
 import { UpdateGoodDto } from './dto/update-goods.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('goods')
 export class GoodsController {
@@ -18,13 +21,17 @@ export class GoodsController {
 
   /**
    * 상품등록
+   * @param file
    * @param createGoodDto
    * @returns
    */
-
   @Post()
-  create(@Body() createGoodDto: CreateGoodDto) {
-    return this.goodsService.create(createGoodDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createGoodDto: CreateGoodDto,
+  ) {
+    return this.goodsService.create(file, createGoodDto);
   }
 
   /**

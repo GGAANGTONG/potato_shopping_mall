@@ -12,7 +12,6 @@ import {
 } from 'typeorm';
 import { Status } from '../types/order.type';
 import { Reviews } from './review.entity';
-import { Carts } from './carts.entity';
 import { Users } from '../../user/entities/user.entitiy';
 import { OrdersDetails } from './ordersdetails.entity';
 
@@ -70,14 +69,11 @@ export class Orders {
   @ManyToOne(() => Users, (user) => user.orders, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'users_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: Users;
 
   @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.orders)
   ordersdetails: OrdersDetails[];
-
-  @OneToMany(() => Carts, (carts) => carts.orders)
-  carts: Carts[];
 
   @OneToOne(() => Reviews, (reviews) => reviews.orders)
   reviews: Reviews;

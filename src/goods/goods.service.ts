@@ -10,6 +10,7 @@ import { Goods } from './entities/goods.entity';
 import { Categories } from './entities/categories.entity';
 import { Stocks } from './entities/stocks.entity';
 import { Repository } from 'typeorm';
+import { S3FileService } from '../configs/s3_fileupload';
 
 @Injectable()
 export class GoodsService {
@@ -20,9 +21,16 @@ export class GoodsService {
     private categoriesRepository: Repository<Categories>,
     @InjectRepository(Stocks)
     private stocksRepository: Repository<Stocks>,
+    private readonly s3FileService: S3FileService,
   ) {}
 
-  async create(createGoodDto: CreateGoodDto) {
+  /**
+   * 상품등록
+   * @param file
+   * @param createGoodDto
+   * @returns
+   */
+  async create(file: Express.Multer.File, createGoodDto: CreateGoodDto) {
     const existedCategory = await this.categoriesRepository.findOneBy({
       id: createGoodDto.category,
     });
@@ -31,12 +39,21 @@ export class GoodsService {
     }
 
     try {
-      const { g_name, g_price, g_desc, g_img, g_option } = createGoodDto;
-      const goodData = { g_name, g_price, g_desc, g_img, g_option };
+      let fileKey = '';
+      // 상품 이미지 버킷에 업로드
+      if (file) {
+        fileKey = await this.s3FileService.uploadFile(file);
+        //fileUrl = `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${fileKey}`;
+      }
+      const { g_name, g_price, g_desc, g_option } = createGoodDto;
+      const goodData = { g_name, g_price, g_desc, g_img: fileKey, g_option };
       const newGood = this.goodsRepository.create(goodData);
       newGood.category = existedCategory;
+
+      // 상품 정보 저장
       const savedGood = await this.goodsRepository.save(newGood);
 
+      // 초기 재고 정보 저장
       const initialStock = this.stocksRepository.create({
         count: 0,
         goods: savedGood,
@@ -124,6 +141,16 @@ export class GoodsService {
     const good = await this.goodsRepository.findOneBy({ id });
     if (!good) {
       throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
+    }
+
+    if (good.g_img) {
+      try {
+        await this.s3FileService.deleteFile(good.g_img);
+      } catch (error) {
+        throw new InternalServerErrorException(
+          '파일 삭제 처리 중 에러가 발생했습니다.',
+        );
+      }
     }
 
     try {

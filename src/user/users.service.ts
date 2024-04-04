@@ -11,21 +11,22 @@ import { Users } from './entities/user.entitiy';
 import { compare, hash } from 'bcrypt';
 import _ from 'lodash';
 import { SignUpDto } from './dto/signup.dto';
+
 import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
+import { Point } from '../point/entities/point.entity';
 import { SignInDto } from './dto/sign_in.dto';
 import { UpdateDto } from './dto/update.dto';
-import { Point } from 'src/point/entities/point.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
-    private readonly jwtService: JwtService,
     @InjectRepository(Point)
     private pointsRepository: Repository<Point>,
+    private readonly jwtService: JwtService,
     private http: HttpService,
     private dataSource: DataSource,
   ) {}

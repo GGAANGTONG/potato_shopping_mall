@@ -14,6 +14,7 @@ RUN npm install --verbose
 COPY src ./src
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
+COPY .env ./env
 
 # 애플리케이션 빌드
 RUN npm run build --verbose
