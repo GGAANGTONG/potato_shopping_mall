@@ -43,7 +43,6 @@ export class GoodsService {
       // 상품 이미지 버킷에 업로드
       if (file) {
         fileKey = await this.s3FileService.uploadFile(file);
-        //fileUrl = `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${fileKey}`;
       }
       const { g_name, g_price, g_desc, g_option } = createGoodDto;
       const goodData = { g_name, g_price, g_desc, g_img: fileKey, g_option };
