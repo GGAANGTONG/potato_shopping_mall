@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Goods } from 'src/goods/entities/goods.entity';
+import { Goods } from '../../goods/entities/goods.entity';
 import {
   Column,
   CreateDateColumn,

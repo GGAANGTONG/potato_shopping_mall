@@ -3,9 +3,9 @@ import { Orders } from './entities/orders.entity';
 import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { Goods } from 'src/goods/entities/goods.entity';
-import { Stocks } from 'src/goods/entities/stocks.entity';
-import { Users } from 'src/user/entities/user.entitiy';
+import { Goods } from '../goods/entities/goods.entity';
+import { Stocks } from '../goods/entities/stocks.entity';
+import { Users } from '../user/entities/user.entitiy';
 
 @Injectable()
 export class OrdersService {

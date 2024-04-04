@@ -10,11 +10,8 @@ describe('PaymentsService', () => {
   let service: OrdersService;
   let ordersRepository: Partial<Record<keyof Repository<Orders>, jest.Mock>>;
   
-  type MockType<T> = {
-    [P in keyof T]?: jest.Mock<T>;
-  };
   
-  const dataSource: Partial<MockType<DataSource>> = {
+  const dataSource = {
     createQueryRunner: jest.fn().mockImplementation(() => ({
       connect: jest.fn(),
       startTransaction: jest.fn(),
@@ -22,10 +19,10 @@ describe('PaymentsService', () => {
       commitTransaction: jest.fn(),
       rollbackTransaction: jest.fn(),
       manager: {
-        update: jest.fn().mockImplementation(),
-        save: jest.fn().mockReturnThis(), 
-        create: jest.fn().mockReturnThis(),
-        findOne: jest.fn().mockImplementation()
+        update: jest.fn(),
+        save: jest.fn(), 
+        create: jest.fn(),
+        findOne: jest.fn()
      }
     }))
   }
@@ -92,7 +89,6 @@ describe('PaymentsService', () => {
     }
     await validation(CreateOrderDto, createOrderDto)
 
-    console.log('국밥', mockQueryRunner)
     dataSource.createQueryRunner().connect()
 
     mockQueryRunner.manager.findOne.mockResolvedValueOnce('구매하려는 상품').mockResolvedValueOnce('구매를 원하는 유저')
