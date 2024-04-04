@@ -10,7 +10,7 @@ import { Goods } from './entities/goods.entity';
 import { Categories } from './entities/categories.entity';
 import { Stocks } from './entities/stocks.entity';
 import { Repository } from 'typeorm';
-import { S3FileService } from '../configs/s3_fileupload';
+import { S3FileService } from '../common/utils/s3_fileupload';
 
 @Injectable()
 export class GoodsService {
