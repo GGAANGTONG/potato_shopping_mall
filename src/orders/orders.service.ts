@@ -69,7 +69,7 @@ export class OrdersService {
       await queryRunner.manager.update(Stocks, { goods }, { count });
       await queryRunner.manager.save(Users, user);
 
-      const newOrder = await this.ordersRepository.create({
+      const newOrder = this.ordersRepository.create({
         user_id: userId,
         o_name: user.name,
         o_tel,
@@ -79,19 +79,18 @@ export class OrdersService {
         o_total_price: paying,
         //goods_id 삭제함
       });
-      await this.ordersRepository.save(newOrder);
+      await queryRunner.manager.save(Orders, newOrder);
 
-      // const newPayments = await this.paymentsRepository.create({
-      //   user_id: userId,
-      //   p_name: user.name,
-      //   p_tel: o_tel,
-      //   p_addr: o_addr,
-      //   p_count: o_count,
-      //   p_total_price: paying,
+      const newPayments = await this.paymentsRepository.create({
+        user_id: userId,
+        p_name: user.name,
+        p_tel: o_tel,
+        p_addr: o_addr,
+        p_count: o_count,
+        p_total_price: paying,
+      });
+      await queryRunner.manager.save(Payments, newPayments);
 
-      // });
-
-      // await this.paymentsRepository.save(newPayments);
       await queryRunner.commitTransaction();
       await queryRunner.release();
 
@@ -102,7 +101,10 @@ export class OrdersService {
       console.error(err);
       throw err;
     }
+
   }
+
+
 
 
   // 유저별 주문 목록 전체 조회
