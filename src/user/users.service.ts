@@ -11,13 +11,13 @@ import { Users } from './entities/user.entitiy';
 import { compare, hash } from 'bcrypt';
 import _ from 'lodash';
 import { SignUpDto } from './dto/signup.dto';
-
 import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { Point } from '../point/entities/point.entity';
 import { SignInDto } from './dto/sign_in.dto';
 import { UpdateDto } from './dto/update.dto';
+import { S3FileService } from '../common/utils/s3_fileupload';
 
 @Injectable()
 export class UserService {
@@ -29,20 +29,29 @@ export class UserService {
     private readonly jwtService: JwtService,
     private http: HttpService,
     private dataSource: DataSource,
+    private readonly s3FileService: S3FileService,
   ) {}
 
-  async register(signUpDto: SignUpDto): Promise<Users> {
+  async register(signUpDto: SignUpDto, file: Express.Multer.File): Promise<Users> {
     const findEmail = await this.findByEmail(signUpDto.email);
     if (findEmail) {
       throw new ConflictException('이미 가입된 이메일 입니다.');
     }
     const hashedPassword = await hash(signUpDto.password, 10);
+
+    let fileKey = '';
+      // 상품 이미지 버킷에 업로드
+      if (file) {
+        fileKey = await this.s3FileService.uploadFile(file);
+        //fileUrl = `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${fileKey}`;
+      }
+
     const user = await this.usersRepository.save({
       email: signUpDto.email,
       password: hashedPassword,
       name: signUpDto.name,
       nickname: signUpDto.nickname,
-      profile: signUpDto.profile,
+      profile: fileKey,
     });
 
     //포인트 등록

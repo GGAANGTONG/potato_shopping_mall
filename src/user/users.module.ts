@@ -7,6 +7,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { Point } from '../point/entities/point.entity';
+import { PointModule } from '../point/point.module';
+import { S3FileService } from '../common/utils/s3_fileupload';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { Point } from '../point/entities/point.entity';
     PointModule,
   ],
   controllers: [UserController],
-  providers: [UserService],
-  exports: [UserService],
+  providers: [UserService,S3FileService],
+  exports: [UserService,S3FileService],
 })
 export class UsersModule {}

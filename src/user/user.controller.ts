@@ -11,7 +11,9 @@ import {
   Query,
   Req,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { SignUpDto } from './dto/signup.dto';
@@ -19,14 +21,19 @@ import { SignInDto } from './dto/sign_in.dto';
 import { Users } from './entities/user.entitiy';
 import { UpdateDto } from './dto/update.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ResizeImagePipe } from '../common/pipe/resize-image.pipe';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('register')
-  async register(@Body() signUpDto: SignUpDto, @Res() res) {
-    await this.userService.register(signUpDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async register(
+    @UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File,
+    @Body() signUpDto: SignUpDto, @Res() res) {
+    await this.userService.register(signUpDto, file);
     res.send('회원가입되었습니다. 로그인해주세요!');
   }
 
