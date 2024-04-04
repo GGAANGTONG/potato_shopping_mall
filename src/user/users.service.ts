@@ -112,7 +112,7 @@ export class UserService {
       .select('SUM(point.possession)', 'sum')
       .where('point.userId = :id', { id: userId })
       .getRawOne();
-console.log(sum)
+    console.log(sum);
     // 사용자 정보를 조회
     const user = await this.dataSource
       .getRepository(Users)
