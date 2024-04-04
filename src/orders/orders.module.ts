@@ -30,7 +30,6 @@ import { Like } from 'src/like/entities/like.entity';
       Users,
       Payments,
       Like,
-
     ]),
   ],
   providers: [OrdersService, ReviewService, CartService],

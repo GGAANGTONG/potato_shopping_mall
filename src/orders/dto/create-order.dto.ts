@@ -40,5 +40,4 @@ export class CreateOrderDto extends PickType(Orders, [
   @IsBoolean()
   @Column()
   paid: boolean;
-
 }

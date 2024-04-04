@@ -16,7 +16,7 @@ export class OrdersService {
     @InjectRepository(Payments)
     private paymentsRepository: Repository<Payments>,
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   async purchase(
     userId: number,
@@ -82,9 +82,8 @@ export class OrdersService {
         p_addr: o_addr,
         p_count: o_count,
         p_total_price: totalpay,
-        paid: true
+        paid: true,
       });
-
 
       await this.paymentsRepository.save(newPayments);
       await queryRunner.commitTransaction();
@@ -113,5 +112,4 @@ export class OrdersService {
   async findOneOrderbyBoth(orderId: number): Promise<Orders> {
     return this.ordersRepository.findOne({ where: { id: orderId } });
   }
-
 }
