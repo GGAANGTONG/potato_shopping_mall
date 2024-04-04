@@ -32,13 +32,4 @@ export class CreateOrderDto extends PickType(Orders, [
   @Column()
   p_count: number;
 
-  @IsNumber()
-  @IsNotEmpty()
-  @Column()
-  p_total_price: number;
-
-  @IsBoolean()
-  @Column()
-  paid: boolean;
-
 }
