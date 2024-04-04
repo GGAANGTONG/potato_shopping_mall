@@ -69,7 +69,7 @@ export class OrdersService {
       await queryRunner.manager.update(Stocks, { goods }, { count });
       await queryRunner.manager.save(Users, user);
 
-      const newOrder = this.ordersRepository.create({
+      const newOrder = await this.ordersRepository.create({
         user_id: userId,
         o_name: user.name,
         o_tel,
@@ -81,17 +81,17 @@ export class OrdersService {
       });
       await this.ordersRepository.save(newOrder);
 
-      const newPayments = this.paymentsRepository.create({
-        user_id: userId,
-        p_name: user.name,
-        p_tel: o_tel,
-        p_addr: o_addr,
-        p_count: o_count,
-        p_total_price: paying,
-        paid: true,
-      });
+      // const newPayments = await this.paymentsRepository.create({
+      //   user_id: userId,
+      //   p_name: user.name,
+      //   p_tel: o_tel,
+      //   p_addr: o_addr,
+      //   p_count: o_count,
+      //   p_total_price: paying,
 
-      await this.paymentsRepository.save(newPayments);
+      // });
+
+      // await this.paymentsRepository.save(newPayments);
       await queryRunner.commitTransaction();
       await queryRunner.release();
 

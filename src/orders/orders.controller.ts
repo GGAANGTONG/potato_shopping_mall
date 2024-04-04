@@ -6,7 +6,6 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Put,
   Req,
   Request,
   UseGuards,
@@ -47,7 +46,7 @@ export class OrdersController {
   // 주문 정보 상세 조회
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
-  async findOneOrderById(@Param('id', ParseIntPipe) id: number) {
+  async findOneOrderByBoth(@Param('id', ParseIntPipe) id: number) {
     return this.ordersService.findOneOrderbyBoth(id);
   }
 
