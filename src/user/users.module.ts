@@ -25,7 +25,7 @@ import { S3FileService } from '../common/utils/s3_fileupload';
     PointModule,
   ],
   controllers: [UserController],
-  providers: [UserService,S3FileService],
-  exports: [UserService,S3FileService],
+  providers: [UserService, S3FileService],
+  exports: [UserService, S3FileService],
 })
 export class UsersModule {}

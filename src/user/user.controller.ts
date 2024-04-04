@@ -32,7 +32,9 @@ export class UserController {
   @UseInterceptors(FileInterceptor('file'))
   async register(
     @UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File,
-    @Body() signUpDto: SignUpDto, @Res() res) {
+    @Body() signUpDto: SignUpDto,
+    @Res() res,
+  ) {
     await this.userService.register(signUpDto, file);
     res.send('회원가입되었습니다. 로그인해주세요!');
   }
