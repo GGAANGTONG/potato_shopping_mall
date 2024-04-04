@@ -1,17 +1,19 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Reviews } from './entities/review.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
+@Injectable()
 export class ReviewService {
   constructor(
     @InjectRepository(Reviews)
     private reviewRepository: Repository<Reviews>,
-  ) {}
+  ) { }
 
   /**
    * 리뷰 작성
-   * @param stars
    * @param ordersId
+   * @param stars
    * @param review
    * @returns
    */
@@ -20,12 +22,17 @@ export class ReviewService {
     stars: string,
     review: string,
   ): Promise<Reviews> {
-    const newReview = await this.reviewRepository.create({
-      orders_id: ordersId,
-      stars,
-      review,
-    });
-    return await this.reviewRepository.save(newReview);
+    try {
+      const newReview = this.reviewRepository.create({
+        orders_id: ordersId,
+        stars,
+        review,
+      });
+      return await this.reviewRepository.save(newReview);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   /**
@@ -34,15 +41,24 @@ export class ReviewService {
    * @returns
    */
   async getReviewByOrderId(ordersId: number): Promise<Reviews | undefined> {
-    return await this.reviewRepository.findOne({
-      where: { orders_id: ordersId },
-    });
+    try {
+      const review = await this.reviewRepository.findOne({
+        where: { orders_id: ordersId },
+      });
+      if (!review) {
+        throw new NotFoundException('해당 주문에 대한 리뷰를 찾을 수 없습니다.');
+      }
+      return review;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   /**
    * 리뷰 수정
-   * @param stars
    * @param ordersId
+   * @param stars
    * @param review
    * @returns
    */
@@ -51,19 +67,34 @@ export class ReviewService {
     stars: string,
     review: string,
   ): Promise<Reviews | undefined> {
-    const existingReview = await this.getReviewByOrderId(ordersId);
-    if (existingReview) {
-      existingReview.stars = stars;
-      existingReview.review = review;
-      return await this.reviewRepository.save(existingReview);
+    try {
+      const existingReview = await this.getReviewByOrderId(ordersId);
+      if (existingReview) {
+        existingReview.stars = stars;
+        existingReview.review = review;
+        return await this.reviewRepository.save(existingReview);
+      }
+      return undefined;
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
-    return undefined;
   }
 
+  /**
+   * 리뷰 삭제
+   * @param ordersId
+   * @returns
+   */
   async deleteReviewByOrderId(ordersId: number): Promise<boolean> {
-    const deleteResult = await this.reviewRepository.delete({
-      orders_id: ordersId,
-    });
-    return deleteResult.affected !== 0;
+    try {
+      const deleteResult = await this.reviewRepository.delete({
+        orders_id: ordersId,
+      });
+      return deleteResult.affected !== 0;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }
