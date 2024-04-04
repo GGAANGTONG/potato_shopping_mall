@@ -14,6 +14,7 @@ import { GoodsService } from './goods.service';
 import { CreateGoodDto } from './dto/create-goods.dto';
 import { UpdateGoodDto } from './dto/update-goods.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ResizeImagePipe } from '../common/pipe/resize-image.pipe';
 
 @Controller('goods')
 export class GoodsController {
@@ -28,7 +29,7 @@ export class GoodsController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   async create(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File,
     @Body() createGoodDto: CreateGoodDto,
   ) {
     return this.goodsService.create(file, createGoodDto);
