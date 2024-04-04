@@ -30,22 +30,21 @@ describe('PaymentsService', () => {
   //   })),
   // };
 
- 
   const dataSource = {
     createQueryRunner: jest.fn().mockImplementation(() => ({
-        connect: jest.fn(),
-        startTransaction: jest.fn(),
-        release: jest.fn(),
-        commitTransaction: jest.fn(),
-        rollbackTransaction: jest.fn(),
-        manager:{
-          update: jest.fn(),
-          save: jest.fn(),
-          create: jest.fn(),
-          findOne: jest.fn()
-        }})
-    ),
-      }
+      connect: jest.fn(),
+      startTransaction: jest.fn(),
+      release: jest.fn(),
+      commitTransaction: jest.fn(),
+      rollbackTransaction: jest.fn(),
+      manager: {
+        update: jest.fn(),
+        save: jest.fn(),
+        create: jest.fn(),
+        findOne: jest.fn(),
+      },
+    })),
+  };
 
   async function validation(Dto, dto) {
     const validatonPipe = new ValidationPipe({
@@ -104,40 +103,43 @@ describe('PaymentsService', () => {
       goods_id: 1,
     };
     await validation(CreateOrderDto, createOrderDto);
-    
+
     const value1 = {
       id: createOrderDto.goods_id,
       g_price: 1000,
       stock: {
-        count: 100
-      }
-    }
+        count: 100,
+      },
+    };
 
     const value2 = {
       id: userId,
-      points: 100000
-    }
-        
-    await queryRunner.connect()
-    await queryRunner.startTransaction()
+      points: 100000,
+    };
 
-    await queryRunner.manager.findOne.mockResolvedValueOnce(value1).mockResolvedValueOnce(value2)
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    console.log('국밥-테스트', await queryRunner.manager.findOne())
+    await queryRunner.manager.findOne
+      .mockResolvedValueOnce(value1)
+      .mockResolvedValueOnce(value2);
 
+    console.log('국밥-테스트', await queryRunner.manager.findOne());
 
-    const value3 = '재고 정보 갱신'
-    await queryRunner.manager.update.mockResolvedValueOnce(value3)
-    const value4 = '유저 포인트 정보 갱신'
-    await queryRunner.manager.save.mockResolvedValueOnce(value4)
+    const value3 = '재고 정보 갱신';
+    await queryRunner.manager.update.mockResolvedValueOnce(value3);
+    const value4 = '유저 포인트 정보 갱신';
+    await queryRunner.manager.save.mockResolvedValueOnce(value4);
 
-    const returnedValue = '주문 정보'
-    ordersRepository.create.mockResolvedValueOnce(returnedValue)
-    ordersRepository.save.mockResolvedValueOnce(returnedValue)
+    const returnedValue = '주문 정보';
+    ordersRepository.create.mockResolvedValueOnce(returnedValue);
+    ordersRepository.save.mockResolvedValueOnce(returnedValue);
 
     // await queryRunner.commitTransaction()
     // await queryRunner.release()
 
-    return await expect(service.purchase(userId, createOrderDto)).resolves.toBe(returnedValue)
+    return await expect(service.purchase(userId, createOrderDto)).resolves.toBe(
+      returnedValue,
+    );
   });
 });

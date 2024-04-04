@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Users } from 'src/user/entities/user.entitiy';
 
 import {
@@ -18,18 +18,27 @@ export class Point {
   @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @IsString()
+  @Column({ type: 'varchar' })
+  status: string;
+
   @IsNotEmpty()
   @IsNumber()
   @Column({ type: 'int' })
-  possession: number;
-
-  @CreateDateColumn()
-  createdAt: Date;
+  status_pirce: number;
 
   @IsNotEmpty()
   @IsNumber()
   @Column('int', { name: 'userId', unsigned: true })
   userId: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @Column({ type: 'int' })
+  possession: number;
 
   @ManyToOne(() => Users, (user) => user.point)
   @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
