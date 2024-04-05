@@ -22,12 +22,12 @@ export class Point {
   createdAt: Date;
 
   @IsString()
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   status: string;
 
   @IsNotEmpty()
   @IsNumber()
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   status_pirce: number;
 
   @IsNotEmpty()

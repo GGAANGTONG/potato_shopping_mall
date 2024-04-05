@@ -28,6 +28,7 @@ import { ResizeImagePipe } from '../common/pipe/resize-image.pipe';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  // 리턴 추가하기 //추가함
   @Post('register')
   @UseInterceptors(FileInterceptor('file'))
   async register(
@@ -36,9 +37,10 @@ export class UserController {
     @Res() res,
   ) {
     await this.userService.register(signUpDto, file);
-    res.send('회원가입되었습니다. 로그인해주세요!');
+    return res.send('회원가입되었습니다. 로그인해주세요!');
   } //1
 
+  // refresh토큰이 저장 되는곳이 없다 레디스에 저장하면 어떨까?
   @Post('login')
   async signIn(@Body() signInDto: SignInDto, @Res() res) {
     const user = await this.userService.signIn(signInDto);
@@ -71,6 +73,7 @@ export class UserController {
     return { message: '삭제 되었습니다' };
   }
 
+  // 3단계때 리펙토링
   //포인트 조회
   @UseGuards(AuthGuard('jwt'))
   @Get('point')
