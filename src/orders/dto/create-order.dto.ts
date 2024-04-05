@@ -1,7 +1,7 @@
 import { PickType } from '@nestjs/swagger';
 import { Orders } from '../entities/orders.entity';
-import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Column } from 'typeorm';
+import { IsNumber } from 'class-validator';
+
 
 export class CreateOrderDto extends PickType(Orders, [
   'o_tel',

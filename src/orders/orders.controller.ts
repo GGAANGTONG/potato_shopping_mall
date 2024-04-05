@@ -19,7 +19,7 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) { }
 
 
-  //상품 주문 및 결제
+  //상품 주문과 결제가 합쳐져 있음. 분리 필요
   @UseGuards(AuthGuard('jwt'))
   @Post()
   purchase(@Request() req, @Body() createOrderDto: CreateOrderDto) {
