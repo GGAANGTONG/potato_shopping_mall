@@ -4,6 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Boards } from './entities/boards.entity';
 import { Repository } from 'typeorm';
 import { BadRequestException } from '@nestjs/common';
+import { S3FileService } from '../common/utils/s3_fileupload';
 
 describe('BoardsService', () => {
   let service: BoardsService;
@@ -21,6 +22,7 @@ describe('BoardsService', () => {
       providers: 
       [
         BoardsService,
+        S3FileService,
         {
           provide: getRepositoryToken(Boards),
           useValue: boardsRepository

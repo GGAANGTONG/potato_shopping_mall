@@ -2,7 +2,7 @@ import { Body, Controller, Post, UseInterceptors, Request, UploadedFile, Get, Pa
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ResizeImagePipe } from 'src/common/pipe/resize-image.pipe';
+import { ResizeImagePipe } from '../common/pipe/resize-image.pipe';
 import { UpdateBoardDto } from './dto/update-board.dto';
 
 @Controller('boards')
@@ -44,6 +44,7 @@ export class BoardsController {
     return this.boardsService.update(file, userId, updateBoardDto)
   }
   
+  //어드민은 그냥 다 삭제할 수 있도록 해둘까?
   @Delete(':board_id')
   remove(@Request() req, @Param() board_id: number) {
     const userId = req.user.id

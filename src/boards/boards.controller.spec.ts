@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BoardsController } from './boards.controller';
 import { BoardsService } from './boards.service';
+import { S3FileService } from '../common/utils/s3_fileupload';
 
 describe('BoardsController', () => {
   let controller: BoardsController;
@@ -23,7 +24,8 @@ describe('BoardsController', () => {
         {
           provide: BoardsService,
           useValue: boardsService
-        }
+        },
+        S3FileService
       ],
     }).compile();
 
@@ -40,9 +42,7 @@ describe('BoardsController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('1-1. Boards - create, file & req & createBoardDto를 정상적으로 전달받아 게시글을 생성함', () => {
-    
-  })
+  it('1-1. Boards - create, file & req & createBoardDto를 정상적으로 전달받아 게시글을 생성함', () => {})
 
   it('1-2. Boards - create, file에 Express.Multer.File 형식이 아닌 다른 형식의 데이터를 전달받아 에러를 반환함', () => {
     

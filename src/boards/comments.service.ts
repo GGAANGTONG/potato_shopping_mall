@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { validation } from 'src/configs/validationPipe';
+import { validation } from '../configs/validationPipe';
 import { Comments } from './entities/comments.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -102,9 +102,10 @@ export class CommentsService {
   }
 
   async remove(userId: number, commentId: number) {
-    if(!userId) {
+    if(!userId || !commentId) {
       throw new BadRequestException('잘못된 요청입니다!')
     }
+
 
     const comment = await this.commentsRepository.findOne({
       where: {

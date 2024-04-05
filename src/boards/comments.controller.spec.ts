@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommentsController } from './comments.controller';
 import { CommentsService } from './comments.service';
-import { CreateBoardDto } from './dto/create-board.dto';
-import { validation } from 'src/configs/validationPipe';
+import { validation } from '../configs/validationPipe';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { BadRequestException } from '@nestjs/common';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { S3FileService } from '../common/utils/s3_fileupload';
 
 describe('CommentsController', () => {
   let controller: CommentsController;
@@ -22,6 +22,7 @@ describe('CommentsController', () => {
       controllers: [CommentsController],
       providers: [
         CommentsService,
+        S3FileService,
         {
           provide: CommentsService,
           useValue: commentsService
@@ -41,7 +42,7 @@ describe('CommentsController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('1-1. Comments - create, req & createBoardDto를 정상적으로 전달받아 게시글을 생성함', async () => {
+  it('1-1. Comments - create, req & createCommentDto를 정상적으로 전달받아 게시글을 생성함', async () => {
     const req = {
       user: {
         id: 1
@@ -61,7 +62,7 @@ describe('CommentsController', () => {
   })
 
 
-  it('1-2. Comments - create, createBoardDto가 불완전한 상태로 전달받아 에러를 반환함', async () => {
+  it('1-2. Comments - create, createCommentDto가 불완전한 상태로 전달받아 에러를 반환함', async () => {
     const req = {
       user: {
         id: 1
@@ -96,7 +97,7 @@ describe('CommentsController', () => {
   })
 
 
-  it('4-1. Comments - update, req & updateBoardDto를 정상적으로 전달받아 게시글을 생성함', async () => {
+  it('4-1. Comments - update, req & updateCommentDto를 정상적으로 전달받아 게시글을 생성함', async () => {
 
     const req = {
       user: {
@@ -118,7 +119,7 @@ describe('CommentsController', () => {
   })
 
 
-  it('4-2. Comments - update, updateBoardDto가 불완전한 상태로 전달받아 에러를 반환함', async () => {
+  it('4-2. Comments - update, updateCommentDto가 불완전한 상태로 전달받아 에러를 반환함', async () => {
     
     const req = {
       user: {

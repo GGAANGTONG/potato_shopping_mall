@@ -3,9 +3,9 @@ import { UpdateBoardDto } from "./dto/update-board.dto";
 import { Boards } from "./entities/boards.entity";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { validation } from "src/configs/validationPipe";
+import { validation } from "../configs/validationPipe";
 import { BadRequestException } from "@nestjs/common";
-import { S3FileService } from "src/common/utils/s3_fileupload";
+import { S3FileService } from "../common/utils/s3_fileupload";
 
 export class BoardsService {
   constructor(@InjectRepository(Boards) private readonly boardsRepository: Repository<Boards>,

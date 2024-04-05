@@ -1,5 +1,5 @@
 import { IsNumber, IsNotEmpty, IsString } from "class-validator";
-import { Users } from "src/user/entities/user.entitiy";
+import { Users } from "../../user/entities/user.entitiy";
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, JoinColumn, ManyToOne } from "typeorm";
 import { Boards } from "./boards.entity";
 
