@@ -31,16 +31,17 @@ export class PaymentsController {
     // 결제 취소
     @UseGuards(AuthGuard('jwt'))
     @Post(':paymentsId/cancel')
-    async cancelPay(@Param('paymentsId') paymentsId: number) {
+    async cancelPay(@Req() req, @Param('paymentsId') paymentsId: number) {
         try {
             // 결제 취소 로직을 서비스에서 호출하여 실행.
-            const cancelledPay = await this.paymentsService.cancelPay(paymentsId);
+            const userId = req.user.id
+            const cancelledPay = await this.paymentsService.cancelPay(userId, paymentsId);
             return { message: '결제가 취소되었습니다.', payments: cancelledPay };
         } catch (error) {
             if (error instanceof NotFoundException) {
                 throw error;
             } else {
-                throw new NotFoundException('결제를 취소할 수 없습니다.'); // 그 외의 오류는 일반적인 오류 메시지를 반환합니다.
+                throw new NotFoundException('결제를 취소할 수 없습니다.'); // 그 외의 오류는 일반적인 오류 메시지를 반환.
             }
         }
     }

@@ -20,6 +20,7 @@ export class PaymentsService {
   // 유저별 결제 목록 전체 조회
   async findAllOrderbyUser(userId: number): Promise<Payments[]> {
     try {
+      // null,undefined,0 들어올 경우 대비 로직 추가 //완료
       const payments = await this.paymentsRepository.find({ where: { user_id: userId } });
       if (!payments || payments.length === 0) {
         throw new NotFoundException('결제 정보가 없습니다.');
@@ -60,9 +61,9 @@ export class PaymentsService {
   }
 
   // 결제 취소
-  async cancelPay(paymentsId: number): Promise<Payments> {
+  async cancelPay(userId: number, paymentsId: number): Promise<Payments> {
     const payments = await this.paymentsRepository.findOne({
-      where: { id: paymentsId }
+      where: { id: paymentsId, user_id: userId }
     });
     if (!payments) {
       throw new NotFoundException('결제 정보를 찾을 수 없습니다.');
@@ -75,6 +76,8 @@ export class PaymentsService {
       if (!userPoint) {
         throw new NotFoundException('사용자 포인트를 찾을 수 없습니다.');//포인트 테이블에 해당 유저 데이터가 없는 경우
       }
+
+      //트랜잭션 필요
       userPoint.possession += refundAmount; // 포인트 테이블에 환불액 기록
       await this.pointRepository.save(userPoint);
 
