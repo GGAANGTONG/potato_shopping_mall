@@ -14,6 +14,7 @@ import { GoodsService } from 'src/goods/goods.service';
 import { UserService } from 'src/user/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Like, Goods, Users, Stocks, Categories, Point]),

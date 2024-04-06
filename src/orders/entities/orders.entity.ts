@@ -75,6 +75,5 @@ export class Orders {
   @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.orders)
   ordersdetails: OrdersDetails[];
 
-  @OneToOne(() => Reviews, (reviews) => reviews.orders)
-  reviews: Reviews;
+
 }

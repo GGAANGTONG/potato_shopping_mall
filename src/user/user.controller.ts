@@ -9,20 +9,13 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   Res,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { SignUpDto } from './dto/signup.dto';
 import { SignInDto } from './dto/sign_in.dto';
 import { Users } from './entities/user.entitiy';
 import { UpdateDto } from './dto/update.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ResizeImagePipe } from '../common/pipe/resize-image.pipe';
 
 @Controller('users')
 export class UserController {
@@ -30,6 +23,7 @@ export class UserController {
 
   // 리턴 추가하기 //추가함
   @Post('register')
+
   @UseInterceptors(FileInterceptor('file'))
   async register(
     @UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File,
@@ -38,6 +32,7 @@ export class UserController {
   ) {
     await this.userService.register(signUpDto, file);
     return res.send('회원가입되었습니다. 로그인해주세요!');
+
   } //1
 
   // refresh토큰이 저장 되는곳이 없다 레디스에 저장하면 어떨까?
@@ -73,6 +68,7 @@ export class UserController {
     return { message: '삭제 되었습니다' };
   }
 
+
   // 3단계때 리펙토링
   //포인트 조회
   @UseGuards(AuthGuard('jwt'))
@@ -81,12 +77,6 @@ export class UserController {
     const user = req.user;
     const point = await this.userService.getPoint(user.id);
     return point;
-  }
-
-  @Get('point/:userId')
-  async getPointDetails(@Param('userId') userId: number): Promise<any> {
-    const details = await this.userService.getPointDetails(userId);
-    return details;
   }
 
   @Get('/oauth')
