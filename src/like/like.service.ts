@@ -16,6 +16,8 @@ export class LikeService {
     private goodsService: GoodsService,
   ) {}
 
+
+  // db에 바로들어감
   async create(createLikeDto: CreateLikeDto): Promise<Like> {
     const { usersId, goodsId } = createLikeDto;
 
@@ -35,6 +37,8 @@ export class LikeService {
 
     return newLike;
   }
+
+  
   // findAll() {
   //   return `This action returns all like`;
   // }

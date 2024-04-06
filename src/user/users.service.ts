@@ -104,6 +104,37 @@ export class UserService {
     return user;
   }
 
+
+  /// 포인트 조회
+  async getPoint(userId: number) {
+    // 사용자의 포인트 합계를 조회
+    const { sum } = await this.dataSource
+      .getRepository(Point)
+      .createQueryBuilder('point')
+      .select('SUM(point.possession)', 'sum')
+      .where('point.userId = :id', { id: userId })
+      .getRawOne();
+    console.log(sum);
+    // 사용자 정보를 조회
+    const user = await this.dataSource
+      .getRepository(Users)
+      .findOneBy({ id: userId });
+
+    if (!user) {
+      throw new Error('유저가 없습니다');
+    }
+
+    // 사용자 정보와 포인트 합계를 함께 반환
+    return {
+      userId: userId,
+      email: user.email,
+      name: user.name,
+      nickname: user.nickname,
+      point: user.points,
+    };
+  }
+
+ 
   async update(id: number, updateDto: UpdateDto) {
     const user = await this.usersRepository.findOne({
       where: { id },
@@ -115,7 +146,7 @@ export class UserService {
       throw new NotFoundException('해당 유저가 없습니다');
     }
 
-    if (!nickname && !profile) {
+    if (!nickname && !profile && !password) {
       throw new BadRequestException('수정할 값을 입력해주세요.');
     }
 
@@ -128,6 +159,7 @@ export class UserService {
     return user;
   }
 
+  // 자기의 비밀번호에 매칭되야 삭제하기
   async remove(id: number) {
     const user = await this.usersRepository.findOneBy({ id });
 

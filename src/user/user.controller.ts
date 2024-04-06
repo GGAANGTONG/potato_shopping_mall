@@ -21,12 +21,21 @@ import { UpdateDto } from './dto/update.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  // 리턴 추가하기 //추가함
   @Post('register')
-  async register(@Body() signUpDto: SignUpDto, @Res() res) {
-    await this.userService.register(signUpDto);
-    res.send('회원가입되었습니다. 로그인해주세요!');
+
+  @UseInterceptors(FileInterceptor('file'))
+  async register(
+    @UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File,
+    @Body() signUpDto: SignUpDto,
+    @Res() res,
+  ) {
+    await this.userService.register(signUpDto, file);
+    return res.send('회원가입되었습니다. 로그인해주세요!');
+
   } //1
 
+  // refresh토큰이 저장 되는곳이 없다 레디스에 저장하면 어떨까?
   @Post('login')
   async signIn(@Body() signInDto: SignInDto, @Res() res) {
     const user = await this.userService.signIn(signInDto);
@@ -57,6 +66,17 @@ export class UserController {
   async remove(@Param('id') id: number) {
     await this.userService.remove(id);
     return { message: '삭제 되었습니다' };
+  }
+
+
+  // 3단계때 리펙토링
+  //포인트 조회
+  @UseGuards(AuthGuard('jwt'))
+  @Get('point')
+  async getPoint(@Req() req) {
+    const user = req.user;
+    const point = await this.userService.getPoint(user.id);
+    return point;
   }
 
   @Get('/oauth')
