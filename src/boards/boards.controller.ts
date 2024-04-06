@@ -11,7 +11,7 @@ export class BoardsController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  async create(@UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File, @Request() req, @Body() createBoardDto:CreateBoardDto) {
+  create(@UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File, @Request() req, @Body() createBoardDto:CreateBoardDto) {
     
     const userId = req.user.id 
 

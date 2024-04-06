@@ -1,4 +1,4 @@
-import { IsNumber, IsNotEmpty, IsString, IsOptional } from "class-validator";
+import { IsNumber, IsNotEmpty, IsString, IsOptional, Min } from "class-validator";
 import { Users } from "../../user/entities/user.entitiy";
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { Comments } from "./comments.entity";
@@ -7,11 +7,13 @@ import { Comments } from "./comments.entity";
 export class Boards {
   
   @IsNumber()
+  @Min(1)
   @PrimaryGeneratedColumn({unsigned: true})
   id: number
 
   @IsNumber()
   @IsNotEmpty()
+  @Min(1)
   @Column({unsigned: true})
   user_id: number
 
@@ -28,7 +30,7 @@ export class Boards {
   @IsString()
   @IsOptional()
   @Column({ type: 'text', nullable: true })
-  profile?: string;
+  b_img?: string;
 
   @CreateDateColumn()
   created_at: Date;

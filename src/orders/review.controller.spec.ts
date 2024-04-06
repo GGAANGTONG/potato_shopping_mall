@@ -87,7 +87,7 @@ describe('ReviewsController', () => {
     };
     reviewService.getReviewByOrderId.mockResolvedValue(returnValue);
 
-    return await expect(controller.getReviewByOrderId(ordersId)).resolves.toBe(
+    return await expect(controller.getReviewByOrderDetailsId(ordersId)).resolves.toBe(
       returnValue,
     );
   });
@@ -102,7 +102,7 @@ describe('ReviewsController', () => {
     reviewService.getReviewByOrderId.mockResolvedValue(returnValue);
 
     return await expect(
-      controller.getReviewByOrderId(ordersId),
+      controller.getReviewByOrderDetailsId(ordersId),
     ).rejects.toThrow();
   });
 
@@ -117,7 +117,7 @@ describe('ReviewsController', () => {
     reviewService.updateReviewByOrderId.mockResolvedValue(returnValue);
 
     return await expect(
-      controller.updateReviewByOrderId(ordersId, body),
+      controller.updateReviewByOrderDetailsId(ordersId, body),
     ).resolves.toBe(returnValue);
   });
 
@@ -132,7 +132,7 @@ describe('ReviewsController', () => {
     reviewService.updateReviewByOrderId.mockResolvedValue(returnValue);
 
     return await expect(
-      controller.updateReviewByOrderId(ordersId, body),
+      controller.updateReviewByOrderDetailsId(ordersId, body),
     ).rejects.toThrow();
   });
 
@@ -147,7 +147,7 @@ describe('ReviewsController', () => {
     reviewService.updateReviewByOrderId.mockResolvedValue(returnValue);
 
     return await expect(
-      controller.updateReviewByOrderId(ordersId, body),
+      controller.updateReviewByOrderDetailsId(ordersId, body),
     ).rejects.toThrow();
   });
 
@@ -158,7 +158,7 @@ describe('ReviewsController', () => {
     reviewService.deleteReviewByOrderId.mockResolvedValue(returnValue);
 
     return await expect(
-      controller.deleteReviewByOrderId(ordersId),
+      controller.deleteReviewByOrderDetailsId(ordersId),
     ).resolves.toBe(returnValue);
   });
 
@@ -169,7 +169,7 @@ describe('ReviewsController', () => {
     reviewService.deleteReviewByOrderId.mockResolvedValue(returnValue);
 
     return await expect(
-      controller.deleteReviewByOrderId(ordersId),
+      controller.deleteReviewByOrderDetailsId(ordersId),
     ).rejects.toThrow();
   });
 });

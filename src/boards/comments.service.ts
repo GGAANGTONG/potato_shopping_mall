@@ -12,7 +12,7 @@ export class CommentsService {
   constructor(@InjectRepository(Comments) private readonly commentsRepository: Repository<Comments>) {}
 
   async create(userId: number, createCommentDto: CreateCommentDto) {
-    if(!userId) {
+    if(!userId || userId == 0) {
       throw new BadRequestException('잘못된 요청입니다!')
     }
 
@@ -33,7 +33,7 @@ export class CommentsService {
 
   
   async findAllByUserId(userId: number, board_id?: number) {
-    if(!userId) {
+    if(!userId || userId == 0) {
       throw new BadRequestException('잘못된 요청입니다!')
     }
     if(!_.isNil(board_id)) {
@@ -49,10 +49,13 @@ export class CommentsService {
     } else if(_.isNil(board_id)) {
      const comments = await this.commentsRepository.findBy({user_id: userId})
 
+     if(!comments) {
+      throw new BadRequestException('댓글이 존재하지 않습니다.')
+     }
      return comments;
 
     } else {
-      throw new BadRequestException('댓글이 존재하지 않습니다.')
+      throw new InternalServerErrorException('서버에서 에러가 발생했습니다.')
     }
   }
 
@@ -69,9 +72,9 @@ export class CommentsService {
 
   async update(userId: number, updateCommentDto: UpdateCommentDto) {
     
-      if(!userId) {
-        throw new BadRequestException('잘못된 요청입니다!')
-      }
+    if(!userId || userId == 0) {
+      throw new BadRequestException('잘못된 요청입니다!')
+    }
   
       await validation(UpdateCommentDto, updateCommentDto)
 
@@ -90,19 +93,19 @@ export class CommentsService {
 
       await this.commentsRepository.update({user_id: userId, board_id}, {content})
 
-
-    return {
-      message: '댓글이 수정되었습니다.',
-      data: {
-        user_id: userId,
-        board_id,
+      const updated = {
+        ...comment,
         content
       }
+    return {
+      message: '댓글이 수정되었습니다.',
+      data: updated
+    
     }
   }
 
   async remove(userId: number, commentId: number) {
-    if(!userId || !commentId) {
+    if(!userId || !commentId || userId == 0 || commentId == 0) {
       throw new BadRequestException('잘못된 요청입니다!')
     }
 

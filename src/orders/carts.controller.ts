@@ -23,25 +23,28 @@ export class CartController {
   async addToCart(
     @Req() req,
     @Param('goodsId', ParseIntPipe) goodsId: number,
-    @Body() createOrderDto: CreateCartDto,
+    @Body() createCartDto: CreateCartDto,
   ) {
     const userId = req.user.id; // 로그인한 사용자의 ID
-    return this.cartService.addToCart(userId, goodsId, createOrderDto);
+    return this.cartService.addToCart(userId, goodsId, createCartDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Delete('remove/:cartId')
-  async removeFromCart(@Param('cartId', ParseIntPipe) cartId: number) {
-    return this.cartService.removeFromCart(cartId);
+  async removeFromCart(@Req() req, @Param('cartId', ParseIntPipe) cartId: number) {
+    const userId = req.user.id
+    return this.cartService.removeFromCart(userId, cartId);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Patch('update/:cartId')
   async updateQuantity(
+    @Req() req,
     @Param('cartId', ParseIntPipe) cartId: number,
     @Body('count', ParseIntPipe) count: number,
   ) {
-    return this.cartService.updateQuantity(cartId, count);
+    const userId = req.user.id
+    return this.cartService.updateQuantity(userId, cartId, count);
   }
 
   @UseGuards(AuthGuard('jwt'))

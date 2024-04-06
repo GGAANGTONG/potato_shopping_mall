@@ -4,7 +4,7 @@ import { Boards } from "./entities/boards.entity";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { validation } from "../configs/validationPipe";
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { S3FileService } from "../common/utils/s3_fileupload";
 
 export class BoardsService {
@@ -12,11 +12,11 @@ export class BoardsService {
   private readonly s3FileService: S3FileService,
   ) {}
 
-  async create(file: Express.Multer.File, userId, createBoardDto:CreateBoardDto) {
+  async create(file: Express.Multer.File, userId: number, createBoardDto:CreateBoardDto) {
 
   await validation(CreateBoardDto, createBoardDto)
 
-  if(!userId) {
+  if(!userId || userId == 0) {
     throw new BadRequestException('잘못된 요청입니다!')
   }
 
@@ -32,7 +32,7 @@ export class BoardsService {
     user_id: userId,
     title,
     content,
-    profile: fileKey
+    b_img: fileKey
   })
 
   await this.boardsRepository.save(newBoard)
@@ -56,9 +56,9 @@ export class BoardsService {
   //어드민은 다른 유저 정보를 입력하면 볼 수 있게 할까?
   async findAllByUserId(userId: number) {
 
-    if(!userId) {
+    if(!userId || userId == 0) {
       throw new BadRequestException('잘못된 요청입니다!')
-    };
+    }
   
     const board = await this.boardsRepository.find({
       relations: ['comments'],
@@ -77,11 +77,11 @@ export class BoardsService {
   
   async findOneByBoardId(userId: number, board_id: number) {
 
-    if(!userId) {
+    if(!userId || userId == 0) {
       throw new BadRequestException('잘못된 요청입니다!')
-    };
+    }
 
-    if(!board_id) {
+    if(!board_id || board_id == 0) {
       throw new BadRequestException('게시글을 지정해 주세요.')
     };
 
@@ -100,20 +100,14 @@ export class BoardsService {
   return board;
   }
 
-  
+  //이미 올린 이미지 처리 로직이 빠져있음(여기 트랜잭션 넣어야 하네)
   async update(file: Express.Multer.File, userId: number, updateBoardDto: UpdateBoardDto) {
 
-    if(!userId) {
+    if(!userId || userId == 0) {
       throw new BadRequestException('잘못된 요청입니다!')
     }
 
     await validation(UpdateBoardDto, updateBoardDto)
-
-    let fileKey = '';
-    // 상품 이미지 버킷에 업로드
-    if (file) {
-      fileKey = await this.s3FileService.uploadFile(file);
-    }
 
     const {id, title, content} = updateBoardDto
 
@@ -123,25 +117,42 @@ export class BoardsService {
       throw new BadRequestException('존재하지 않는 게시글입니다.')
     }
 
+    if (board.b_img) {
+      try {
+        await this.s3FileService.deleteFile(board.b_img);
+      } catch (error) {
+        throw new InternalServerErrorException(
+          '파일 삭제 처리 중 에러가 발생했습니다.',
+        );
+      }
+    }
+
+    let fileKey = '';
+    // 상품 이미지 버킷에 업로드
+    if (file) {
+      fileKey = await this.s3FileService.uploadFile(file);
+    }
+
     const update = this.boardsRepository.create({
       id,
       user_id: userId,
       title,
       content,
-      profile: fileKey
+      b_img: fileKey
     })
 
    await this.boardsRepository.save(update)
     return update 
   }
   
+  //이미 올린 이미지 처리 로직이 빠져있음(여기 트랜잭션 넣어야 하네)
   async remove(userId: number, board_id: number) {
     
-    if(!userId) {
+    if(!userId || userId == 0) {
       throw new BadRequestException('잘못된 요청입니다!')
     }
 
-    if(!board_id) {
+    if(!board_id || board_id == 0) {
       throw new BadRequestException('게시글을 지정해 주세요.')
     };
 
@@ -154,6 +165,16 @@ export class BoardsService {
 
     if(!board) {
       throw new BadRequestException('존재하지 않는 게시글입니다.')
+    }
+
+    if (board.b_img) {
+      try {
+        await this.s3FileService.deleteFile(board.b_img);
+      } catch (error) {
+        throw new InternalServerErrorException(
+          '파일 삭제 처리 중 에러가 발생했습니다.',
+        );
+      }
     }
 
     await this.boardsRepository.delete(board)
