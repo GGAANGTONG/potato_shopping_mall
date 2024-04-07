@@ -9,13 +9,20 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { SignUpDto } from './dto/signup.dto';
 import { SignInDto } from './dto/sign_in.dto';
 import { Users } from './entities/user.entitiy';
 import { UpdateDto } from './dto/update.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { ResizeImagePipe } from '../common/pipe/resize-image.pipe';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UserController {
