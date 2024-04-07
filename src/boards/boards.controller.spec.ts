@@ -9,38 +9,15 @@ import { UpdateBoardDto } from './dto/update-board.dto';
 
 describe('BoardsController', () => {
   let controller: BoardsController;
-  let boardsService = {
-    create: jest.fn(),
-    findAll: jest.fn(),
-    findAllByUserId: jest.fn(),
-    findOneByBoardId: jest.fn(),
-    update: jest.fn(),
-    remove: jest.fn()
-  }
-
-
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BoardsController],
-      providers: 
-      [
-        {
-          provide: BoardsService,
-          useValue: boardsService
-        },
-        S3FileService
-      ],
+      providers: [BoardsService],
     }).compile();
-
 
     controller = module.get<BoardsController>(BoardsController);
   });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
