@@ -1,13 +1,15 @@
-import { IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Orders } from './orders.entity';
 import { Goods } from '../../goods/entities/goods.entity';
+import { Reviews } from './review.entity';
 
 @Entity({ name: 'ordersdetails' })
 export class OrdersDetails {
@@ -16,10 +18,12 @@ export class OrdersDetails {
   id: number;
 
   @IsNumber()
+  @IsNotEmpty()
   @Column({ unsigned: true })
   goods_id: number;
 
   @IsNumber()
+  @IsNotEmpty()
   @Column({ unsigned: true })
   orders_id: number;
 
@@ -29,6 +33,7 @@ export class OrdersDetails {
   reviews_id: number;
 
   @IsNumber()
+  @IsNotEmpty()
   @Column()
   od_count: number;
 
