@@ -14,6 +14,8 @@ import { Like } from 'src/like/entities/like.entity';
 import { Grade } from '../type/user_grade.type';
 import { Orders } from 'src/orders/entities/orders.entity';
 import { Point } from 'src/point/entities/point.entity';
+import { Comments } from 'src/boards/entities/comments.entity';
+import { Boards } from 'src/boards/entities/boards.entity';
 // import { Orders } from "src/orders/entities/orders.entity";
 
 @Entity({ name: 'users' })
@@ -74,9 +76,9 @@ export class Users {
   @OneToMany(() => Orders, (orders) => orders.user)
   orders: Orders[];
 
-  // @OneToMany(() => Comments, (comments) => comments.user)
-  // comments: Comments[]
+  @OneToMany(() => Comments, (comments) => comments.user)
+  comments: Comments[]
 
-  // @OneToMany(() => Boards, (boards) => boards.user)
-  // boards: Boards[]
+  @OneToMany(() => Boards, (boards) => boards.user)
+  boards: Boards[]
 }

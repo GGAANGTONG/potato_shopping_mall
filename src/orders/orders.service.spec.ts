@@ -3,48 +3,21 @@ import { OrdersService } from './orders.service';
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Orders } from './entities/orders.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Payments } from '../payments/entities/payments.entity';
+import { Users } from '../user/entities/user.entitiy';
+import { Point } from '../point/entities/point.entity';
+import { Stocks } from '../goods/entities/stocks.entity';
+import { Goods } from '../goods/entities/goods.entity';
 
-describe('PaymentsService', () => {
+describe('OrdersService', () => {
   let service: OrdersService;
   let ordersRepository: Partial<Record<keyof Repository<Orders>, jest.Mock>>;
+  let usersRepository: Partial<Record<keyof Repository<Users>, jest.Mock>>;
+  let pointRepository: Partial<Record<keyof Repository<Point>, jest.Mock>>;
+  let paymentsRepository: Partial<Record<keyof Repository<Payments>, jest.Mock>>;
 
-  // type MockType<T> = {
-  //   [P in keyof T]?: jest.Mock<T>;
-  // };
-  //이걸 하려면 manager도 따로 모킹 타입 정의를 해줘야 함. jest.Mock<DataSource>가 돼서 그냥 전부 실제 DataSource 함수들이 들어가게 됨
-  // const dataSource: Partial<MockType<DataSource>> = {
-  //   createQueryRunner: jest.fn().mockImplementation(() => ({
-  //     connect: jest.fn(),
-  //     startTransaction: jest.fn(),
-  //     release: jest.fn(),
-  //     commitTransaction: jest.fn(),
-  //     rollbackTransaction: jest.fn(),
-  //     manager: {
-  //       update: jest.fn().mockImplementation(),
-  //       save: jest.fn().mockReturnThis(),
-  //       create: jest.fn().mockReturnThis(),
-  //       findOne: jest.fn().mockImplementation(),
-  //     },
-  //   })),
-  // };
-
-  const dataSource = {
-    createQueryRunner: jest.fn().mockImplementation(() => ({
-      connect: jest.fn(),
-      startTransaction: jest.fn(),
-      release: jest.fn(),
-      commitTransaction: jest.fn(),
-      rollbackTransaction: jest.fn(),
-      manager: {
-        update: jest.fn(),
-        save: jest.fn(),
-        create: jest.fn(),
-        findOne: jest.fn(),
-      },
-    })),
-  };
 
   async function validation(Dto, dto) {
     const validatonPipe = new ValidationPipe({
@@ -60,17 +33,68 @@ describe('PaymentsService', () => {
     await validatonPipe.transform(dto, metadata);
   }
 
+    // {
+  //   createQueryRunner: jest.fn().mockImplementation(() => ({
+  //     connect: jest.fn(),
+  //     startTransaction: jest.fn(),
+  //     release: jest.fn(),
+  //     commitTransaction: jest.fn(),
+  //     rollbackTransaction: jest.fn(),
+  //     manager: {
+  //       update: jest.fn(),
+  //       save: jest.fn(),
+  //       create: jest.fn(),
+  //       findOne: jest.fn(),
+  //     },
+  //   })),
+  // };
+  let dataSource: DataSource
+
+  const qr = {
+    manager: {}
+  } as QueryRunner;
+
+  class DataSourceMock {
+    createQueryRunner(mode?: 'master' | 'slave'): QueryRunner {
+      return qr;
+    }
+  }
+
   beforeEach(async () => {
+    Object.assign(qr.manager, {
+        update: jest.fn(),
+        save: jest.fn(),
+        create: jest.fn(),
+        findOne: jest.fn()
+    });
+    qr.connect = jest.fn()
+    qr.startTransaction = jest.fn()
+    qr.commitTransaction = jest.fn()
+    qr.rollbackTransaction = jest.fn()
+    qr.release = jest.fn()
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrdersService,
         {
           provide: DataSource,
-          useValue: dataSource,
+          useClass: DataSourceMock
         },
         {
           provide: getRepositoryToken(Orders),
           useValue: ordersRepository,
+        },
+        {
+          provide: getRepositoryToken(Users),
+          useValue: usersRepository,
+        },
+        {
+          provide: getRepositoryToken(Point),
+          useValue: pointRepository,
+        },
+        {
+          provide: getRepositoryToken(Payments),
+          useValue: paymentsRepository,
         },
       ],
     }).compile();
@@ -80,7 +104,10 @@ describe('PaymentsService', () => {
       save: jest.fn(),
     };
 
+    
+
     service = module.get<OrdersService>(OrdersService);
+    dataSource = module.get<DataSource>(DataSource);
   });
 
   afterEach(() => {
@@ -92,7 +119,7 @@ describe('PaymentsService', () => {
   });
 
   it('1-1. Orders - purchase, userId와 createOrderDto를 정상적으로 전송받아 결제 완료를 반환함', async () => {
-    const queryRunner = await dataSource.createQueryRunner();
+    const queryRunner = dataSource.createQueryRunner();
 
     const userId = 1;
     const createOrderDto: CreateOrderDto = {
@@ -120,26 +147,42 @@ describe('PaymentsService', () => {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    await queryRunner.manager.findOne
-      .mockResolvedValueOnce(value1)
-      .mockResolvedValueOnce(value2);
+    jest.spyOn(queryRunner.manager, 'findOne').mockResolvedValueOnce(value1).mockResolvedValueOnce(value1)
+    
 
-    console.log('국밥-테스트', await queryRunner.manager.findOne());
+    //기존의 함수가 가지고 있었던 의존성을 jest 인스턴스가 가진 의존성으로 대체함
 
-    const value3 = '재고 정보 갱신';
-    await queryRunner.manager.update.mockResolvedValueOnce(value3);
-    const value4 = '유저 포인트 정보 갱신';
-    await queryRunner.manager.save.mockResolvedValueOnce(value4);
+    // const value3 = '재고 정보 갱신';
+    // await queryRunner.manager.update.mockResolvedValueOnce(value3);
+    // const value4 = '유저 포인트 정보 갱신';
+    // await queryRunner.manager.save.mockResolvedValueOnce(value4);
 
-    const returnedValue = '주문 정보';
-    ordersRepository.create.mockResolvedValueOnce(returnedValue);
-    ordersRepository.save.mockResolvedValueOnce(returnedValue);
+    jest.spyOn(queryRunner.manager, 'update').mockResolvedValueOnce({
+      raw:  value1,
+      generatedMaps: [Stocks]
+    }
+  )
 
-    // await queryRunner.commitTransaction()
-    // await queryRunner.release()
+    jest.spyOn(queryRunner.manager, 'save').mockResolvedValueOnce(value2)
+
+  const value3 = {
+    raw: {
+      o_name: '주문 정보'
+    },
+    generatedMaps: [Orders]
+  }
+
+    jest.spyOn(queryRunner.manager, 'save').mockResolvedValueOnce(value3)
+
+
+    jest.spyOn(queryRunner.manager, 'save').mockResolvedValueOnce(value3)
+
+
+    await queryRunner.commitTransaction()
+    await queryRunner.release()
 
     return await expect(service.purchase(userId, createOrderDto)).resolves.toBe(
-      returnedValue,
+      value3,
     );
   });
 });
