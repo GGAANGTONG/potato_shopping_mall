@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { StocksService } from './stocks.service';
 import { CreateStockDto } from './dto/create-stocks.dto';
 import { UpdateStockDto } from './dto/update-stocks.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('stocks')
 export class StocksController {
@@ -21,6 +23,7 @@ export class StocksController {
    * @returns
    */
   @Post()
+  @UseGuards(AuthGuard('jwt'))
   create(@Body() createStockDto: CreateStockDto) {
     return this.stocksService.create(createStockDto);
   }
@@ -56,6 +59,7 @@ export class StocksController {
    * @returns
    */
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'))
   update(@Param('id') id: string, @Body() updateStockDto: UpdateStockDto) {
     return this.stocksService.update(+id, updateStockDto);
   }
@@ -66,6 +70,7 @@ export class StocksController {
    * @returns
    */
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
   remove(@Param('id') id: string) {
     return this.stocksService.remove(+id);
   }
