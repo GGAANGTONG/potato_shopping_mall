@@ -18,7 +18,7 @@ import { Point } from '../point/entities/point.entity';
 import { SignInDto } from './dto/sign_in.dto';
 import { UpdateDto } from './dto/update.dto';
 import { S3FileService } from '../common/utils/s3_fileupload';
-
+//2
 @Injectable()
 export class UserService {
   constructor(
