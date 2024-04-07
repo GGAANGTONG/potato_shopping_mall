@@ -45,6 +45,10 @@ describe('BoardsService', () => {
     service = module.get<BoardsService>(BoardsService);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
