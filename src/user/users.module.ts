@@ -7,12 +7,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { Point } from '../point/entities/point.entity';
-import { PointModule } from '../point/point.module';
-import { S3FileService } from '../common/utils/s3_fileupload';
+import { Boards } from 'src/boards/entities/boards.entity';
+import { Comments } from 'src/boards/entities/comments.entity';
+import { S3FileService } from 'src/common/utils/s3_fileupload';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Users, Point]),
+    TypeOrmModule.forFeature([Users, Point,Boards,Comments]),
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
         signOptions: { expiresIn: '1h' },
@@ -20,12 +21,10 @@ import { S3FileService } from '../common/utils/s3_fileupload';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Users, Point]),
     HttpModule,
-    PointModule,
   ],
   controllers: [UserController],
-  providers: [UserService, S3FileService],
-  exports: [UserService, S3FileService],
+  providers: [UserService,S3FileService],
+  exports: [UserService,S3FileService],
 })
 export class UsersModule {}

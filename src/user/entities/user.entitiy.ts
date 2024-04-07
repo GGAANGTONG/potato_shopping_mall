@@ -14,6 +14,8 @@ import { Like } from 'src/like/entities/like.entity';
 import { Grade } from '../type/user_grade.type';
 import { Orders } from 'src/orders/entities/orders.entity';
 import { Point } from 'src/point/entities/point.entity';
+import { Comments } from 'src/boards/entities/comments.entity';
+import { Boards } from 'src/boards/entities/boards.entity';
 // import { Orders } from "src/orders/entities/orders.entity";
 
 @Entity({ name: 'users' })
@@ -34,6 +36,7 @@ export class Users {
         '비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다.',
     },
   )
+  @IsNotEmpty()
   @Column({ type: 'varchar', select: false })
   password: string;
 
@@ -43,6 +46,7 @@ export class Users {
   email: string;
 
   @IsString()
+  @IsNotEmpty()
   @Column({ type: 'varchar' })
   nickname: string;
 
@@ -72,9 +76,9 @@ export class Users {
   @OneToMany(() => Orders, (orders) => orders.user)
   orders: Orders[];
 
-  // @OneToMany(() => Comments, (comments) => comments.user)
-  // comments: Comments[]
+  @OneToMany(() => Comments, (comments) => comments.user)
+  comments: Comments[]
 
-  // @OneToMany(() => Boards, (boards) => boards.user)
-  // boards: Boards[]
+  @OneToMany(() => Boards, (boards) => boards.user)
+  boards: Boards[]
 }
