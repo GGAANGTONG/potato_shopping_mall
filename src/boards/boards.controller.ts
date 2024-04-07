@@ -1,9 +1,5 @@
-import { Body, Controller, Post, UseInterceptors, Request, UploadedFile, Get, Param, Patch, Delete } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { BoardsService } from './boards.service';
-import { CreateBoardDto } from './dto/create-board.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ResizeImagePipe } from '../common/pipe/resize-image.pipe';
-import { UpdateBoardDto } from './dto/update-board.dto';
 
 @Controller('boards')
 export class BoardsController {

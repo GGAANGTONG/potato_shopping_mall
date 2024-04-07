@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { OrdersDetails } from './ordersdetails.entity';
+import { Orders } from './orders.entity';
 
 @Entity({ name: 'reviews' })
 export class Reviews {
@@ -15,9 +15,8 @@ export class Reviews {
   id: number;
 
   @IsNumber()
-  @IsNotEmpty()
   @Column({ unsigned: true })
-  ordersdetails_id: number;
+  orders_id: number;
 
   @IsString()
   @IsNotEmpty()
