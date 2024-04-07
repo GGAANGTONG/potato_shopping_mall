@@ -29,6 +29,11 @@ export class OrdersDetails {
 
   @IsNumber()
   @IsNotEmpty()
+  @Column({ unsigned: true })
+  reviews_id: number;
+
+  @IsNumber()
+  @IsNotEmpty()
   @Column()
   od_count: number;
 
@@ -45,5 +50,6 @@ export class OrdersDetails {
   goods: Goods;
 
   @OneToOne(() => Reviews, (reviews) => reviews.ordersdetails)
+  @JoinColumn({ name: 'reviews_id', referencedColumnName: 'id' })
   reviews: Reviews;
 }

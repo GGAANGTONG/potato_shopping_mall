@@ -30,6 +30,5 @@ export class Reviews {
   review: string;
 
   @OneToOne(() => OrdersDetails, (ordersdetails) => ordersdetails.reviews, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'ordersdetails_id' })
   ordersdetails: OrdersDetails;
 }

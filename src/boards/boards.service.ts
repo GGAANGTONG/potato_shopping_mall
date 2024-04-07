@@ -3,7 +3,7 @@ import { UpdateBoardDto } from "./dto/update-board.dto";
 import { Boards } from "./entities/boards.entity";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { validation } from "../configs/validationPipe";
+import { validation } from "../common/pipe/validationPipe";
 import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { S3FileService } from "../common/utils/s3_fileupload";
 
