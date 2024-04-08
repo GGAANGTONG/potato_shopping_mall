@@ -3,7 +3,7 @@ import { OrdersService } from './orders.service';
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Orders } from './entities/orders.entity';
-import { DataSource, QueryRunner, Repository } from 'typeorm';
+import { DataSource, QueryRunner, Repository, UpdateResult } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Payments } from '../payments/entities/payments.entity';
 import { Users } from '../user/entities/user.entitiy';
@@ -104,6 +104,10 @@ describe('OrdersService', () => {
       save: jest.fn(),
     };
 
+    paymentsRepository = {
+      create: jest.fn(),
+      save: jest.fn(),
+    };
     
 
     service = module.get<OrdersService>(OrdersService);
@@ -123,11 +127,11 @@ describe('OrdersService', () => {
 
     const userId = 1;
     const createOrderDto: CreateOrderDto = {
+      goods_id: 1,
       o_tel: '010-0000-0000',
       o_addr: '국밥광역시 국밥구 국밥동 국밥아파트',
       o_count: 15,
       o_req: '섭씨 150도짜리 국밥',
-      goods_id: 1,
     };
     await validation(CreateOrderDto, createOrderDto);
 
@@ -147,42 +151,70 @@ describe('OrdersService', () => {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    jest.spyOn(queryRunner.manager, 'findOne').mockResolvedValueOnce(value1).mockResolvedValueOnce(value1)
+    jest.spyOn(queryRunner.manager, 'findOne').mockResolvedValueOnce(value1).mockResolvedValueOnce(value2)
     
 
     //기존의 함수가 가지고 있었던 의존성을 jest 인스턴스가 가진 의존성으로 대체함
 
-    // const value3 = '재고 정보 갱신';
-    // await queryRunner.manager.update.mockResolvedValueOnce(value3);
-    // const value4 = '유저 포인트 정보 갱신';
-    // await queryRunner.manager.save.mockResolvedValueOnce(value4);
-
     jest.spyOn(queryRunner.manager, 'update').mockResolvedValueOnce({
-      raw:  value1,
+      raw:  null,
       generatedMaps: [Stocks]
     }
   )
 
-    jest.spyOn(queryRunner.manager, 'save').mockResolvedValueOnce(value2)
-
-  const value3 = {
-    raw: {
-      o_name: '주문 정보'
-    },
-    generatedMaps: [Orders]
+  const value4 = {
+    raw:  {
+      id: userId,
+      password: 'Ex@mple!!123',
+      email: 'gookbab',
+      nickname: '국밥',
+      profile: '국밥사진_potato_.jpg',
+      role: 0,
+      grade: 0,
+      points: value2.points - value1.g_price * value1.stock.count
+    }
   }
 
-    jest.spyOn(queryRunner.manager, 'save').mockResolvedValueOnce(value3)
+    jest.spyOn(queryRunner.manager, 'save').mockResolvedValueOnce(value4)
 
+  const value5 = {
+      id: 1,
+      user_id: userId,
+      o_name: '국밥',
+      o_tel: createOrderDto.o_tel,
+      o_addr: createOrderDto.o_addr,
+      o_count: createOrderDto.o_count,
+      o_total_price: createOrderDto.o_count * value1.g_price,
+      o_req: createOrderDto.o_req,
+      o_status: '주문완료',
+      o_date: new Date(),
+      updated_at: new Date()
+  }
+    // jest.spyOn(ordersRepository, 'create').mockReturnValueOnce(value5)
+    ordersRepository['create'] = jest.fn(() => jest.spyOn(queryRunner.manager, 'save').mockResolvedValueOnce(value5))
 
-    jest.spyOn(queryRunner.manager, 'save').mockResolvedValueOnce(value3)
+    // jest.spyOn(queryRunner.manager, 'save').mockResolvedValueOnce(value5)
+
+    const value6 = {
+        id: 1,
+        user_id: userId,
+        p_name: '국밥',
+        p_tel: createOrderDto.o_tel,
+        p_addr: createOrderDto.o_addr,
+        p_count: createOrderDto.o_count,
+        p_total_price: createOrderDto.o_count * value1.g_price,
+        p_status: '결제완료',
+    }
+    jest.spyOn(paymentsRepository, 'create').mockReturnValueOnce(value6)
+    jest.spyOn(queryRunner.manager, 'save').mockResolvedValueOnce(value6)
 
 
     await queryRunner.commitTransaction()
     await queryRunner.release()
 
     return await expect(service.purchase(userId, createOrderDto)).resolves.toBe(
-      value3,
+      value5
     );
   });
 });
+
