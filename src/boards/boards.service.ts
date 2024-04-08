@@ -23,7 +23,7 @@ export class BoardsService {
   let fileKey = '';
   // 상품 이미지 버킷에 업로드
   if (file) {
-    fileKey = await this.s3FileService.uploadFile(file);
+    fileKey = await this.s3FileService.uploadFile(file, 'boards');
   }
   
 
@@ -130,7 +130,7 @@ export class BoardsService {
     let fileKey = '';
     // 상품 이미지 버킷에 업로드
     if (file) {
-      fileKey = await this.s3FileService.uploadFile(file);
+      fileKey = await this.s3FileService.uploadFile(file,'boards');
     }
 
     const update = this.boardsRepository.create({
