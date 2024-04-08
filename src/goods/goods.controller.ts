@@ -70,8 +70,13 @@ export class GoodsController {
    */
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'))
-  update(@Param('id') id: string, @Body() updateGoodDto: UpdateGoodDto) {
-    return this.goodsService.update(+id, updateGoodDto);
+  @UseInterceptors(FileInterceptor('file'))
+  update(
+    @Param('id') id: string, 
+    @Body() updateGoodDto: UpdateGoodDto,
+    @UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File,
+  ) {
+    return this.goodsService.update(+id, updateGoodDto, file);
   }
 
   /**
