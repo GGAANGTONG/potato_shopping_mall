@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Users } from 'src/user/entities/user.entitiy';
+import { Users } from '../../user/entities/user.entitiy';
 
 import {
   Column,
