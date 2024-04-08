@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommentsController } from './comments.controller';
 import { CommentsService } from './comments.service';
-import { validation } from '../configs/validationPipe';
+import { validation } from '../common/pipe/validationPipe';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { BadRequestException } from '@nestjs/common';
 import { UpdateCommentDto } from './dto/update-comment.dto';
