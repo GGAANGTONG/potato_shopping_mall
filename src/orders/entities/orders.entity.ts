@@ -11,9 +11,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Status } from '../types/order.type';
-import { Reviews } from './review.entity';
 import { Users } from '../../user/entities/user.entitiy';
 import { OrdersDetails } from './ordersdetails.entity';
+import { Payments } from 'src/payments/entities/payments.entity';
 
 @Entity({ name: 'orders' })
 export class Orders {
@@ -24,6 +24,7 @@ export class Orders {
   @IsNumber()
   @Column({ unsigned: true })
   user_id: number;
+
 
   @IsString()
   @IsNotEmpty()
@@ -74,6 +75,9 @@ export class Orders {
 
   @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.orders)
   ordersdetails: OrdersDetails[];
+
+  @OneToOne(() => Payments, (payments) => payments.orders)
+  payments: Payments;
 
 
 }

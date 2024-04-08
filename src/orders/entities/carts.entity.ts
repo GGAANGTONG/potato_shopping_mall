@@ -39,4 +39,6 @@ export class Carts {
   })
   @JoinColumn({ name: 'goods_id', referencedColumnName: 'id' })
   goods: Goods;
+
+  //장바구니 유저  온딜리트 캐시캐이드 트루1:1
 }

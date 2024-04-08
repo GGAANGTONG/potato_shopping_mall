@@ -1,10 +1,18 @@
-import { Controller, Get, NotFoundException, Param, ParseIntPipe, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, NotFoundException, Param, ParseIntPipe, Post, Req, UseGuards } from "@nestjs/common";
 import { PaymentsService } from "./payments.service";
 import { AuthGuard } from "@nestjs/passport";
+import { CreatePaymentDto } from "../orders/dto/create-payment.dto";
 
 @Controller('payments')
 export class PaymentsController {
     constructor(private readonly paymentsService: PaymentsService) { }
+    //결제
+    @UseGuards(AuthGuard('jwt'))
+    @Post()
+    async pay(@Req() req, @Body() createPaymentDto: CreatePaymentDto) {
+        const userId = req.user.id;
+        return this.paymentsService.pay(userId, createPaymentDto);
+    }
 
     // 유저 결제 목록 전체 조회
     @UseGuards(AuthGuard('jwt'))
