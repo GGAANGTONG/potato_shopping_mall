@@ -1,10 +1,13 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Payments } from './entities/payments.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Point } from '../point/entities/point.entity';
 import { Users } from '../user/entities/user.entitiy';
 import { PayStatus } from './types/payments.type';
+import { Orders } from '../orders/entities/orders.entity';
+import { CreatePaymentDto } from '../orders/dto/create-payment.dto';
+import { validation } from 'src/common/pipe/validationPipe';
 
 @Injectable()
 export class PaymentsService {
@@ -14,8 +17,78 @@ export class PaymentsService {
     @InjectRepository(Point)
     private pointRepository: Repository<Point>,
     @InjectRepository(Users)
-    private usersRepository: Repository<Users>
+    private usersRepository: Repository<Users>,
+    @InjectRepository(Orders)
+    private ordersRepository: Repository<Orders>,
+    private readonly dataSource: DataSource,
   ) { }
+
+  // 전체적으로 추가적인 보안요소 필요
+  async pay(
+    userId: number,
+    createPaymentDto: CreatePaymentDto // 포스트맨의 body,
+  ) {
+    await validation(CreatePaymentDto, createPaymentDto)
+    const { orders_id } = createPaymentDto
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const order = await queryRunner.manager.findOne(Orders, {
+        where: {
+          id: orders_id, user_id: userId
+        }
+
+      })
+
+      if (!order) {
+        throw new BadRequestException('존재하지 않는 주문입니다.');
+      }
+
+      const user = await queryRunner.manager.findOne(Users, {
+        where: {
+          id: userId,
+        },
+      });
+
+      if (!user) {
+        throw new BadRequestException('존재하지 않는 유저입니다.');
+      }
+
+
+
+      const paying = order.o_total_price
+      const afterPaidPoints = user.points - paying; // 포인트가 부족한 경우를 확인하기 위해 변경
+
+
+
+      if (afterPaidPoints < 0) {
+        throw new BadRequestException('포인트가 부족합니다.');
+      }
+
+      user.points = afterPaidPoints;
+      await queryRunner.manager.save(Users, user);
+
+      const newPayments = await this.paymentsRepository.create({
+        orders_id,
+        user_id: userId,
+        p_total_price: paying,
+      });
+      const returnNewPayments = await queryRunner.manager.save(Payments, newPayments);
+
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
+
+      return returnNewPayments
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+      console.error(err);
+      throw err;
+    }
+
+  }
+
 
   // 유저별 결제 목록 전체 조회
   async findAllOrderbyUser(userId: number): Promise<Payments[]> {
@@ -62,6 +135,9 @@ export class PaymentsService {
 
   // 결제 취소
   async cancelPay(userId: number, paymentsId: number): Promise<Payments> {
+    if (!userId || userId == 0 || !paymentsId || paymentsId == 0) {
+      throw new BadRequestException('잘못된 요청입니다!')
+    }
     const payments = await this.paymentsRepository.findOne({
       where: { id: paymentsId, user_id: userId }
     });

@@ -80,22 +80,12 @@ export class OrdersService {
         o_total_price: paying,
         //goods_id 삭제함
       });
-      await queryRunner.manager.save(Orders, newOrder);
-
-      const newPayments = await this.paymentsRepository.create({
-        user_id: userId,
-        p_name: user.name,
-        p_tel: o_tel,
-        p_addr: o_addr,
-        p_count: o_count,
-        p_total_price: paying,
-      });
-      await queryRunner.manager.save(Payments, newPayments);
+      const returnNewOrder = await queryRunner.manager.save(Orders, newOrder);
 
       await queryRunner.commitTransaction();
       await queryRunner.release();
 
-      return newOrder;
+      return returnNewOrder;
     } catch (err) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
@@ -160,6 +150,7 @@ export class OrdersService {
     }
 
     // 환불 로직
+    // 재고 반환 로직 추가
     if (order.o_status !== '주문취소') {
       const refundAmount = order.o_total_price; // 주문 취소로 인한 환불액
       const userPoint = await this.pointRepository.findOne({ where: { userId: order.user_id } });
