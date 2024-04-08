@@ -10,13 +10,13 @@ export class S3FileService {
     });
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<string> {
+  async uploadFile(file: Express.Multer.File, folderPath): Promise<string> {
     try {
       const extension = file.originalname.substring(
         file.originalname.lastIndexOf('.'),
       );
       const uniqueKey = uuidv4(); // 고유 식별자 생성
-      const key = `${uniqueKey}_potato${extension}`;
+      const key = `${folderPath}/${uniqueKey}_potato${extension}`;
       await this.s3
         .putObject({
           Key: key,

@@ -42,7 +42,7 @@ export class UserService {
     let fileKey = '';
     // 프로필 이미지 s3에 업로드
     if (file) {
-      fileKey = await this.s3FileService.uploadFile(file);
+      fileKey = await this.s3FileService.uploadFile(file, 'users');
     }
 
     const user = await this.usersRepository.save({

@@ -10,6 +10,8 @@ export class ResizeImagePipe implements PipeTransform {
 
   async transform(value: Express.Multer.File): Promise<Express.Multer.File> {
     try {
+
+      if (!value) return value;
       if (!value || !value.buffer) {
         throw new BadRequestException('파일이 제공되지 않았습니다.');
       }
