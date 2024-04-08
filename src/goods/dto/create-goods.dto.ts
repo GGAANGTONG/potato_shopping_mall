@@ -9,12 +9,12 @@ export class CreateGoodDto extends PickType(Goods, [
   'g_option',
 ] as const) {
   @Type(() => Number)
-  @IsNumber({}, { message: 'g_price must be a numeric value' })
-  @IsPositive({ message: 'g_price must be a positive number' })
+  @IsNumber({}, { message: '상품 가격은 숫자 형식으로 입력되어야 합니다.' })
+  @IsPositive({ message: '상품 가격은 양수로 입력되어야 합니다.' })
   g_price: number;
 
   @Type(() => Number)
-  @IsNumber({}, { message: 'category must be a numeric value' })
-  @IsPositive({ message: 'category must be a positive number' })
+  @IsNumber({}, { message: '카테고리 id는 숫자 형식으로 입력되어야 합니다.' })
+  @IsPositive({ message: '카테고리 id는 양수로 입력되어야 합니다.' })
   category: number;
 }
