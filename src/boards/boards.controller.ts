@@ -4,6 +4,7 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResizeImagePipe } from '../common/pipe/resize-image.pipe';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import logger from 'src/common/log/logger';
 
 @Controller('boards')
 export class BoardsController {
@@ -14,13 +15,14 @@ export class BoardsController {
   create(@UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File, @Request() req, @Body() createBoardDto:CreateBoardDto) {
     
     const userId = req.user.id 
-
+    logger.traceLogger(`입력 정보 = file: ${file} & req.user: ${JSON.stringify(req.user)} & createBoardDto: ${JSON.stringify(createBoardDto)}`, 'Board.controller - create')
     return this.boardsService.create(file, userId, createBoardDto)
   }
 
   //어드민 전용 Role = admin Only
   @Get()
   findAll() {
+    logger.traceLogger(`입력 정보 = none`, 'Board.controller - findAll')
   return this.boardsService.findAll();
   }
 
@@ -28,6 +30,7 @@ export class BoardsController {
   @Get('QnAs')
   findAllByUserId(@Request() req) {
   const userId = req.user.id
+  logger.traceLogger(`입력 정보 = req.user: ${JSON.stringify(req.user)}`, 'Board.controller - findAllByUserId')
   return this.boardsService.findAllByUserId(userId)
   }
 
@@ -35,12 +38,15 @@ export class BoardsController {
   @Get('QnA')
   findOneByBoardId(@Request() req,@Param() board_id: number) {
   const userId = req.user.id
+
+  logger.traceLogger(`입력 정보 = req.user: ${JSON.stringify(req.user)} & board_id: ${board_id}`, 'Board.controller - findOneByBoardId')
   return this.boardsService.findOneByBoardId(userId, board_id)
   }
 
   @Patch()
   update(@UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File, @Request() req, @Body() updateBoardDto: UpdateBoardDto) {
     const userId = req.user.id
+    logger.traceLogger(`입력 정보 = file: ${file} & req.user: ${JSON.stringify(req.user)} & createBoardDto: ${JSON.stringify(updateBoardDto)}`, 'Board.controller - update')
     return this.boardsService.update(file, userId, updateBoardDto)
   }
   
@@ -48,6 +54,7 @@ export class BoardsController {
   @Delete(':board_id')
   remove(@Request() req, @Param() board_id: number) {
     const userId = req.user.id
+    logger.traceLogger(`입력 정보 = req.user: ${JSON.stringify(req.user)} & board_id: ${board_id}`, 'Board.controller - remove')
     return this.boardsService.remove(userId, board_id)
   }
 }
