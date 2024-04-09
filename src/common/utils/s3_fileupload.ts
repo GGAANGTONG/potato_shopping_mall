@@ -9,7 +9,7 @@ export class S3FileService {
       secretAccessKey: process.env.S3_SECRETKEY,
     });
   }
-
+ç
   async uploadFile(file: Express.Multer.File, folderPath): Promise<string> {
     try {
       const extension = file.originalname.substring(
