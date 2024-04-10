@@ -11,7 +11,7 @@ import { GoodsModule } from './goods/goods.module';
 import { AuthModule } from './auth/auth.module';
 import { LikeModule } from './like/like.module';
 import { PointModule } from './point/point.module';
-import { RedisModule } from './redis/redis.module';
+// import { RedisModule } from './redis/redis.module';
 import { BoardsModule } from './boards/boards.module';
 import { CacheModule } from '@nestjs/cache-manager';
 
@@ -21,7 +21,7 @@ import { CacheModule } from '@nestjs/cache-manager';
       isGlobal: true,
       validationSchema: configModuleValidationSchema,
     }),
-    CacheModule.register({isGlobal: true}),
+    // CacheModule.register({isGlobal: true}),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     AuthModule,
     UsersModule,
@@ -31,7 +31,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     GoodsModule,
     LikeModule,
     PointModule,
-    RedisModule,
+    // RedisModule,
     BoardsModule,
   ],
   controllers: [AppController],
