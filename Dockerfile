@@ -3,7 +3,7 @@
 ####################
 
 # Node.js 기반 이미지 선택
-FROM --platform=linux/amd64 node:20.11.0 as build
+FROM node:20.11.0 as build
 
 # 애플리케이션 디렉토리 생성
 WORKDIR /usr/src/app
@@ -28,7 +28,7 @@ RUN npm run build --verbose
 # Production Stage
 ####################
 
-FROM --platform=linux/amd64 node:20.11.0 as production
+FROM node:20.11.0 as production
 
 # 애플리케이션 디렉토리 생성
 WORKDIR /usr/src/app
