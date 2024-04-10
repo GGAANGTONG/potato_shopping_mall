@@ -16,4 +16,11 @@ export class RedisService {
   getClient(): Redis {
     return this.client;
   }
+
+  async saveRefreshToken(userId: string, refreshToken: string, ttl: number): Promise<void> {
+    await this.client.set(`refreshToken:${userId}`, refreshToken, 'EX', ttl);
+}
+  
+
+
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { LikeService } from './like.service';
 import { CreateLikeDto } from './dto/create-like.dto';
 // import { UpdateLikeDto } from './dto/update-like.dto';
@@ -16,10 +16,10 @@ export class LikeController {
     };
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.likeService.findAll();
-  // }
+  @Get(':usersId')
+  findAll(@Param('usersId') usersId:number) {
+    return this.likeService.findAll(usersId);
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {

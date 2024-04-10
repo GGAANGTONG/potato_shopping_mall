@@ -5,11 +5,11 @@ import { UserService } from './users.service';
 import { Users } from './entities/user.entitiy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { HttpModule } from '@nestjs/axios';
 import { Point } from '../point/entities/point.entity';
 import { Boards } from 'src/boards/entities/boards.entity';
 import { Comments } from 'src/boards/entities/comments.entity';
 import { S3FileService } from 'src/common/utils/s3_fileupload';
+import { RedisService } from 'src/redis/redis.service';
 
 @Module({
   imports: [
@@ -21,10 +21,9 @@ import { S3FileService } from 'src/common/utils/s3_fileupload';
       }),
       inject: [ConfigService],
     }),
-    HttpModule,
   ],
   controllers: [UserController],
-  providers: [UserService,S3FileService],
-  exports: [UserService,S3FileService],
+  providers: [UserService,S3FileService,RedisService],
+  exports: [UserService,S3FileService,RedisService],
 })
 export class UsersModule {}

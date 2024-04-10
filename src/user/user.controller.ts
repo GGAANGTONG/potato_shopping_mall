@@ -86,26 +86,26 @@ export class UserController {
     return point;
   }
 
-  @Get('/oauth')
-  @Header('Content-Type', 'text/html')
-  redirectToKakaoAuth(@Res() res) {
-    const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
-    const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
-    const kakaoAuthURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}`;
+  // @Get('/oauth')
+  // @Header('Content-Type', 'text/html')
+  // redirectToKakaoAuth(@Res() res) {
+  //   const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
+  //   const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
+  //   const kakaoAuthURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}`;
 
-    res.redirect(HttpStatus.TEMPORARY_REDIRECT, kakaoAuthURL);
-  }
+  //   res.redirect(HttpStatus.TEMPORARY_REDIRECT, kakaoAuthURL);
+  // }
 
-  @Get('/oauth/callback')
-  async getKakaoInfo(@Query() query: { code }) {
-    const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
-    const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
+  // @Get('/oauth/callback')
+  // async getKakaoInfo(@Query() query: { code }) {
+  //   const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
+  //   const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
 
-    await this.userService.kakaoLogin(
-      KAKAO_REST_API_KEY,
-      KAKAO_REDIRECT_URI,
-      query.code,
-    );
-    return { message: '로그인 되었습니다' };
-  }
+  //   await this.userService.kakaoLogin(
+  //     KAKAO_REST_API_KEY,
+  //     KAKAO_REDIRECT_URI,
+  //     query.code,
+  //   );
+  //   return { message: '로그인 되었습니다' };
+  // }
 }

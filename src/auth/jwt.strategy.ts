@@ -33,6 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (tokenType !== 'Bearer')
         throw new BadRequestException('토큰 타입이 일치하지 않습니다.');
       if (token) {
+        console.log(1, token);
         return token;
       }
       return null;
@@ -40,7 +41,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
+    console.log(2, payload.email);
     const user = await this.userService.findByEmail(payload.email);
+    console.log(user);
     if (_.isNil(user)) {
       throw new NotFoundException('해당하는 사용자를 찾을 수 없습니다.');
     }

@@ -13,6 +13,7 @@ import { LikeModule } from './like/like.module';
 import { PointModule } from './point/point.module';
 import { RedisModule } from './redis/redis.module';
 import { BoardsModule } from './boards/boards.module';
+import { OauthModule } from './oauth/oauth.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { BoardsModule } from './boards/boards.module';
     PointModule,
     RedisModule,
     BoardsModule,
+    OauthModule,
   ],
   controllers: [AppController],
   providers: [],
