@@ -18,6 +18,9 @@ import { Point } from '../point/entities/point.entity';
 import { SignInDto } from './dto/sign_in.dto';
 import { UpdateDto } from './dto/update.dto';
 import { S3FileService } from '../common/utils/s3_fileupload';
+// import { RedisService } from 'src/redis/redis.service';
+import { Grade } from './type/user_grade.type';
+
 //2
 @Injectable()
 export class UserService {
@@ -27,9 +30,10 @@ export class UserService {
     @InjectRepository(Point)
     private pointsRepository: Repository<Point>,
     private readonly jwtService: JwtService,
-    private http: HttpService,
+    // private http: HttpService,
     private readonly s3FileService: S3FileService,
     private dataSource: DataSource,
+    //  private readonly redisService: RedisService
   ) {}
 
   async register(signUpDto: SignUpDto, file: Express.Multer.File): Promise<Users> {
@@ -53,6 +57,7 @@ export class UserService {
       profile: fileKey, // s3에 업로드된 파일 키를 사용
     });
 
+  
     //포인트 등록
 
     const point = this.pointsRepository.create({
@@ -86,7 +91,11 @@ export class UserService {
       secret: process.env.JWT_REFRESH_TOKEN_SECRET,
       expiresIn: '7d',
     });
-
+    
+   
+    // await this.redisService.saveRefreshToken(user.id.toString(), refreshToken, 604800);
+    // console.log(1,refreshToken)
+    
     return {
       accessToken,
       refreshToken,
@@ -183,55 +192,97 @@ export class UserService {
     return await this.usersRepository.findOne({ where: { email } });
   }
 
+
+
+  async purchasePoints(userId: number, purchaseAmount: number) {
+    const user = await this.usersRepository.findOneBy({ id: userId });
+
+    if (!user || user.bank < purchaseAmount) {
+      return { success: false, message: '잔액이 충분하지 않습니다' };
+    }
+
+    // 계산된 포인트와 사용자의 bank 잔액 업데이트
+    const bonusRate = this.getBonusRate(user.grade);
+    const bonusPoints = purchaseAmount * bonusRate;
+    const totalPoints = purchaseAmount + bonusPoints;
+    user.bank -= purchaseAmount;
+
+    // 사용자 정보 업데이트
+    await this.usersRepository.save(user);
+
+    return {
+      success: true,
+      message: '포인트를 성공적으로 구매 햇습니다',
+      newBankBalance: user.bank,
+      totalPoints,
+    };
+  }
+
+  private getBonusRate(user_grade:Grade): number {
+    switch (user_grade) {
+      case Grade.CUSTUMER:
+        return 0.05;
+      case Grade.THANKFUL:
+        return 0.07;
+      case Grade.VIP:
+        return 0.12;
+      default:
+        return 0;
+    }
+  }
+
+  
+
+
   //카카오
 
-  async kakaoLogin(
-    KAKAO_REST_API_KEY: string,
-    KAKAO_REDIRECT_URI: string,
-    code: string,
-  ) {
-    const config = {
-      grant_type: 'authorization_code',
-      client_id: KAKAO_REST_API_KEY,
-      redirect_uri: KAKAO_REDIRECT_URI,
-      code,
-    };
-    const params = new URLSearchParams(config).toString();
-    const tokenHeaders = {
-      'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
-    };
-    const tokenUrl = `https://kauth.kakao.com/oauth/token?${params}`;
+  // async kakaoLogin(
+  //   KAKAO_REST_API_KEY: string,
+  //   KAKAO_REDIRECT_URI: string,
+  //   code: string,
+  // ) {
+  //   const config = {
+  //     grant_type: 'authorization_code',
+  //     client_id: KAKAO_REST_API_KEY,
+  //     redirect_uri: KAKAO_REDIRECT_URI,
+  //     code,
+  //   };
+  //   const params = new URLSearchParams(config).toString();
+  //   const tokenHeaders = {
+  //     'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+  //   };
+  //   const tokenUrl = `https://kauth.kakao.com/oauth/token?${params}`;
 
-    const tokenRes = await firstValueFrom(
-      this.http.post(tokenUrl, '', { headers: tokenHeaders }),
-    );
+  //   const tokenRes = await firstValueFrom(
+  //     this.http.post(tokenUrl, '', { headers: tokenHeaders }),
+  //   );
 
-    // 'any' 타입으로 응답을 단언하여 'access_token'에 접근
-    const accessToken = (tokenRes as any).data.access_token;
+  //   // 'any' 타입으로 응답을 단언하여 'access_token'에 접근
+  //   const accessToken = (tokenRes as any).data.access_token;
 
-    // accessToken을 사용하여 사용자 정보를 가져오는 부분
-    const userInfoUrl = `https://kapi.kakao.com/v2/user/me`;
-    const userInfoHeaders = {
-      Authorization: `Bearer ${accessToken}`,
-    };
+  //   // accessToken을 사용하여 사용자 정보를 가져오는 부분
+  //   const userInfoUrl = `https://kapi.kakao.com/v2/user/me`;
+  //   const userInfoHeaders = {
+  //     Authorization: `Bearer ${accessToken}`,
+  //   };
 
-    // 사용자 정보 요청 및 응답 처리
-    const userInfoRes = await firstValueFrom(
-      this.http.get(userInfoUrl, { headers: userInfoHeaders }),
-    );
-    console.log(userInfoRes);
-    // const data = userInfoRes.data;
-    // // 사용자 정보를 로컬 DB에 저장
-    // let user = await this.usersRepository.findOne({
-    //   where: { email: data.email },
-    // });
-    // if (!user) {
-    //   user = new Users();
-    //   user.email = data.kakao_account.email;
-    //   user.nickname = data.properties.nickname;
-    //   // 기타 필요한 정보 추가 가능
-    //   await this.usersRepository.save(user);
-    // }
-    // return user;
-  }
+  //   // 사용자 정보 요청 및 응답 처리
+  //   const userInfoRes = await firstValueFrom(
+  //     this.http.get(userInfoUrl, { headers: userInfoHeaders }),
+  //   );
+  //   console.log(userInfoRes);
+  //   // const data = userInfoRes.data;
+  //   // // 사용자 정보를 로컬 DB에 저장
+  //   // let user = await this.usersRepository.findOne({
+  //   //   where: { email: data.email },
+  //   // });
+  //   // if (!user) {
+  //   //   user = new Users();
+  //   //   user.email = data.kakao_account.email;
+  //   //   user.nickname = data.properties.nickname;
+  //   //   // 기타 필요한 정보 추가 가능
+  //   //   await this.usersRepository.save(user);
+  //   // }
+  //   // return user;
+  // }
 }

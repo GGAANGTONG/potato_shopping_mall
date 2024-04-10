@@ -66,6 +66,10 @@ export class Users {
   @Column({ type: 'int', default: 1000000 })
   points: number;
 
+  @IsNumber()
+  @Column({ type: 'int', nullable: true })
+  bank: number;
+
   @OneToMany(() => Like, (like) => like.user)
   like: Like[];
 
