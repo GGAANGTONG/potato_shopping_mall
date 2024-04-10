@@ -1,38 +1,190 @@
-import { Injectable } from "@nestjs/common";
-import { CreateGoodDto } from "./dto/create-goods.dto";
-import { UpdateGoodDto } from "./dto/update-goods.dto";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Goods } from "./entities/goods.entity";
-import { Repository } from "typeorm";
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { CreateGoodDto } from './dto/create-goods.dto';
+import { UpdateGoodDto } from './dto/update-goods.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Goods } from './entities/goods.entity';
+import { Categories } from './entities/categories.entity';
+import { Stocks } from './entities/stocks.entity';
+import { Repository } from 'typeorm';
+import { S3FileService } from '../common/utils/s3_fileupload';
 
 @Injectable()
 export class GoodsService {
-
   constructor(
     @InjectRepository(Goods)
     private goodsRepository: Repository<Goods>,
+    @InjectRepository(Categories)
+    private categoriesRepository: Repository<Categories>,
+    @InjectRepository(Stocks)
+    private stocksRepository: Repository<Stocks>,
+    private readonly s3FileService: S3FileService,
   ) {}
-  
-  async create(createGoodDto: CreateGoodDto) {
-    const newGood = this.goodsRepository.create(createGoodDto);
-    await this.goodsRepository.save(newGood);
 
-    return newGood;
+  /**
+   * 상품등록
+   * @param file
+   * @param createGoodDto
+   * @returns
+   */
+  async create(file: Express.Multer.File, createGoodDto: CreateGoodDto) {
+    const existedCategory = await this.categoriesRepository.findOneBy({
+      id: createGoodDto.category,
+    });
+    if (!existedCategory) {
+      throw new NotFoundException('해당하는 카테고리를 찾을 수 없습니다.');
+    }
+
+    try {
+      let fileKey = '';
+      // 상품 이미지 버킷에 업로드
+      if (file) {
+        fileKey = await this.s3FileService.uploadFile(file, 'goods');
+      }
+      const { g_name, g_price, g_desc, g_option } = createGoodDto;
+      const goodData = { g_name, g_price, g_desc, g_img: fileKey, g_option };
+      const newGood = this.goodsRepository.create(goodData);
+      newGood.category = existedCategory;
+
+      // 상품 정보 저장
+      const savedGood = await this.goodsRepository.save(newGood);
+
+      // 초기 재고 정보 저장
+      const initialStock = this.stocksRepository.create({
+        count: 0,
+        goods: savedGood,
+      });
+      await this.stocksRepository.save(initialStock);
+
+      return newGood;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        '상품 생성 중 에러가 발생했습니다.',
+      );
+    }
   }
 
-  async findAll() {
-    return `This action returns all goods`;
+  /**
+   * 전체조회
+   * @param g_name
+   * @param cate_id
+   * @returns
+   */
+  async findAll(g_name?: string, cate_id?: string) {
+    const query = this.goodsRepository
+      .createQueryBuilder('goods')
+      .leftJoinAndSelect('goods.category', 'category')
+      .leftJoinAndSelect('goods.stock', 'stocks')
+      .select([
+        'goods.id',
+        'goods.g_name',
+        'goods.g_price',
+        'goods.g_desc',
+        'category.c_name',
+        'stocks.count',
+      ]);
+
+    if (g_name) {
+      query.andWhere('goods.g_name LIKE :g_name', { g_name: `%${g_name}%` });
+    }
+
+    if (cate_id) {
+      query.andWhere('goods.cate_id = :cate_id', { cate_id });
+    }
+
+    return query.getMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} good`;
+  /**
+   * 상세조회
+   * @param id number
+   * @returns
+   */
+  async findOne(id: number): Promise<Goods> {
+    const good = await this.goodsRepository.findOne({
+      where: { id },
+      relations: ['category', 'stock'],
+    });
+    if (!good) {
+      throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
+    }
+    return good;
   }
 
-  update(id: number, updateGoodDto: UpdateGoodDto) {
-    return `This action updates a #${id} good`;
+  /**
+   * 상품 정보 수정
+   * @param id
+   * @param updateGoodDto
+   */
+  async update(id: number, updateGoodDto: UpdateGoodDto, file: Express.Multer.File,) {
+    const good = await this.goodsRepository.findOneBy({ id });
+    if (!good) {
+      throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
+    }
+
+    const existedCategory = await this.categoriesRepository.findOneBy({
+      id: updateGoodDto.category,
+    });
+    if (!existedCategory) {
+      throw new NotFoundException('해당하는 카테고리를 찾을 수 없습니다.');
+    }
+
+    // 이미지가 존재하고, 이미 업로드된 이미지가 있다면 기존 이미지 삭제
+    if (file && good.g_img) {
+      try {
+        await this.s3FileService.deleteFile(good.g_img);
+      } catch (error) {
+        throw new InternalServerErrorException('이미지 파일 수정 중 에러가 발생했습니다.');
+      }
+    }
+
+    // 새로운 파일이 있다면 업로드
+    const fileKey = file ? await this.s3FileService.uploadFile(file,'goods') : good.g_img;
+
+    // 수정할 상품 데이터 업데이트
+    good.g_name = updateGoodDto.g_name;
+    good.g_price = updateGoodDto.g_price;
+    good.g_desc = updateGoodDto.g_desc;
+    good.g_option = updateGoodDto.g_option;
+    good.g_img = fileKey;
+    good.category = existedCategory;
+
+    try {
+      const updatedGood = await this.goodsRepository.save(good);
+      return updatedGood;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        '상품 업데이트 중 에러가 발생했습니다.',
+      );
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} good`;
+  async remove(id: number) {
+    const good = await this.goodsRepository.findOneBy({ id });
+    if (!good) {
+      throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
+    }
+
+    if (good.g_img) {
+      try {
+        await this.s3FileService.deleteFile(good.g_img);
+      } catch (error) {
+        throw new InternalServerErrorException(
+          '파일 삭제 처리 중 에러가 발생했습니다.',
+        );
+      }
+    }
+
+    try {
+      await this.goodsRepository.delete(id);
+      return { message: '상품이 성공적으로 삭제되었습니다.', data: good };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        '상품 삭제 처리 중 에러가 발생했습니다.',
+      );
+    }
   }
 }

@@ -1,66 +1,83 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
-import { Goods } from "src/goods/entities/goods.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Status } from '../types/order.type';
+import { Users } from '../../user/entities/user.entitiy';
+import { OrdersDetails } from './ordersdetails.entity';
+import { Payments } from 'src/payments/entities/payments.entity';
 
-
-
-@Entity('Orders')
+@Entity({ name: 'orders' })
 export class Orders {
+  @IsNumber()
+  @PrimaryGeneratedColumn({ unsigned: true })
+  id: number;
 
-    @IsNumber()
-    @PrimaryGeneratedColumn({ unsigned: true })
-    id: number;
-
-    @IsNumber()
-    @Column({ unsigned: true })
-    user_id: number;
-
-    @IsString()
-    @IsNotEmpty()
-    @Column()
-    o_name: string;
-
-    @IsString()
-    @IsNotEmpty()
-    @Column()
-    o_tel: string;
-
-    @IsString()
-    @IsNotEmpty()
-    @Column()
-    o_addr: string;
-
-    @IsNumber()
-    @IsNotEmpty()
-    @Column()
-    o_count: number;
-
-    @IsNumber()
-    @IsNotEmpty()
-    @Column()
-    o_total_price: number;
-
-    @IsString()
-    @Column({ nullable: true })
-    o_req: string;
-
-    //enum으로 바꾸면 좋을 것 같아요
-    @IsString()
-    @IsNotEmpty()
-    @Column()
-    o_status: string;
-
-    @CreateDateColumn()
-    o_date: Date;
-
-    @UpdateDateColumn()
-    updated_at: Date;
+  @IsNumber()
+  @Column({ unsigned: true })
+  user_id: number;
 
 
-    @ManyToOne(() => Goods, (goods) => goods.orders, {
-        onDelete: "CASCADE",
-    })
-    @JoinColumn({ name: "goods_id", referencedColumnName: "id" })
-    goods: Goods;
+  @IsString()
+  @IsNotEmpty()
+  @Column()
+  o_name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Column()
+  o_tel: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Column()
+  o_addr: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Column()
+  o_count: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Column()
+  o_total_price: number;
+
+  @IsString()
+  @Column({ nullable: true })
+  o_req: string;
+
+  //enum으로 바꾸면 좋을 것 같아요
+  @IsEnum(Status)
+  @IsNotEmpty()
+  @Column({ type: 'enum', enum: Status, default: '주문완료' })
+  o_status: Status;
+
+  @CreateDateColumn()
+  o_date: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  @ManyToOne(() => Users, (user) => user.orders, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  user: Users;
+
+  @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.orders)
+  ordersdetails: OrdersDetails[];
+
+  @OneToOne(() => Payments, (payments) => payments.orders)
+  payments: Payments;
+
 
 }

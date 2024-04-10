@@ -1,16 +1,15 @@
-import { ConfigService } from "@nestjs/config";
-import { IsNumber } from "class-validator";
+import { IsNumber } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
-} from "typeorm";
+} from 'typeorm';
+import { Goods } from '../../goods/entities/goods.entity';
 
-const configService = new ConfigService();
-@Entity({
-  name: "carts",
-})
+@Entity({ name: 'carts' })
 export class Carts {
   @IsNumber()
   @PrimaryGeneratedColumn({ unsigned: true })
@@ -25,10 +24,6 @@ export class Carts {
   goods_id: number;
 
   @IsNumber()
-  @Column({ unsigned: true })
-  order_id: number;
-
-  @IsNumber()
   @Column()
   ct_count: number;
 
@@ -38,4 +33,12 @@ export class Carts {
 
   @CreateDateColumn()
   ct_date: Date;
+
+  @ManyToOne(() => Goods, (goods) => goods.carts, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'goods_id', referencedColumnName: 'id' })
+  goods: Goods;
+
+  //장바구니 유저  온딜리트 캐시캐이드 트루1:1
 }

@@ -1,0 +1,127 @@
+{
+    "containerDefinitions": [
+        {
+            "name": "potato",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "name": "potato-3000-port",
+                    "containerPort": 3000,
+                    "hostPort": 3000,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
+                }
+            ],
+            "essential": true,
+            "environment": [],
+            "environmentFiles": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [
+                {
+                    "name": "DB_HOST",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:DB_HOST::"
+                },
+                {
+                    "name": "DB_NAME",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:DB_NAME::"
+                },
+                {
+                    "name": "DB_PASSWORD",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:DB_PASSWORD::"
+                },
+                {
+                    "name": "DB_PORT",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:DB_PORT::"
+                },
+                {
+                    "name": "DB_SYNC",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:DB_SYNC::"
+                },
+                {
+                    "name": "DB_USERNAME",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:DB_USERNAME::"
+                },
+                {
+                    "name": "HOST",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:HOST::"
+                },
+                {
+                    "name": "JWT_ACCESS_TOKEN_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:JWT_ACCESS_TOKEN_SECRET::"
+                },
+                {
+                    "name": "JWT_REFRESH_TOKEN_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:JWT_REFRESH_TOKEN_SECRET::"
+                },
+                {
+                    "name": "PASSWORD_HASH_ROUND",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:PASSWORD_HASH_ROUND::"
+                },
+                {
+                    "name": "REDIS_HOST",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:REDIS_HOST::"
+                },
+                {
+                    "name": "REDIS_PASSWORD",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:REDIS_PASSWORD::"
+                },
+                {
+                    "name": "REDIS_PORT",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:REDIS_PORT::"
+                },
+                {
+                    "name": "S3_ACCESSKEY",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:S3_ACCESSKEY::"
+                },
+                {
+                    "name": "S3_BUCKET",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:S3_BUCKET::"
+                },
+                {
+                    "name": "S3_REGION",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:S3_REGION::"
+                },
+                {
+                    "name": "S3_SECRETKEY",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:S3_SECRETKEY::"
+                },
+                {
+                    "name": "SERVER_PORT",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:SERVER_PORT::"
+                }
+            ],
+            "ulimits": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-create-group": "true",
+                    "awslogs-group": "/ecs/potato-app-task",
+                    "awslogs-region": "ap-northeast-2",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "systemControls": []
+        }
+    ],
+    "family": "potato-app-task",
+    "executionRoleArn": "arn:aws:iam::381492189993:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "volumes": [],
+    "placementConstraints": [],
+    "compatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "1024",
+    "memory": "3072",
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "tags": []
+}
