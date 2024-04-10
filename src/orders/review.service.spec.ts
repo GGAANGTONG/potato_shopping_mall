@@ -3,10 +3,13 @@ import { ReviewService } from './review.service';
 import { Reviews } from './entities/review.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { CreateReviewDto } from './dto/create-review.dto';
+import { OrdersDetails } from './entities/ordersdetails.entity';
 
 describe('ReviewsService', () => {
   let service: ReviewService;
   let reviewsRepository: Partial<Record<keyof Repository<Reviews>, jest.Mock>>;
+  let ordersdetailsRepository: Partial<Record<keyof Repository<OrdersDetails>, jest.Mock>>;
 
   beforeEach(async () => {
     reviewsRepository = {
@@ -23,6 +26,10 @@ describe('ReviewsService', () => {
           provide: getRepositoryToken(Reviews),
           useValue: reviewsRepository,
         },
+        {
+          provide: getRepositoryToken(OrdersDetails),
+          useValue: ordersdetailsRepository
+        }
       ],
     }).compile();
 
@@ -39,50 +46,47 @@ describe('ReviewsService', () => {
 
   it('1-1. Reviews - createReview, ordersId, stars, review 데이터를 createReviewDto를 통해 전달받아 성공적으로 ordersId에 해당하는 리뷰를 생성함', async () => {
     const ordersId = 1;
-    const stars = '5';
-    const review = '국밥은 국밥입니다!';
-    // const createReviewDto:CreateReviewDto = {
-    //   starts: '5',
-    //   review: '국밥은 국밥입니다!'
-    // }
-    const returnedValue = {
-      ordersId: 1,
+    const createReviewDto:CreateReviewDto = {
       stars: '5',
-      review: '국밥은 국밥입니다!',
-    };
+      review: '국밥은 국밥입니다!'
+    }
+    const returnedValue = createReviewDto
+    
+    // {
+    //   ordersId: 1,
+    //   stars: '5',
+    //   review: '국밥은 국밥입니다!',
+    // };
     reviewsRepository.create.mockResolvedValue(returnedValue);
     reviewsRepository.save.mockResolvedValue(returnedValue);
 
     return await expect(
-      service.createReview(ordersId, stars, review),
+      service.createReview(ordersId, createReviewDto),
     ).resolves.toBe(returnedValue);
   });
 
   it('1-2. Reviews - createReview, ordersId에 null/undefined가 할당된채 전달받아, 에러를 반환함', async () => {
     const ordersId = null || undefined;
-    const stars = '5';
-    const review = '국밥은 국밥입니다!';
-    // const createReviewDto:CreateReviewDto = {
-    //   starts: '5',
-    //   review: '국밥은 국밥입니다!'
-    // }
+    const createReviewDto:CreateReviewDto = {
+      stars: '5',
+      review: '국밥은 국밥입니다!'
+    }
+    const returnedValue = createReviewDto
 
     return await expect(
-      service.createReview(ordersId, stars, review),
+      service.createReview(ordersId, createReviewDto),
     ).rejects.toThrow();
   });
 
   it('1-3. Reviews - createReview, createReviewDto에 null/undefined값이 할당된채 전달받아, 에러를 반환함', async () => {
     const ordersId = 1;
-    const stars = '';
-    const review = '국밥은 국밥입니다!';
-    // const createReviewDto:CreateReviewDto = {
-    //   starts: '',
-    //   review: '국밥은 국밥입니다!'
-    // }
-
+    const createReviewDto:CreateReviewDto = {
+      stars: '5',
+      review: '국밥은 국밥입니다!'
+    }
+    const returnedValue = createReviewDto
     return await expect(
-      service.createReview(ordersId, stars, review),
+      service.createReview(ordersId, createReviewDto),
     ).rejects.toThrow();
   });
 
@@ -96,7 +100,7 @@ describe('ReviewsService', () => {
     };
     reviewsRepository.findOne.mockResolvedValue(returnedValue);
 
-    return await expect(service.getReviewByOrderId(ordersId)).resolves.toBe(
+    return await expect(service.getReviewByOrderDetailsId(ordersId)).resolves.toBe(
       returnedValue,
     );
   });
@@ -111,7 +115,7 @@ describe('ReviewsService', () => {
     };
     reviewsRepository.findOne.mockResolvedValue(returnedValue);
 
-    return await expect(service.getReviewByOrderId(ordersId)).rejects.toThrow();
+    return await expect(service.getReviewByOrderDetailsId(ordersId)).rejects.toThrow();
   });
 
   it('3-1. Reviews - updateReviewByOrderId, ordersId, stars, review 데이터를 updateReviewDto를 통해 전달받아 성공적으로 ordersId에 해당하는 리뷰를 업데이트함', async () => {
@@ -142,7 +146,7 @@ describe('ReviewsService', () => {
     reviewsRepository.save.mockResolvedValue(returnedUpdatedValue);
 
     return await expect(
-      service.updateReviewByOrderId(ordersId, stars, review),
+      service.updateReviewByOrderDetailsId(ordersId, stars, review),
     ).resolves.toBe(returnedUpdatedValue);
   });
 
@@ -174,7 +178,7 @@ describe('ReviewsService', () => {
     reviewsRepository.save.mockResolvedValue(returnedUpdatedValue);
 
     return await expect(
-      service.updateReviewByOrderId(ordersId, stars, review),
+      service.updateReviewByOrderDetailsId(ordersId, stars, review),
     ).rejects.toThrow();
   });
 
@@ -206,7 +210,7 @@ describe('ReviewsService', () => {
     reviewsRepository.save.mockResolvedValue(returnedUpdatedValue);
 
     return await expect(
-      service.updateReviewByOrderId(ordersId, stars, review),
+      service.updateReviewByOrderDetailsId(ordersId, stars, review),
     ).rejects.toThrow();
   });
 
@@ -216,7 +220,7 @@ describe('ReviewsService', () => {
     const returnedValue = '리뷰가 삭제되었습니다.';
     reviewsRepository.delete.mockResolvedValue(returnedValue);
 
-    return await expect(service.deleteReviewByOrderId(ordersId)).resolves.toBe(
+    return await expect(service.deleteReviewByOrderDetailsId(ordersId)).resolves.toBe(
       returnedValue,
     );
   });
@@ -228,7 +232,7 @@ describe('ReviewsService', () => {
     reviewsRepository.delete.mockResolvedValue(returnedValue);
 
     return await expect(
-      service.deleteReviewByOrderId(ordersId),
+      service.deleteReviewByOrderDetailsId(ordersId),
     ).rejects.toThrow();
   });
 });

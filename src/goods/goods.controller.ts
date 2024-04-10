@@ -9,24 +9,27 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
 } from '@nestjs/common';
 import { GoodsService } from './goods.service';
 import { CreateGoodDto } from './dto/create-goods.dto';
 import { UpdateGoodDto } from './dto/update-goods.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor} from '@nestjs/platform-express';
 import { ResizeImagePipe } from '../common/pipe/resize-image.pipe';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('goods')
 export class GoodsController {
   constructor(private readonly goodsService: GoodsService) {}
 
   /**
-   * 상품등록
+   * 상품등록 
    * @param file
    * @param createGoodDto
    * @returns
    */
   @Post()
+  @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(FileInterceptor('file'))
   async create(
     @UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File,
@@ -66,8 +69,14 @@ export class GoodsController {
    * @returns
    */
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGoodDto: UpdateGoodDto) {
-    return this.goodsService.update(+id, updateGoodDto);
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(FileInterceptor('file'))
+  update(
+    @Param('id') id: string, 
+    @Body() updateGoodDto: UpdateGoodDto,
+    @UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File,
+  ) {
+    return this.goodsService.update(+id, updateGoodDto, file);
   }
 
   /**
@@ -76,6 +85,7 @@ export class GoodsController {
    * @returns
    */
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
   remove(@Param('id') id: string) {
     return this.goodsService.remove(+id);
   }

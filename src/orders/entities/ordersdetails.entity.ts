@@ -27,6 +27,7 @@ export class OrdersDetails {
   @Column({ unsigned: true })
   orders_id: number;
 
+
   @IsNumber()
   @IsNotEmpty()
   @Column()

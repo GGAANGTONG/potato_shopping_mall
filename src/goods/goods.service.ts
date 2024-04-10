@@ -42,7 +42,7 @@ export class GoodsService {
       let fileKey = '';
       // 상품 이미지 버킷에 업로드
       if (file) {
-        fileKey = await this.s3FileService.uploadFile(file);
+        fileKey = await this.s3FileService.uploadFile(file, 'goods');
       }
       const { g_name, g_price, g_desc, g_option } = createGoodDto;
       const goodData = { g_name, g_price, g_desc, g_img: fileKey, g_option };
@@ -119,15 +119,41 @@ export class GoodsService {
    * @param id
    * @param updateGoodDto
    */
-  async update(id: number, updateGoodDto: UpdateGoodDto) {
+  async update(id: number, updateGoodDto: UpdateGoodDto, file: Express.Multer.File,) {
     const good = await this.goodsRepository.findOneBy({ id });
     if (!good) {
       throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
     }
 
+    const existedCategory = await this.categoriesRepository.findOneBy({
+      id: updateGoodDto.category,
+    });
+    if (!existedCategory) {
+      throw new NotFoundException('해당하는 카테고리를 찾을 수 없습니다.');
+    }
+
+    // 이미지가 존재하고, 이미 업로드된 이미지가 있다면 기존 이미지 삭제
+    if (file && good.g_img) {
+      try {
+        await this.s3FileService.deleteFile(good.g_img);
+      } catch (error) {
+        throw new InternalServerErrorException('이미지 파일 수정 중 에러가 발생했습니다.');
+      }
+    }
+
+    // 새로운 파일이 있다면 업로드
+    const fileKey = file ? await this.s3FileService.uploadFile(file,'goods') : good.g_img;
+
+    // 수정할 상품 데이터 업데이트
+    good.g_name = updateGoodDto.g_name;
+    good.g_price = updateGoodDto.g_price;
+    good.g_desc = updateGoodDto.g_desc;
+    good.g_option = updateGoodDto.g_option;
+    good.g_img = fileKey;
+    good.category = existedCategory;
+
     try {
-      const updatedGood = this.goodsRepository.merge(good, updateGoodDto);
-      await this.goodsRepository.save(updatedGood);
+      const updatedGood = await this.goodsRepository.save(good);
       return updatedGood;
     } catch (error) {
       throw new InternalServerErrorException(

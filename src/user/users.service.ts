@@ -18,7 +18,7 @@ import { Point } from '../point/entities/point.entity';
 import { SignInDto } from './dto/sign_in.dto';
 import { UpdateDto } from './dto/update.dto';
 import { S3FileService } from '../common/utils/s3_fileupload';
-import { RedisService } from 'src/redis/redis.service';
+// import { RedisService } from 'src/redis/redis.service';
 import { Grade } from './type/user_grade.type';
 
 //2
@@ -33,7 +33,7 @@ export class UserService {
     // private http: HttpService,
     private readonly s3FileService: S3FileService,
     private dataSource: DataSource,
-     private readonly redisService: RedisService
+    //  private readonly redisService: RedisService
   ) {}
 
   async register(signUpDto: SignUpDto, file: Express.Multer.File): Promise<Users> {
@@ -46,7 +46,7 @@ export class UserService {
     let fileKey = '';
     // 프로필 이미지 s3에 업로드
     if (file) {
-      fileKey = await this.s3FileService.uploadFile(file);
+      fileKey = await this.s3FileService.uploadFile(file, 'users');
     }
 
     const user = await this.usersRepository.save({

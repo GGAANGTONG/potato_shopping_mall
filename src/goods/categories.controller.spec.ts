@@ -70,9 +70,9 @@ describe('CategoriesController', () => {
       c_desc: '섭씨 220도 짜리 국밥',
     };
 
-    await validation(CreateCategoryDto, createCategoryDto).catch((err) =>
-      expect(err),
-    );
+    await validation(CreateCategoryDto, createCategoryDto).then(() => {
+      throw new Error('잘못된 테스트입니다.')
+    }).catch((err) => expect(err))
   });
 
   it('2-1. Categories - findAll, 전체 카테고리 정보를 조회함', async () => {
@@ -113,9 +113,9 @@ describe('CategoriesController', () => {
     };
     console.log(id)
 
-    await validation(CreateCategoryDto, createCategoryDto).catch((err) =>
-      expect(err),
-    );
+    await validation(CreateCategoryDto, createCategoryDto).then(() => {
+      throw new Error('잘못된 테스트입니다.')
+    }).catch((err) => expect(err))
   });
 
   it('5-1. Categories - delete, id를 전달받아 해당하는 카테고리 정보를 삭제함(id null/undefined 대응은 서비스에 존재)', async () => {

@@ -10,13 +10,12 @@ import {
   IsStrongPassword,
 } from 'class-validator';
 
-import { Like } from 'src/like/entities/like.entity';
+import { Like } from '../../like/entities/like.entity';
 import { Grade } from '../type/user_grade.type';
-import { Orders } from 'src/orders/entities/orders.entity';
-import { Point } from 'src/point/entities/point.entity';
-import { Comments } from 'src/boards/entities/comments.entity';
-import { Boards } from 'src/boards/entities/boards.entity';
-// import { Orders } from "src/orders/entities/orders.entity";
+import { Orders } from '../../orders/entities/orders.entity';
+import { Point } from '../../point/entities/point.entity';
+import { Comments } from '../../boards/entities/comments.entity';
+import { Boards } from '../../boards/entities/boards.entity';
 
 @Entity({ name: 'users' })
 export class Users {

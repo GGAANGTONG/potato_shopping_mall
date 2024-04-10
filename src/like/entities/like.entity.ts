@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { IsNotEmpty, IsNumber } from 'class-validator';
-import { Users } from 'src/user/entities/user.entitiy';
+import { Users } from '../../user/entities/user.entitiy';
 // import { Goods } from "src/goods/entities/goods.entity";
 
 @Entity({ name: 'likes' })

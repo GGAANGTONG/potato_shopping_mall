@@ -29,7 +29,7 @@ export class Reviews {
   @Column({ type: 'text' })
   review: string;
 
-  @OneToOne(() => OrdersDetails, (ordersdetails) => ordersdetails.reviews, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'ordersdetails_id' })
+  @OneToOne(() => OrdersDetails, (ordersdetails) => ordersdetails.reviews,)
+  @JoinColumn({ name: 'ordersdetails_id', referencedColumnName: 'id' })
   ordersdetails: OrdersDetails;
 }

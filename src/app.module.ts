@@ -11,9 +11,10 @@ import { GoodsModule } from './goods/goods.module';
 import { AuthModule } from './auth/auth.module';
 import { LikeModule } from './like/like.module';
 import { PointModule } from './point/point.module';
-import { RedisModule } from './redis/redis.module';
+// import { RedisModule } from './redis/redis.module';
 import { BoardsModule } from './boards/boards.module';
-import { OauthModule } from './oauth/oauth.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { OauthModule } from './oauth/oauth.module';
       isGlobal: true,
       validationSchema: configModuleValidationSchema,
     }),
+    // CacheModule.register({isGlobal: true}),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     AuthModule,
     UsersModule,
@@ -30,9 +32,9 @@ import { OauthModule } from './oauth/oauth.module';
     GoodsModule,
     LikeModule,
     PointModule,
-    RedisModule,
+    // RedisModule,
     BoardsModule,
-    OauthModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [],
