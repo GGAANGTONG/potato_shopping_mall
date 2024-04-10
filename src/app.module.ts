@@ -14,6 +14,7 @@ import { PointModule } from './point/point.module';
 import { RedisModule } from './redis/redis.module';
 import { BoardsModule } from './boards/boards.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     PointModule,
     RedisModule,
     BoardsModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [],
