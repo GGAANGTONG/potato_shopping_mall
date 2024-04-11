@@ -5,12 +5,14 @@ import {
 } from '@nestjs/common';
 import { CreateGoodDto } from './dto/create-goods.dto';
 import { UpdateGoodDto } from './dto/update-goods.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Goods } from './entities/goods.entity';
 import { Categories } from './entities/categories.entity';
 import { Stocks } from './entities/stocks.entity';
 import { Repository } from 'typeorm';
 import { S3FileService } from '../common/utils/s3_fileupload';
+import { Storage } from '../storage/entities/storage.entity';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class GoodsService {
@@ -21,7 +23,10 @@ export class GoodsService {
     private categoriesRepository: Repository<Categories>,
     @InjectRepository(Stocks)
     private stocksRepository: Repository<Stocks>,
+    @InjectRepository(Storage)
+    private storageRepository: Repository<Storage>,
     private readonly s3FileService: S3FileService,
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   /**
@@ -38,13 +43,20 @@ export class GoodsService {
       throw new NotFoundException('해당하는 카테고리를 찾을 수 없습니다.');
     }
 
+    const existedStorage = await this.storageRepository.findOneBy({
+      id: createGoodDto.storage_id,
+    });
+    if (!existedStorage) {
+      throw new NotFoundException('해당하는 창고를 찾을 수 없습니다.');
+    }
+
     try {
       let fileKey = '';
       // 상품 이미지 버킷에 업로드
       if (file) {
         fileKey = await this.s3FileService.uploadFile(file, 'goods');
       }
-      const { g_name, g_price, g_desc, g_option } = createGoodDto;
+      const { g_name, g_price, g_desc, g_option, storage_id } = createGoodDto;
       const goodData = { g_name, g_price, g_desc, g_img: fileKey, g_option };
       const newGood = this.goodsRepository.create(goodData);
       newGood.category = existedCategory;
@@ -56,6 +68,7 @@ export class GoodsService {
       const initialStock = this.stocksRepository.create({
         count: 0,
         goods: savedGood,
+        storage: existedStorage,
       });
       await this.stocksRepository.save(initialStock);
 
@@ -77,14 +90,12 @@ export class GoodsService {
     const query = this.goodsRepository
       .createQueryBuilder('goods')
       .leftJoinAndSelect('goods.category', 'category')
-      .leftJoinAndSelect('goods.stock', 'stocks')
       .select([
         'goods.id',
         'goods.g_name',
         'goods.g_price',
         'goods.g_desc',
         'category.c_name',
-        'stocks.count',
       ]);
 
     if (g_name) {
@@ -94,7 +105,6 @@ export class GoodsService {
     if (cate_id) {
       query.andWhere('goods.cate_id = :cate_id', { cate_id });
     }
-
     return query.getMany();
   }
 
@@ -106,7 +116,7 @@ export class GoodsService {
   async findOne(id: number): Promise<Goods> {
     const good = await this.goodsRepository.findOne({
       where: { id },
-      relations: ['category', 'stock'],
+      relations: ['category'],
     });
     if (!good) {
       throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
@@ -115,11 +125,34 @@ export class GoodsService {
   }
 
   /**
+   * 상품 정보 (재고 합계 포함하여)
+   * @param id
+   * @returns
+   */
+  async findOneWithTotalStock(id: number): Promise<any> {
+    try {
+      const result = await this.dataSource.manager.query(
+        'CALL GetGoodsWithTotalStock_S(?)',
+        [id],
+      );
+      // 결과의 첫 번째 부분(실제 데이터)만 반환
+      return result[0];
+    } catch (error) {
+      console.error('프로시저에서 에러 발생:', error);
+      throw new InternalServerErrorException('서버 내부 오류가 발생했습니다.');
+    }
+  }
+
+  /**
    * 상품 정보 수정
    * @param id
    * @param updateGoodDto
    */
-  async update(id: number, updateGoodDto: UpdateGoodDto, file: Express.Multer.File,) {
+  async update(
+    id: number,
+    updateGoodDto: UpdateGoodDto,
+    file: Express.Multer.File,
+  ) {
     const good = await this.goodsRepository.findOneBy({ id });
     if (!good) {
       throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
@@ -137,12 +170,16 @@ export class GoodsService {
       try {
         await this.s3FileService.deleteFile(good.g_img);
       } catch (error) {
-        throw new InternalServerErrorException('이미지 파일 수정 중 에러가 발생했습니다.');
+        throw new InternalServerErrorException(
+          '이미지 파일 수정 중 에러가 발생했습니다.',
+        );
       }
     }
 
     // 새로운 파일이 있다면 업로드
-    const fileKey = file ? await this.s3FileService.uploadFile(file,'goods') : good.g_img;
+    const fileKey = file
+      ? await this.s3FileService.uploadFile(file, 'goods')
+      : good.g_img;
 
     // 수정할 상품 데이터 업데이트
     good.g_name = updateGoodDto.g_name;

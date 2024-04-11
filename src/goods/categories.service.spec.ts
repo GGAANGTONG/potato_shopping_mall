@@ -81,9 +81,11 @@ describe('CategoriesService', () => {
       c_desc: '섭씨 220도 짜리 국밥',
     };
 
-    return await validation(CreateCategoryDto, createCategoryDto).then(() => {
-      throw new Error('잘못된 테스트입니다.')
-    }).catch((err) => expect(err))
+    return await validation(CreateCategoryDto, createCategoryDto)
+      .then(() => {
+        throw new Error('잘못된 테스트입니다.');
+      })
+      .catch((err) => expect(err));
   });
 
   it('2-1. Categories - findAll, 모든 카테고리 정보를 조회함', async () => {
@@ -102,7 +104,7 @@ describe('CategoriesService', () => {
   });
 
   it('3-2. Categories - findOne, id에 0 || null ||undefined가 할당된채로 전달받아 에러를 반환함', async () => {
-    const id = 0
+    const id = 0;
     const returnedValue = null || undefined;
     categoriesRepository.findOneBy.mockResolvedValueOnce(returnedValue);
 
@@ -134,7 +136,7 @@ describe('CategoriesService', () => {
   });
 
   it('4-2. Categories - update, id에 0 || null ||undefined가 할당된채 전달받아 에러를 반환함', async () => {
-    const id = 0
+    const id = 0;
     const createCategoryDto: CreateCategoryDto = {
       c_name: '국밥',
       c_desc: '섭씨 220도 짜리 국밥',
@@ -155,9 +157,11 @@ describe('CategoriesService', () => {
       c_name: undefined,
       c_desc: '섭씨 220도 짜리 국밥',
     };
-    return await validation(CreateCategoryDto, createCategoryDto).then(() => {
-      throw new Error('잘못된 테스트입니다.')
-    }).catch((err) => expect(err))
+    return await validation(CreateCategoryDto, createCategoryDto)
+      .then(() => {
+        throw new Error('잘못된 테스트입니다.');
+      })
+      .catch((err) => expect(err));
   });
 
   it('5-1. Categories - remove, id를 전달받아 특정 카테고리 정보를 삭제함', async () => {
@@ -176,7 +180,7 @@ describe('CategoriesService', () => {
   });
 
   it('5-2. Categories - remove, id에 0 || null ||undefined가 할당된채 전달받아 에러를 반환함', async () => {
-    const id = 0
+    const id = 0;
     const returnedValue = undefined || null;
     categoriesRepository.findOneBy.mockResolvedValueOnce(returnedValue);
 

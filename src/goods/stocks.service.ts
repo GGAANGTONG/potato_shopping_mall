@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Stocks } from './entities/stocks.entity';
 import { Goods } from './entities/goods.entity';
+import { Storage } from '../storage/entities/storage.entity';
 import { CreateStockDto } from './dto/create-stocks.dto';
 import { UpdateStockDto } from './dto/update-stocks.dto';
 
@@ -17,6 +18,8 @@ export class StocksService {
     private stocksRepository: Repository<Stocks>,
     @InjectRepository(Goods)
     private goodsRepository: Repository<Goods>,
+    @InjectRepository(Storage)
+    private storageRepository: Repository<Storage>,
   ) {}
 
   /**
@@ -31,9 +34,17 @@ export class StocksService {
     if (!goods) {
       throw new NotFoundException('해당하는 상품을 찾을 수 없습니다.');
     }
+
+    const storage = await this.storageRepository.findOneBy({
+      id: createStockDto.storage_id,
+    });
+    if (!storage) {
+      throw new NotFoundException('해당하는 창고를 찾을 수 없습니다.');
+    }
     const newStock = this.stocksRepository.create({
       count: createStockDto.count,
       goods: goods,
+      storage: storage,
     });
 
     await this.stocksRepository.save(newStock);
@@ -48,12 +59,14 @@ export class StocksService {
     const query = this.stocksRepository
       .createQueryBuilder('stocks')
       .leftJoinAndSelect('stocks.goods', 'goods')
+      .leftJoinAndSelect('stocks.storage', 'storage')
       .select([
         'stocks.id',
         'stocks.count',
         'goods.id',
         'goods.g_price',
         'goods.g_name',
+        'storage.name',
       ]);
 
     return query.getMany();
@@ -67,7 +80,7 @@ export class StocksService {
   async findOne(id: number): Promise<Stocks> {
     const stock = await this.stocksRepository.findOne({
       where: { id },
-      relations: ['goods'],
+      relations: ['goods', 'storage'],
     });
     if (!stock) {
       throw new NotFoundException('해당 상품 재고 정보를 찾을 수 없습니다.');
@@ -89,7 +102,7 @@ export class StocksService {
 
     const stock = await this.stocksRepository.findOne({
       where: { goods: { id: goodsId } },
-      relations: ['goods'],
+      relations: ['goods', 'storage'],
     });
     console.log('stock : ' + stock);
     if (!stock) {
