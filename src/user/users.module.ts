@@ -6,10 +6,10 @@ import { Users } from './entities/user.entitiy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Point } from '../point/entities/point.entity';
-import { Boards } from 'src/boards/entities/boards.entity';
-import { Comments } from 'src/boards/entities/comments.entity';
-import { S3FileService } from 'src/common/utils/s3_fileupload';
-import { RedisService } from 'src/redis/redis.service';
+import { Boards } from '../boards/entities/boards.entity';
+import { Comments } from '../boards/entities/comments.entity';
+import { S3FileService } from '../common/utils/s3_fileupload';
+// import { RedisService } from 'src/redis/redis.service';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { RedisService } from 'src/redis/redis.service';
     }),
   ],
   controllers: [UserController],
-  providers: [UserService,S3FileService,RedisService],
-  exports: [UserService,S3FileService,RedisService],
+  providers: [UserService,S3FileService],
+  exports: [UserService,S3FileService],
 })
 export class UsersModule {}

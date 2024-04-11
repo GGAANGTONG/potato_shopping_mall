@@ -86,6 +86,14 @@ export class UserController {
     return point;
   }
 
+  @Post('/purchase/:userId')
+  async purchasePoints(
+    @Param('userId') userId: number,
+    @Body('purchaseAmount') purchaseAmount: number,) {
+    return await this.userService.purchasePoints(userId, purchaseAmount);
+  }
+
+
   // @Get('/oauth')
   // @Header('Content-Type', 'text/html')
   // redirectToKakaoAuth(@Res() res) {
