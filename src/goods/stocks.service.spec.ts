@@ -102,12 +102,14 @@ describe('StocksService', () => {
   it('1-2. Stocks - create, createStockDto의 goods_id에 0 || null ||undefined가 할당된채 전달받아 에러를 반환함', async () => {
     const createStockDto: CreateStockDto = {
       count: 7,
-      goods_id: 0 || null || undefined
+      goods_id: 0 || null || undefined,
     };
 
-    await validation(CreateStockDto, createStockDto).then(() => {
-      throw new Error('잘못된 테스트입니다.')
-    }).catch((err) => expect(err))
+    await validation(CreateStockDto, createStockDto)
+      .then(() => {
+        throw new Error('잘못된 테스트입니다.');
+      })
+      .catch((err) => expect(err));
 
     // const returnedValue = null || undefined
     // goodsRepository.findOneBy.mockResolvedValueOnce(returnedValue)
@@ -121,9 +123,11 @@ describe('StocksService', () => {
       goods_id: 1,
     };
 
-    await validation(CreateStockDto, createStockDto).then(() => {
-      throw new Error('잘못된 테스트입니다.')
-    }).catch((err) => expect(err))
+    await validation(CreateStockDto, createStockDto)
+      .then(() => {
+        throw new Error('잘못된 테스트입니다.');
+      })
+      .catch((err) => expect(err));
 
     // const returnedValue = 'goods_id 1에 해당하는 상품'
     // goodsRepository.findOneBy.mockResolvedValue(returnedValue)
@@ -147,7 +151,7 @@ describe('StocksService', () => {
   });
 
   it('2-1. Stocks - findAll, 전체 재고가 하나도 조회되지 않아 에러를 반환함', async () => {
-    const returnedValue = null || undefined
+    const returnedValue = null || undefined;
     stocksRepository
       .createQueryBuilder()
       .leftJoinAndSelect()
@@ -168,19 +172,19 @@ describe('StocksService', () => {
   it('3-2. Stocks - findOne, id에 0 ||null || undefined가 할당된채 전달받아 에러를 반환함', async () => {
     const id = 0 || null || undefined;
 
-
-    return await expect(service.findOne(id)).rejects.toThrow(BadRequestException);
+    return await expect(service.findOne(id)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('3-3. Stocks - findOne, id에 해당하는 재고가 조회되지 않아 에러를 반환함', async () => {
-    const id = 3
+    const id = 3;
 
     const returnedValue = null || undefined;
     stocksRepository.findOne.mockResolvedValueOnce(returnedValue);
 
     return await expect(service.findOne(id)).rejects.toThrow(NotFoundException);
   });
-
 
   it('4-1. Stocks - findOneByGoodsId, GoodsId를 전달받아 특정 상품의 특정 재고 정보를 상세 조회함', async () => {
     const goodsId = 1;
@@ -254,9 +258,8 @@ describe('StocksService', () => {
     );
   });
 
-  
   it('5-3. Stocks - update, id에 해당하는 재고 정보를 찾지 못해 에러를 반환함', async () => {
-    const id = 3
+    const id = 3;
     const updateStockDto: UpdateStockDto = {
       count: 7,
     };
@@ -270,7 +273,6 @@ describe('StocksService', () => {
       NotFoundException,
     );
   });
-
 
   it('6-1. Stocks - remove, id를 전달받아 재고 정보를 삭제함', async () => {
     const id = 1;
@@ -293,12 +295,13 @@ describe('StocksService', () => {
   it('6-2. Stocks - remove, id에 0 || null ||undefined가 할당된채 전달받아 에러를 반환함', async () => {
     const id = 0 || null || undefined;
 
-
-    return await expect(service.remove(id)).rejects.toThrow(BadRequestException);
+    return await expect(service.remove(id)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('6-3. Stocks - remove, id에 해당하는 재고 정보를 찾지 못해 에러를 반환함', async () => {
-    const id = 3
+    const id = 3;
 
     const returnedValue = null || undefined;
     stocksRepository.findOneBy.mockResolvedValueOnce(returnedValue);

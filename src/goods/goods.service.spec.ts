@@ -13,7 +13,7 @@ import { Goods } from './entities/goods.entity';
 import { Stocks } from './entities/stocks.entity';
 import { CreateGoodDto } from './dto/create-goods.dto';
 import { UpdateGoodDto } from './dto/update-goods.dto';
-import fs from 'fs'
+import fs from 'fs';
 import { S3FileService } from '../common/utils/s3_fileupload';
 
 describe('GoodsService', () => {
@@ -26,8 +26,8 @@ describe('GoodsService', () => {
 
   let s3FileService = {
     uploadFile: jest.fn(),
-    deleteFile: jest.fn()
-  }
+    deleteFile: jest.fn(),
+  };
 
   async function validation(Dto, dto) {
     const validatonPipe = new ValidationPipe({
@@ -87,8 +87,8 @@ describe('GoodsService', () => {
         },
         {
           provide: S3FileService,
-          useValue: s3FileService
-        }
+          useValue: s3FileService,
+        },
       ],
     }).compile();
 
@@ -104,7 +104,6 @@ describe('GoodsService', () => {
   });
 
   it('1-1. Goods - create, file & createDto를 전달받아 상품 정보를 생성함', async () => {
-
     const file: Express.Multer.File = {
       fieldname: 'avatar',
       originalname: '195도짜리 국밥.jpg',
@@ -115,8 +114,8 @@ describe('GoodsService', () => {
       filename: 'avatar-123.jpg',
       path: '/uploads/avatar-123.jpg',
       buffer: Buffer.from('This is a file buffer'),
-      stream : fs.createReadStream('./s3_mocking_test')
-  };
+      stream: fs.createReadStream('./s3_mocking_test'),
+    };
 
     const createGoodDto: CreateGoodDto = {
       g_name: '국밥',
@@ -133,8 +132,8 @@ describe('GoodsService', () => {
 
     categoriesRepository.findOneBy.mockResolvedValueOnce(value1);
 
-    const imageValue = '국밥사진'
-    s3FileService.uploadFile.mockResolvedValueOnce(imageValue)
+    const imageValue = '국밥사진';
+    s3FileService.uploadFile.mockResolvedValueOnce(imageValue);
 
     const value2 = {
       g_name: '국밥',
@@ -154,12 +153,13 @@ describe('GoodsService', () => {
     stocksRepository.create.mockResolvedValueOnce(value3);
     stocksRepository.save.mockResolvedValueOnce(value3);
 
-    return await expect(service.create(file, createGoodDto)).resolves.toBe(value2);
+    return await expect(service.create(file, createGoodDto)).resolves.toBe(
+      value2,
+    );
   });
 
   it('1-2. Goods - create, file == null || undefined & createDto를 전달받아 이미지 없이 상품 정보를 생성함', async () => {
-
-    const file: Express.Multer.File = null || undefined
+    const file: Express.Multer.File = null || undefined;
 
     const createGoodDto: CreateGoodDto = {
       g_name: '국밥',
@@ -176,8 +176,8 @@ describe('GoodsService', () => {
 
     categoriesRepository.findOneBy.mockResolvedValueOnce(value1);
 
-    const imageValue = '국밥사진'
-    s3FileService.uploadFile.mockResolvedValueOnce(imageValue)
+    const imageValue = '국밥사진';
+    s3FileService.uploadFile.mockResolvedValueOnce(imageValue);
 
     const value2 = {
       g_name: '국밥',
@@ -197,24 +197,24 @@ describe('GoodsService', () => {
     stocksRepository.create.mockResolvedValueOnce(value3);
     stocksRepository.save.mockResolvedValueOnce(value3);
 
-    return await expect(service.create(file, createGoodDto)).resolves.toBe(value2);
+    return await expect(service.create(file, createGoodDto)).resolves.toBe(
+      value2,
+    );
   });
 
-
   it('1-3. Goods - create, createDto가 불완전한 상태로 전달받아 에러를 반환함, 근데 이거 프로덕션 이후에는 category에 문자가 들어오는 걸 막을 방법이 있나?', async () => {
-
-  //   const file: Express.Multer.File = {
-  //     fieldname: 'avatar',
-  //     originalname: '195도짜리 국밥.jpg',
-  //     encoding: 'utf-8',
-  //     mimetype: 'image/jpeg',
-  //     size: 1024, // 파일 크기를 바이트 단위로 가정
-  //     destination: '/uploads/',
-  //     filename: 'avatar-123.jpg',
-  //     path: '/uploads/avatar-123.jpg',
-  //     buffer: Buffer.from('This is a file buffer'),
-  //     stream : fs.createReadStream('./s3_mocking_test')
-  // };
+    //   const file: Express.Multer.File = {
+    //     fieldname: 'avatar',
+    //     originalname: '195도짜리 국밥.jpg',
+    //     encoding: 'utf-8',
+    //     mimetype: 'image/jpeg',
+    //     size: 1024, // 파일 크기를 바이트 단위로 가정
+    //     destination: '/uploads/',
+    //     filename: 'avatar-123.jpg',
+    //     path: '/uploads/avatar-123.jpg',
+    //     buffer: Buffer.from('This is a file buffer'),
+    //     stream : fs.createReadStream('./s3_mocking_test')
+    // };
 
     const createGoodDto: CreateGoodDto = {
       g_name: '국밥',
@@ -223,13 +223,14 @@ describe('GoodsService', () => {
       g_option: '섭씨 220도짜리 국밥',
       category: 1,
     };
-    return await validation(CreateGoodDto, createGoodDto).then(() => {
-      throw new Error('잘못된 테스트입니다.')
-    }).catch((err) => expect(err))
+    return await validation(CreateGoodDto, createGoodDto)
+      .then(() => {
+        throw new Error('잘못된 테스트입니다.');
+      })
+      .catch((err) => expect(err));
   });
 
   it('1-4. Goods - create, createDto를 전달받았으나, cate_id에 해당하는 카테고리 데이터가 없어  에러를 반환함', async () => {
-
     const file: Express.Multer.File = {
       fieldname: 'avatar',
       originalname: '195도짜리 국밥.jpg',
@@ -240,8 +241,8 @@ describe('GoodsService', () => {
       filename: 'avatar-123.jpg',
       path: '/uploads/avatar-123.jpg',
       buffer: Buffer.from('This is a file buffer'),
-      stream : fs.createReadStream('./s3_mocking_test')
-  };
+      stream: fs.createReadStream('./s3_mocking_test'),
+    };
 
     const createGoodDto: CreateGoodDto = {
       g_name: '주먹밥',
@@ -507,9 +508,6 @@ describe('GoodsService', () => {
   });
 
   it('2-4. Goods - findAll, 상품이 조회되지 않아 에러를 반환함(이게 통과되도록 로직 짜주셔요)', async () => {
-
-    
-
     return await expect(service.findAll()).rejects.toThrow(BadRequestException);
   });
 
@@ -609,9 +607,11 @@ describe('GoodsService', () => {
       g_option: '절대영도에 도달한 장국밥',
     };
 
-    await validation(UpdateGoodDto, updateGoodDto).then(() => {
-      throw new Error('잘못된 테스트입니다.')
-    }).catch((err) => expect(err))
+    await validation(UpdateGoodDto, updateGoodDto)
+      .then(() => {
+        throw new Error('잘못된 테스트입니다.');
+      })
+      .catch((err) => expect(err));
   });
 
   it('5-1. Goods - remove, id를 전달받아 해당 id와 일치하는 id를 가진 상품정보를 삭제함', async () => {
