@@ -182,26 +182,35 @@ export class PaymentsService {
       }
 
       // 환불 로직
-      {
-        const refundAmount = payments.p_total_price; // 결제 취소로 인한 환불액
-        const userPoint = await queryRunner.manager.findOne(Point, { where: { userId: payments.user_id } });
-        if (!userPoint) {
-          throw new NotFoundException('사용자 포인트를 찾을 수 없습니다.');//포인트 테이블에 해당 유저 데이터가 없는 경우
-        }
 
-
-        userPoint.possession += refundAmount; // 포인트 테이블에 환불액 기록
-        await this.pointRepository.save(userPoint);
-
-        const user = await queryRunner.manager.findOne(Users, { where: { id: payments.user_id } });
-        if (!user) {
-          throw new NotFoundException('사용자를 찾을 수 없습니다.');
-        }
-        user.points += refundAmount; // 유저의 기존 포인트에 환불액 추가
-        await queryRunner.manager.save(user);
+      const refundAmount = payments.p_total_price; // 결제 취소로 인한 환불액
+      const userPoint = await queryRunner.manager.findOne(Point, { where: { userId: payments.user_id } });
+      if (!userPoint) {
+        throw new NotFoundException('사용자 포인트를 찾을 수 없습니다.');//포인트 테이블에 해당 유저 데이터가 없는 경우
       }
-      await queryRunner.manager.update(Orders, { user_id: userId, id: payments.orders_id }, { p_status: false, o_status: Status.PAycanceled })
+
+
+      userPoint.possession += refundAmount; // 포인트 테이블에 환불액 기록
+      await this.pointRepository.save(userPoint);
+
+      const user = await queryRunner.manager.findOne(Users, { where: { id: payments.user_id } });
+      if (!user) {
+        throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      }
+      user.points += refundAmount; // 유저의 기존 포인트에 환불액 추가
+      await queryRunner.manager.save(user);
+
+      await queryRunner.manager.update(Orders, { user_id: userId, id: payments.orders_id }, { p_status: false, o_status: Status.PayCanceled })
       payments.p_total_price = -payments.p_total_price
+
+      const order = await queryRunner.manager.findOne(Orders, {
+        where: { user_id: userId, id: payments.orders_id }
+      })
+      console.log('!!!!!!!!', order)
+      if (order.o_status == Status.PayCanceled) {
+        throw new BadRequestException('이미 취소된 주문입니다.');
+      }
+
       await queryRunner.manager.save(Payments, payments);
       await queryRunner.commitTransaction();
       await queryRunner.release();
