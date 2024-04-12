@@ -4,10 +4,14 @@ import { Payments } from './entities/payments.entity';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Point } from '../point/entities/point.entity';
 import { Users } from '../user/entities/user.entitiy';
-import { PayStatus } from './types/payments.type';
 import { Orders } from '../orders/entities/orders.entity';
 import { CreatePaymentDto } from '../orders/dto/create-payment.dto';
-import { validation } from 'src/common/pipe/validationPipe';
+import { validation } from '../common/pipe/validationPipe';
+import { OrdersDetails } from '../orders/entities/ordersdetails.entity';
+import { Stocks } from '../goods/entities/stocks.entity';
+import logger from '../common/log/logger';
+import { Goods } from '../goods/entities/goods.entity';
+import { Status } from '../orders/types/order.type';
 
 @Injectable()
 export class PaymentsService {
@@ -20,6 +24,8 @@ export class PaymentsService {
     private usersRepository: Repository<Users>,
     @InjectRepository(Orders)
     private ordersRepository: Repository<Orders>,
+    @InjectRepository(OrdersDetails)
+    private ordersDetailsRepository: Repository<OrdersDetails>,
     private readonly dataSource: DataSource,
   ) { }
 
@@ -55,6 +61,31 @@ export class PaymentsService {
         throw new BadRequestException('존재하지 않는 유저입니다.');
       }
 
+      const ordersdetails = await queryRunner.manager.find(OrdersDetails, {
+        where: {
+          orders_id: order.id
+        }
+      })
+
+      for (let i = 0; i < ordersdetails.length; i++) {
+        const goods = await queryRunner.manager.findOne(Goods, {
+          relations: ['stock'],
+          where: {
+            id: ordersdetails[i].goods_id
+          }
+        })
+        const count = goods.stock.count - ordersdetails[i].od_count;
+        console.log('제육!!!!!!!!!', count)
+        if (count < 0) {
+          const badRequestException = new BadRequestException('재고가 없습니다.')
+
+          logger.errorLogger(badRequestException, `userId = ${userId}, createPaymentDto = ${JSON.stringify(createPaymentDto)}, ordersdetails = ${ordersdetails}, `)
+          throw badRequestException;
+        }
+
+        await queryRunner.manager.update(Stocks, { id: goods.stock.id }, { count })
+        //Cart >> Orders 엔티티를 만들기 위해서 재고를 갱신하고 총액을 구하는 과정
+      }
 
 
       const paying = order.o_total_price
@@ -75,7 +106,7 @@ export class PaymentsService {
         p_total_price: paying,
       });
       const returnNewPayments = await queryRunner.manager.save(Payments, newPayments);
-
+      await queryRunner.manager.update(Orders, { user_id: userId, id: orders_id }, { p_status: true })
       await queryRunner.commitTransaction();
       await queryRunner.release();
 
@@ -134,38 +165,55 @@ export class PaymentsService {
   }
 
   // 결제 취소
+  //트랜잭션 필요
   async cancelPay(userId: number, paymentsId: number): Promise<Payments> {
-    if (!userId || userId == 0 || !paymentsId || paymentsId == 0) {
-      throw new BadRequestException('잘못된 요청입니다!')
-    }
-    const payments = await this.paymentsRepository.findOne({
-      where: { id: paymentsId, user_id: userId }
-    });
-    if (!payments) {
-      throw new NotFoundException('결제 정보를 찾을 수 없습니다.');
-    }
-
-    // 환불 로직
-    if (payments.p_status !== '결제취소') {
-      const refundAmount = payments.p_total_price; // 결제 취소로 인한 환불액
-      const userPoint = await this.pointRepository.findOne({ where: { userId: payments.user_id } });
-      if (!userPoint) {
-        throw new NotFoundException('사용자 포인트를 찾을 수 없습니다.');//포인트 테이블에 해당 유저 데이터가 없는 경우
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      if (!userId || userId == 0 || !paymentsId || paymentsId == 0) {
+        throw new BadRequestException('잘못된 요청입니다!')
+      }
+      const payments = await queryRunner.manager.findOne(Payments, {
+        where: { id: paymentsId, user_id: userId }
+      });
+      if (!payments) {
+        throw new NotFoundException('결제 정보를 찾을 수 없습니다.');
       }
 
-      //트랜잭션 필요
-      userPoint.possession += refundAmount; // 포인트 테이블에 환불액 기록
-      await this.pointRepository.save(userPoint);
+      // 환불 로직
+      {
+        const refundAmount = payments.p_total_price; // 결제 취소로 인한 환불액
+        const userPoint = await queryRunner.manager.findOne(Point, { where: { userId: payments.user_id } });
+        if (!userPoint) {
+          throw new NotFoundException('사용자 포인트를 찾을 수 없습니다.');//포인트 테이블에 해당 유저 데이터가 없는 경우
+        }
 
-      const user = await this.usersRepository.findOne({ where: { id: payments.user_id } });
-      if (!user) {
-        throw new NotFoundException('사용자를 찾을 수 없습니다.');
+
+        userPoint.possession += refundAmount; // 포인트 테이블에 환불액 기록
+        await this.pointRepository.save(userPoint);
+
+        const user = await queryRunner.manager.findOne(Users, { where: { id: payments.user_id } });
+        if (!user) {
+          throw new NotFoundException('사용자를 찾을 수 없습니다.');
+        }
+        user.points += refundAmount; // 유저의 기존 포인트에 환불액 추가
+        await queryRunner.manager.save(user);
       }
-      user.points += refundAmount; // 유저의 기존 포인트에 환불액 추가
-      await this.usersRepository.save(user);
+      await queryRunner.manager.update(Orders, { user_id: userId, id: payments.orders_id }, { p_status: false, o_status: Status.PAycanceled })
+      payments.p_total_price = -payments.p_total_price
+      await queryRunner.manager.save(Payments, payments);
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
+      return payments;
+
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+      console.error(err);
+      throw err;
     }
 
-    payments.p_status = PayStatus.Paycancel; // 결제 상태를 '결제취소'로 변경
-    return this.paymentsRepository.save(payments);
   }
 }
+

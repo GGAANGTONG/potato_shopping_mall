@@ -14,11 +14,12 @@ export class Stocks {
   @PrimaryGeneratedColumn()
   id: number;
 
+
   @IsNumber()
   @Column({ type: 'int' })
   count: number;
 
   @OneToOne(() => Goods, (goods) => goods.stock, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'goods_id' })
+  @JoinColumn({ name: 'goods_id', referencedColumnName: 'id' })
   goods: Goods;
 }
