@@ -2,24 +2,28 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToOne,
+  ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { Goods } from './goods.entity';
-import { IsNumber } from 'class-validator';
+import { Storage } from '../../storage/entities/storage.entity';
 
 @Entity({ name: 'stocks' })
 export class Stocks {
-  @IsNumber()
   @PrimaryGeneratedColumn()
   id: number;
 
 
+
   @IsNumber()
   @Column({ type: 'int' })
-  count: number;
+  count: number; // 창고에 저장된 상품의 수량
 
-  @OneToOne(() => Goods, (goods) => goods.stock, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'goods_id', referencedColumnName: 'id' })
+  @ManyToOne(() => Goods, (goods) => goods.stock)
+  @JoinColumn({ name: 'goods_id' })
   goods: Goods;
+
+  @ManyToOne(() => Storage, (storage) => storage.stock)
+  @JoinColumn({ name: 'storage_id' })
+  storage: Storage;
 }

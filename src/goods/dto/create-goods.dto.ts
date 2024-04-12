@@ -23,4 +23,9 @@ export class CreateGoodDto extends PickType(Goods, [
   @IsNumber({}, { message: '카테고리 id는 숫자 형식으로 입력되어야 합니다.' })
   @IsPositive({ message: '카테고리 id는 양수로 입력되어야 합니다.' })
   category: number;
+
+  @Type(() => Number)
+  @IsNumber({}, { message: '창고 id는 숫자 형식으로 입력되어야 합니다.' })
+  @IsPositive({ message: '창고 id는 양수로 입력되어야 합니다.' })
+  storage_id: number;
 }
