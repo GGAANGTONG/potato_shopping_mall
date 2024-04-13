@@ -65,7 +65,7 @@ const warnLogger = (warnMessage: string, functionName:string)=>{
 //custom fatal logger
 const fatalLogger = (error: Error, functionName:string)=>{
 
-    loggerException.warn(`Function Name: ${functionName} Warning: ${error}`);    
+    loggerException.fatal(`Function Name: ${functionName} Warning: ${error}`);    
 
 }
 
