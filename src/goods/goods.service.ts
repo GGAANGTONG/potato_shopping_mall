@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -26,8 +27,10 @@ export class GoodsService {
     @InjectRepository(Storage)
     private storageRepository: Repository<Storage>,
     private readonly s3FileService: S3FileService,
+  ) { }
     @InjectDataSource() private dataSource: DataSource,
   ) {}
+
 
   /**
    * 상품등록
@@ -56,6 +59,16 @@ export class GoodsService {
       if (file) {
         fileKey = await this.s3FileService.uploadFile(file, 'goods');
       }
+
+      const { g_name, g_desc, g_option, cost_price, discount_rate } = createGoodDto;
+
+      const endPrice = cost_price * (1 - discount_rate);
+      console.log(discount_rate)
+      if (discount_rate < 0 || discount_rate > 1) {
+        throw new BadRequestException('할인율은 0.0과 1.0 사이의 값이어야 합니다.');
+      }
+      const goodData = { g_name, g_price: endPrice, g_desc, g_img: fileKey, g_option, cost_price, discount_rate };
+
       const { g_name, g_price, g_desc, g_option, storage_id } = createGoodDto;
       const goodData = { g_name, g_price, g_desc, g_img: fileKey, g_option };
       const newGood = this.goodsRepository.create(goodData);
@@ -63,6 +76,7 @@ export class GoodsService {
 
       // 상품 정보 저장
       const savedGood = await this.goodsRepository.save(newGood);
+
 
       // 초기 재고 정보 저장
       const initialStock = this.stocksRepository.create({
@@ -177,9 +191,10 @@ export class GoodsService {
     }
 
     // 새로운 파일이 있다면 업로드
-    const fileKey = file
-      ? await this.s3FileService.uploadFile(file, 'goods')
-      : good.g_img;
+
+    const fileKey = file ? await this.s3FileService.uploadFile(file, 'goods') : good.g_img;
+    
+
 
     // 수정할 상품 데이터 업데이트
     good.g_name = updateGoodDto.g_name;

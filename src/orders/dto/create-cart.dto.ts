@@ -1,6 +1,7 @@
-import { IsInt } from 'class-validator';
+import { IsInt, IsNumber } from 'class-validator';
 
 export class CreateCartDto {
   @IsInt()
-  count: number;
+  ctCount: number;
+
 }

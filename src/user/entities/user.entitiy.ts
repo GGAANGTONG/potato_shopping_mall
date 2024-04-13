@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Role } from '../type/user_role.type';
 import {
   IsEmail,
@@ -16,6 +16,7 @@ import { Orders } from '../../orders/entities/orders.entity';
 import { Point } from '../../point/entities/point.entity';
 import { Comments } from '../../boards/entities/comments.entity';
 import { Boards } from '../../boards/entities/boards.entity';
+import { Carts } from '../../orders/entities/carts.entity';
 
 @Entity({ name: 'users' })
 export class Users {
@@ -84,4 +85,7 @@ export class Users {
 
   @OneToMany(() => Boards, (boards) => boards.user)
   boards: Boards[]
+
+  @OneToMany(() => Carts, (carts) => carts.user)
+  carts: Carts[]
 }
