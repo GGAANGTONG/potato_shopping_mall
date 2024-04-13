@@ -2,6 +2,7 @@ import { Body, Controller, Get, NotFoundException, Param, ParseIntPipe, Post, Re
 import { PaymentsService } from "./payments.service";
 import { AuthGuard } from "@nestjs/passport";
 import { CreatePaymentDto } from "../orders/dto/create-payment.dto";
+import { error } from "console";
 
 @Controller('payments')
 export class PaymentsController {
@@ -44,8 +45,10 @@ export class PaymentsController {
             // 결제 취소 로직을 서비스에서 호출하여 실행.
             const userId = req.user.id
             const cancelledPay = await this.paymentsService.cancelPay(userId, paymentsId);
+
             return { message: '결제가 취소되었습니다.', payments: cancelledPay };
         } catch (error) {
+            console.error(error)
             if (error instanceof NotFoundException) {
                 throw error;
             } else {
