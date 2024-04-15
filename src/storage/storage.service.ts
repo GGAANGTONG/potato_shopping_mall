@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateStorageDto } from './dto/create-storage.dto';
 import { UpdateStorageDto } from './dto/update-storage.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -30,7 +34,7 @@ export class StorageService {
    * 전체 창고 조회
    * @returns
    */
-  async findAll(name?: string, address?: string, contactName? : string) {
+  async findAll(name?: string, address?: string, contactName?: string) {
     let whereCondition = {};
 
     if (name) {
@@ -42,7 +46,10 @@ export class StorageService {
     }
 
     if (contactName) {
-      whereCondition = { ...whereCondition, contact_name: Like(`%${contactName}%`) };
+      whereCondition = {
+        ...whereCondition,
+        contact_name: Like(`%${contactName}%`),
+      };
     }
 
     const storages = await this.storageRepository.find({
@@ -60,13 +67,13 @@ export class StorageService {
 
   /**
    * 창고 상세 조회
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
   async findOne(id: number) {
     const storage = await this.storageRepository.findOne({
       where: { id: +id },
-      relations: ['racks']
+      relations: ['racks'],
     });
 
     if (!storage) {
@@ -77,31 +84,33 @@ export class StorageService {
 
   /**
    * 창고 정보 업데이트
-   * @param id 
-   * @param updateStorageDto 
-   * @returns message: '창고 정보가 성공적으로 업데이트되었습니다.', storage 
+   * @param id
+   * @param updateStorageDto
+   * @returns message: '창고 정보가 성공적으로 업데이트되었습니다.', storage
    */
   async update(id: number, updateStorageDto: UpdateStorageDto) {
     const storage = await this.storageRepository.preload({
       id: +id,
       ...updateStorageDto,
     });
-  
+
     if (!storage) {
       throw new NotFoundException('해당 창고를 찾을 수 없습니다.');
     }
-  
+
     try {
       await this.storageRepository.save(storage);
       return { message: '창고 정보가 성공적으로 업데이트되었습니다.', storage };
     } catch (error) {
-      throw new InternalServerErrorException(`#${id} 창고 정보 업데이트 중 문제가 발생했습니다.`);
+      throw new InternalServerErrorException(
+        `#${id} 창고 정보 업데이트 중 문제가 발생했습니다.`,
+      );
     }
   }
 
   async remove(id: number) {
     const storage = await this.storageRepository.findOne({
-      where: { id: +id }
+      where: { id: +id },
     });
 
     if (!storage) {
@@ -112,7 +121,9 @@ export class StorageService {
       await this.storageRepository.remove(storage);
       return { message: '창고 정보가 성공적으로 삭제되었습니다.' };
     } catch (error) {
-      throw new InternalServerErrorException('창고 정보 삭제 중 문제가 발생했습니다.');
+      throw new InternalServerErrorException(
+        '창고 정보 삭제 중 문제가 발생했습니다.',
+      );
     }
   }
 }

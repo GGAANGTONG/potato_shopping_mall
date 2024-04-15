@@ -33,5 +33,4 @@ export class Storage {
 
   @OneToMany(() => Racks, (racks) => racks.storage)
   racks: Racks[];
-
 }

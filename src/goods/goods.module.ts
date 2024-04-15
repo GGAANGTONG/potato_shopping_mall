@@ -24,7 +24,7 @@ import { RackService } from '../storage/rack.service';
       Orders,
       Like,
       Storage,
-      Racks
+      Racks,
     ]),
   ],
   controllers: [GoodsController, CategoriesController, StocksController],
