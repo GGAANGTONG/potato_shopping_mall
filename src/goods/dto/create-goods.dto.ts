@@ -15,6 +15,7 @@ export class CreateGoodDto extends PickType(Goods, [
   @IsPositive({ message: '상품 가격은 양수로 입력되어야 합니다.' })
   cost_price: number;
 
+  @Type(() => Number)
   @IsNumber()
   @IsNotEmpty()
   discount_rate: number;

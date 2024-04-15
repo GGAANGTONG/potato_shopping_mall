@@ -38,7 +38,7 @@ export class GoodsService {
    * @returns
    */
   async create(file: Express.Multer.File, createGoodDto: CreateGoodDto) {
-    const { g_name, cost_price, g_desc, g_option, rack_id } = createGoodDto;
+    const { rack_id } = createGoodDto;
 
     const existedCategory = await this.categoriesRepository.findOneBy({
       id: createGoodDto.category,
@@ -67,14 +67,6 @@ export class GoodsService {
 
       // 상품 정보 저장
       const savedGood = await this.goodsRepository.save(newGood);
-
-      // 초기 재고 정보 저장
-      const initialStock = this.stocksRepository.create({
-        count: 0,
-        goods: savedGood,
-        rack: existedRack,
-      });
-      await this.stocksRepository.save(initialStock);
 
       return newGood;
     } catch (error) {
