@@ -51,13 +51,25 @@ export class RackService {
    * 특정 창고의 전체 랙 조회
    * @returns
    */
-  async findAllByStorage(storageId : number) {
-    const racks = await this.racksRepository.find({
-      where: { storage: { id: storageId } },
-      relations: ['stock', 'stock.goods'] 
-    });
+  async findAllByStorage(storageId: number) {
+    const racks = await this.racksRepository.createQueryBuilder("rack")
+      .leftJoinAndSelect("rack.stock", "stock")
+      .leftJoinAndSelect("stock.goods", "goods", "goods.id = stock.goods.id")
+      .select([
+        "rack.id",  // 랙 ID
+        "rack.name",  
+        "rack.location_info",  
+        "stock.id", // 재고 ID
+        "stock.count", 
+        "goods.g_name", // 상품 이름
+        "goods.g_desc" 
+      ])
+      .where("rack.storage_id = :storageId", { storageId })
+      .getMany();
+  
     return racks;
   }
+  
 
   /**
    * 창고 상세 조회
