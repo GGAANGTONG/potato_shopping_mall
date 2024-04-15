@@ -38,6 +38,13 @@ export class LikeService {
     return newLike;
   }
 
+  async findAll(usersId:number){
+    const likes = await this.likeRepository.findOneBy({
+   usersId,
+    });
+    return likes;
+  }
+
   
   // findAll() {
   //   return `This action returns all like`;

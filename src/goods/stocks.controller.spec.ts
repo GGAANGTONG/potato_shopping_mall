@@ -70,13 +70,15 @@ describe('PaymentsController', () => {
   it('1-2. Stocks -create, createStockDto가 불완전한 상태로 전달받아 성공적으로 stocks 데이터를 생성함, service 단에서 null 거르는 유효성 로직이 있음', async () => {
     const createStockDto: CreateStockDto = {
       count: undefined || null,
-      goods_id: 1
+      goods_id: 1,
     };
 
-    await validation(CreateStockDto, createStockDto).then(() => {
-      throw new Error('잘못된 테스트입니다.')
-    }).catch((err) => expect(err))
-    
+    await validation(CreateStockDto, createStockDto)
+      .then(() => {
+        throw new Error('잘못된 테스트입니다.');
+      })
+      .catch((err) => expect(err));
+
     const returnedValue = '재고 정보가 생성되었습니다.';
     stocksService.create.mockResolvedValueOnce(returnedValue);
 
@@ -124,9 +126,11 @@ describe('PaymentsController', () => {
       count: null || undefined,
     };
 
-    await validation(UpdateStockDto, updateStockDto).then(() => {
-      throw new Error('잘못된 테스트입니다.')
-    }).catch((err) => expect(err))
+    await validation(UpdateStockDto, updateStockDto)
+      .then(() => {
+        throw new Error('잘못된 테스트입니다.');
+      })
+      .catch((err) => expect(err));
 
     // const returnedValue = '해당 상품 재고 정보가 갱신되었습니다.'
     // stocksService.update.mockResolvedValueOnce(returnedValue)

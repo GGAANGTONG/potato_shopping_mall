@@ -9,6 +9,7 @@ import { Stocks } from './entities/stocks.entity';
 import { Goods } from './entities/goods.entity';
 import { CreateStockDto } from './dto/create-stocks.dto';
 import { UpdateStockDto } from './dto/update-stocks.dto';
+import { Racks } from '../storage/entities/rack.entity';
 
 @Injectable()
 export class StocksService {
@@ -17,6 +18,8 @@ export class StocksService {
     private stocksRepository: Repository<Stocks>,
     @InjectRepository(Goods)
     private goodsRepository: Repository<Goods>,
+    @InjectRepository(Racks)
+    private racksRepository: Repository<Racks>,
   ) {}
 
   /**
@@ -31,9 +34,17 @@ export class StocksService {
     if (!goods) {
       throw new NotFoundException('해당하는 상품을 찾을 수 없습니다.');
     }
+
+    const rack = await this.racksRepository.findOneBy({
+      id: createStockDto.rack_id,
+    });
+    if (!rack) {
+      throw new NotFoundException('해당 랙 정보를 찾을 수 없습니다.');
+    }
     const newStock = this.stocksRepository.create({
       count: createStockDto.count,
       goods: goods,
+      rack: rack,
     });
 
     await this.stocksRepository.save(newStock);
@@ -48,12 +59,14 @@ export class StocksService {
     const query = this.stocksRepository
       .createQueryBuilder('stocks')
       .leftJoinAndSelect('stocks.goods', 'goods')
+      .leftJoinAndSelect('stocks.storage', 'storage')
       .select([
         'stocks.id',
         'stocks.count',
         'goods.id',
         'goods.g_price',
         'goods.g_name',
+        'storage.name',
       ]);
 
     return query.getMany();
@@ -67,7 +80,7 @@ export class StocksService {
   async findOne(id: number): Promise<Stocks> {
     const stock = await this.stocksRepository.findOne({
       where: { id },
-      relations: ['goods'],
+      relations: ['goods', 'storage'],
     });
     if (!stock) {
       throw new NotFoundException('해당 상품 재고 정보를 찾을 수 없습니다.');
@@ -89,9 +102,9 @@ export class StocksService {
 
     const stock = await this.stocksRepository.findOne({
       where: { goods: { id: goodsId } },
-      relations: ['goods'],
+      relations: ['goods', 'storage'],
     });
-    console.log('stock : ' + stock);
+
     if (!stock) {
       throw new NotFoundException(
         '해당하는 상품의 재고 정보를 찾을 수 없습니다.',
@@ -106,12 +119,18 @@ export class StocksService {
    * @param createStockDto
    */
   async update(id: number, updateStockDto: UpdateStockDto): Promise<Stocks> {
+    const { rack_id } = updateStockDto;
     const stock = await this.stocksRepository.findOneBy({ id });
     if (!stock) {
       throw new NotFoundException('해당 상품 재고 정보를 찾을 수 없습니다.');
     }
+    const rack = await this.racksRepository.findOneBy({ id: rack_id });
+    if (!rack) {
+      throw new NotFoundException('해당 랙 정보를 찾을 수 없습니다.');
+    }
 
-    stock.count = updateStockDto.count;
+    stock.rack = rack;
+    stock.count += updateStockDto.count;
     await this.stocksRepository.save(stock);
     return stock;
   }

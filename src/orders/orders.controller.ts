@@ -13,6 +13,7 @@ import {
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AuthGuard } from '@nestjs/passport';
+import logger from 'src/common/log/logger';
 
 @Controller('orders')
 export class OrdersController {
@@ -24,6 +25,7 @@ export class OrdersController {
   @Post()
   purchase(@Request() req, @Body() createOrderDto: CreateOrderDto) {
     const userId = req.user.id;
+    logger.traceLogger('Orders - purchase', `req.user = ${JSON.stringify(req.user)}, createOrderDto = ${JSON.stringify(createOrderDto)} `)
     return this.ordersService.purchase(userId, createOrderDto);
   }
 
@@ -32,6 +34,7 @@ export class OrdersController {
   @Get('user')
   async findAllOrderByUser(@Req() req) {
     const userId = req.user.id; // 현재 로그인한 사용자의 ID
+    logger.traceLogger('Orders - findAllOrderByUser', `req.user = ${JSON.stringify(req.user)}`)
     return this.ordersService.findAllOrderbyUser(userId);
   }
 
@@ -39,6 +42,7 @@ export class OrdersController {
   @UseGuards(AuthGuard('jwt'))
   @Get('admin')
   async findAllOrderByAdmin() {
+    logger.traceLogger('Orders - findAllOrderByUser', `parameter = none`)
     return this.ordersService.findAllOrderbyAdmin();
   }
 
@@ -52,16 +56,20 @@ export class OrdersController {
   // 주문 취소
   @UseGuards(AuthGuard('jwt'))
   @Post(':orderId/cancel')
-  async cancelOrder(@Param('orderId') orderId: number) {
+  async cancelOrder(@Req() req, @Param('orderId') orderId: number) {
     try {
+      const userId = req.user.id
       // 주문 취소 로직을 서비스에서 호출하여 실행합니다.
-      const cancelledOrder = await this.ordersService.cancelOrder(orderId);
+      logger.traceLogger('Orders - findAllOrderByUser', `orderId = ${orderId}`)
+      const cancelledOrder = await this.ordersService.cancelOrder(userId, orderId);
       return { message: '주문이 취소되었습니다.', order: cancelledOrder };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       } else {
-        throw new NotFoundException('주문을 취소할 수 없습니다.'); // 그 외의 오류는 일반적인 오류 메시지를 반환합니다.
+        const fatalError = new NotFoundException('주문을 취소할 수 없습니다.');
+        logger.fatalLogger(fatalError, `orderId = ${orderId}`) 
+        throw fatalError  // 그 외의 오류는 일반적인 오류 메시지를 반환합니다.
       }
     }
   }

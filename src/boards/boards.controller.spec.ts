@@ -3,7 +3,7 @@ import { BoardsController } from './boards.controller';
 import { BoardsService } from './boards.service';
 import { S3FileService } from '../common/utils/s3_fileupload';
 import { CreateBoardDto } from './dto/create-board.dto';
-import { validation } from '../configs/validationPipe';
+import { validation } from '../common/pipe/validationPipe';
 import fs from 'fs'
 import { UpdateBoardDto } from './dto/update-board.dto';
 

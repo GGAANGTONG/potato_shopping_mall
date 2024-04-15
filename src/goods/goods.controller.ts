@@ -14,7 +14,7 @@ import {
 import { GoodsService } from './goods.service';
 import { CreateGoodDto } from './dto/create-goods.dto';
 import { UpdateGoodDto } from './dto/update-goods.dto';
-import { FileInterceptor} from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ResizeImagePipe } from '../common/pipe/resize-image.pipe';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -23,7 +23,7 @@ export class GoodsController {
   constructor(private readonly goodsService: GoodsService) {}
 
   /**
-   * 상품등록 
+   * 상품등록
    * @param file
    * @param createGoodDto
    * @returns
@@ -57,9 +57,14 @@ export class GoodsController {
    * @param id
    * @returns
    */
-  @Get(':id')
+  @Get('get-one/:id')
   findOne(@Param('id') id: number) {
     return this.goodsService.findOne(+id);
+  }
+
+  @Get('get-one-stocks/:id')
+  findOneWithTotalStock(@Param('id') id: number) {
+    return this.goodsService.findOneWithTotalStock(+id);
   }
 
   /**
@@ -72,7 +77,7 @@ export class GoodsController {
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(FileInterceptor('file'))
   update(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @Body() updateGoodDto: UpdateGoodDto,
     @UploadedFile(new ResizeImagePipe(400, 400)) file: Express.Multer.File,
   ) {

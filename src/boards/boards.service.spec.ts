@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { BadRequestException } from '@nestjs/common';
 import { S3FileService } from '../common/utils/s3_fileupload';
 import fs from 'fs'
-import { validation } from '../configs/validationPipe';
+import { validation } from '../common/pipe/validationPipe';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 

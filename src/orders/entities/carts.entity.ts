@@ -1,16 +1,21 @@
-import { IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Goods } from '../../goods/entities/goods.entity';
+import { Users } from '../../user/entities/user.entitiy';
 
 @Entity({ name: 'carts' })
 export class Carts {
+
   @IsNumber()
   @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
@@ -29,16 +34,20 @@ export class Carts {
 
   @IsNumber()
   @Column()
-  ct_total_price: number;
+  ct_price: number;
 
   @CreateDateColumn()
-  ct_date: Date;
+  created_at: Date;
 
-  @ManyToOne(() => Goods, (goods) => goods.carts, {
-    onDelete: 'CASCADE',
-  })
+  @UpdateDateColumn()
+  updated_at: Date;
+
+
+  @ManyToOne(() => Goods, (goods) => goods.carts, { onDelete: 'CASCADE', })
   @JoinColumn({ name: 'goods_id', referencedColumnName: 'id' })
   goods: Goods;
 
-  //장바구니 유저  온딜리트 캐시캐이드 트루1:1
+  @ManyToOne(() => Users, (user) => user.carts, { onDelete: 'CASCADE', })
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  user: Users;
 }

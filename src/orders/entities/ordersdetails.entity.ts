@@ -17,6 +17,12 @@ export class OrdersDetails {
   @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Column({ unsigned: true })
+  orders_id: number;
+
   @IsNumber()
   @IsNotEmpty()
   @Column({ unsigned: true })
@@ -24,14 +30,10 @@ export class OrdersDetails {
 
   @IsNumber()
   @IsNotEmpty()
-  @Column({ unsigned: true })
-  orders_id: number;
-
-
-  @IsNumber()
-  @IsNotEmpty()
   @Column()
   od_count: number;
+
+  //od_status 장바구니 상태인지, 주문건인지
 
   @ManyToOne(() => Orders, (orders) => orders.ordersdetails, {
     onDelete: 'CASCADE',

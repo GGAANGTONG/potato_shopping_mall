@@ -23,7 +23,7 @@ export class Point {
 
   @IsString()
   @Column({ type: 'varchar', nullable: true })
-  status: string;
+  description: string;
 
   @IsNotEmpty()
   @IsNumber()

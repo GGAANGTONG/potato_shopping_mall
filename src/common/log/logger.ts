@@ -7,7 +7,7 @@ configure(
     {
         appenders: {          
             console: { type: "console" },
-            app: {type: 'file', filename: 'src/common/log/log-history'}
+            app: {type: 'file', filename: 'log-history/log-history'}
         },
         categories: {
             default: {
@@ -63,9 +63,9 @@ const warnLogger = (warnMessage: string, functionName:string)=>{
 }
 
 //custom fatal logger
-const fatalLogger = (fatalMessage: string, functionName:string)=>{
+const fatalLogger = (error: Error, functionName:string)=>{
 
-    loggerException.warn(`Function Name: ${functionName} Warning: ${fatalMessage}`);    
+    loggerException.fatal(`Function Name: ${functionName} Warning: ${error}`);    
 
 }
 

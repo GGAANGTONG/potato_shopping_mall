@@ -8,12 +8,13 @@ import { GoodsModule } from 'src/goods/goods.module';
 import { Goods } from '../goods/entities/goods.entity';
 import { Stocks } from '../goods/entities/stocks.entity';
 import { Categories } from '../goods/entities/categories.entity';
-import { Users } from 'src/user/entities/user.entitiy';
-import { Point } from 'src/point/entities/point.entity';
+import { Users } from '../user/entities/user.entitiy';
+import { Point } from '../point/entities/point.entity';
 import { GoodsService } from 'src/goods/goods.service';
 import { UserService } from 'src/user/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Like, Goods, Users, Stocks, Categories, Point]),
