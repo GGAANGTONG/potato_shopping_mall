@@ -8,12 +8,14 @@ import {
   ManyToOne,
   OneToOne,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 import { Categories } from './categories.entity';
 import { Stocks } from './stocks.entity';
 import { OrdersDetails } from '../../orders/entities/ordersdetails.entity';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Carts } from '../../orders/entities/carts.entity';
+import { Racks } from '../../storage/entities/rack.entity';
 
 @Entity({ name: 'goods' })
 export class Goods {
