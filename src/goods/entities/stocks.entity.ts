@@ -13,7 +13,7 @@ import { IsNumber } from 'class-validator';
 export class Stocks {
   @PrimaryGeneratedColumn()
   id: number;
-  
+
   @IsNumber()
   @Column({ type: 'int' })
   count: number; // 창고에 저장된 상품의 수량

@@ -9,7 +9,6 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Storage } from './storage.entity';
-import { Goods } from '../../goods/entities/goods.entity';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Stocks } from '../../goods/entities/stocks.entity';
 
@@ -21,7 +20,7 @@ export class Racks {
 
   @IsString()
   @IsNotEmpty()
-  @Column()
+  @Column({ type: 'varchar', length: 100 })
   name: string;
 
   @IsString()

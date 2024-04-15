@@ -18,7 +18,7 @@ export class RacksController {
 
   /**
    * 랙 등록
-   * @param createRacksDto 
+   * @param createRacksDto
    * @returns
    */
   @Post()
@@ -28,7 +28,7 @@ export class RacksController {
 
   /**
    * 랙 리스트 조회
-   * @returns 
+   * @returns
    */
   @Get('rack-storage/:storageId')
   findAll(@Param('storageId') storageId: string) {
@@ -37,8 +37,8 @@ export class RacksController {
 
   /**
    * 랙 하나 상세조회
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
   @Get('get-one/:id')
   findOne(@Param('id') id: string) {
@@ -47,8 +47,8 @@ export class RacksController {
 
   /**
    * 상품 새로 적재
-   * @param body 
-   * @returns 
+   * @param body
+   * @returns
    */
   @Post('add-goods')
   addGoodsToRack(@Body() addGoodsToRackDto: AddGoodsToRackDto) {
@@ -57,9 +57,9 @@ export class RacksController {
 
   /**
    * 창고 정보 수정
-   * @param id 
-   * @param updateRacksDto 
-   * @returns 
+   * @param id
+   * @param updateRacksDto
+   * @returns
    */
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRacksDto: UpdateRacksDto) {
@@ -67,9 +67,9 @@ export class RacksController {
   }
 
   /**
-   * 창고 삭제
-   * @param id 
-   * @returns 
+   * 랙 삭제
+   * @param id
+   * @returns
    */
   @Delete(':id')
   remove(@Param('id') id: string) {

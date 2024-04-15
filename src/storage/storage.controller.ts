@@ -28,20 +28,24 @@ export class StorageController {
 
   /**
    * 창고 리스트 조회
-   * @param name 
-   * @param address 
-   * @param contactName 
-   * @returns 
+   * @param name
+   * @param address
+   * @param contactName
+   * @returns
    */
   @Get()
-  findAll(@Query('name') name?: string, @Query('address') address?: string, @Query('contactName') contactName?: string) {
+  findAll(
+    @Query('name') name?: string,
+    @Query('address') address?: string,
+    @Query('contactName') contactName?: string,
+  ) {
     return this.storageService.findAll(name, address, contactName);
   }
 
   /**
    * 창고 하나 상세조회
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
   @Get('get-one/:id')
   findOne(@Param('id') id: string) {
@@ -59,9 +63,9 @@ export class StorageController {
 
   /**
    * 창고 정보 수정
-   * @param id 
-   * @param updateStorageDto 
-   * @returns 
+   * @param id
+   * @param updateStorageDto
+   * @returns
    */
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateStorageDto: UpdateStorageDto) {
@@ -70,8 +74,8 @@ export class StorageController {
 
   /**
    * 창고 삭제
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
   @Delete(':id')
   remove(@Param('id') id: string) {

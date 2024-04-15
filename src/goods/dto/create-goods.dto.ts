@@ -8,7 +8,6 @@ export class CreateGoodDto extends PickType(Goods, [
   'g_desc',
   'g_option',
 ] as const) {
-
   //g_price가 할인된 최종 가격으로 변경, cost_price가 원래 g_price 역할 (원가)
   @Type(() => Number)
   @IsNumber({}, { message: '상품 가격은 숫자 형식으로 입력되어야 합니다.' })

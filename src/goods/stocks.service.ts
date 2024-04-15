@@ -39,7 +39,7 @@ export class StocksService {
       id: createStockDto.rack_id,
     });
     if (!rack) {
-      throw new NotFoundException('해당하는 창고를 찾을 수 없습니다.');
+      throw new NotFoundException('해당 랙 정보를 찾을 수 없습니다.');
     }
     const newStock = this.stocksRepository.create({
       count: createStockDto.count,
@@ -124,7 +124,7 @@ export class StocksService {
     if (!stock) {
       throw new NotFoundException('해당 상품 재고 정보를 찾을 수 없습니다.');
     }
-    const rack = await this.racksRepository.findOneBy({ id:rack_id });
+    const rack = await this.racksRepository.findOneBy({ id: rack_id });
     if (!rack) {
       throw new NotFoundException('해당 랙 정보를 찾을 수 없습니다.');
     }

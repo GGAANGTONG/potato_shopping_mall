@@ -23,7 +23,7 @@ import { S3FileService } from '../common/utils/s3_fileupload';
       Orders,
       Like,
       Storage,
-      Racks
+      Racks,
     ]),
   ],
   controllers: [GoodsController, CategoriesController, StocksController],
