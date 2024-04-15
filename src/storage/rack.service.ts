@@ -71,7 +71,6 @@ export class RackService {
       ])
       .where('rack.storage_id = :storageId', { storageId })
       .getMany();
-
     return racks;
   }
 
