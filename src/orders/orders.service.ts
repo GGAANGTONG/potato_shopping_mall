@@ -1,14 +1,18 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Orders } from './entities/orders.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { Goods } from '../goods/entities/goods.entity';
-import { Stocks } from '../goods/entities/stocks.entity';
 import { Users } from '../user/entities/user.entitiy';
 import { Payments } from '../payments/entities/payments.entity';
 import { Status } from './types/order.type';
 import { Point } from '../point/entities/point.entity';
+import { Carts } from './entities/carts.entity';
+import { Goods } from '../goods/entities/goods.entity';
+import logger from '../common/log/logger';
+import { OrdersDetails } from './entities/ordersdetails.entity';
+import { validation } from 'src/common/pipe/validationPipe';
+import _ from 'lodash';
 
 
 @Injectable()
@@ -22,75 +26,111 @@ export class OrdersService {
     private pointRepository: Repository<Point>,
     @InjectRepository(Payments)
     private paymentsRepository: Repository<Payments>,
+    @InjectRepository(Goods)
+    private goodsRepository: Repository<Goods>,
     private readonly dataSource: DataSource,
-  ) { }
+  ) {
+
+   }
+
+  // 
 
   async purchase(
     userId: number,
-    createOrderDto: CreateOrderDto, // 포스트맨의 body,
+    createOrderDto: CreateOrderDto,
+    // 포스트맨의 body,
   ) {
-    const queryRunner = await this.dataSource.createQueryRunner();
+    // !userId, _.isNil(userId) 걸러주는 로직 필요 + await validation(CreateOrderDto, createOrderDto)
+    if (_.isNil(userId) || userId == 0) {
+      const error = new BadRequestException('잘못된 요청입니다!') 
+      logger.errorLogger(error, `userId = ${userId}`)
+      throw error
+    }
+
+    await validation(CreateOrderDto, createOrderDto)
+
+    const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const { o_tel, o_addr, o_count, o_req, goods_id } = createOrderDto;
-      const goods = await queryRunner.manager.findOne(Goods, {
-        relations: ['stock'],
+      const { carts_id } = createOrderDto;
+      const carts = await queryRunner.manager.find(Carts, {
         where: {
-          id: goods_id,
+          id: In(carts_id)
         },
       });
-      if (!goods) {
-        throw new BadRequestException('존재하지 않는 상품입니다.');
+      if (!carts) {
+        const error = new BadRequestException('존재하지 않는 상품입니다.');
+        logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${JSON.stringify(carts)} `)
+        throw  error
+      }
+      if (carts.length !== carts_id.length) {
+        const error =  new BadRequestException("유효하지 않은 요청입니다.");
+        logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${JSON.stringify(carts)} `)
+        throw  error
+      }
+      for (let element of carts) {
+        if (element.user_id !== userId) {
+          const error =  new BadRequestException("유효하지 않은 요청입니다.");
+          logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${JSON.stringify(carts)}, element = ${element} `)
+          throw  error
+        }
       }
 
-      const count = goods.stock.count - o_count;
+      let o_total_price: number = 0;
+      for (let i = 0; i < carts.length; i++) {
+        const goods = await queryRunner.manager.findOne(Goods, {
+          relations: ['stock'],
+          where: {
+            id: carts[i].goods_id
+          }
+        })
+        const count = goods.stock.count - carts[i].ct_count;
+        if (count < 0) {
+          const error = new BadRequestException('재고가 없습니다.')
 
-      if (count < 0) {
-        throw new BadRequestException('재고가 없습니다.');
+          logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${carts}, carts_id = ${carts_id}`)
+          throw error;
+        }
+        o_total_price += carts[i].ct_count * carts[i].ct_price
+        //Cart >> Orders 엔티티를 만들기 위해서 재고를 갱신하고 총액을 구하는 과정
       }
 
-      const user = await queryRunner.manager.findOne(Users, {
-        where: {
-          id: userId,
-        },
-      });
-
-      if (!user) {
-        throw new BadRequestException('존재하지 않는 유저입니다.');
-      }
-      const paying = goods.g_price * o_count;
-      const afterPaidPoints = user.points - paying; // 포인트가 부족한 경우를 확인하기 위해 변경
-
-      if (afterPaidPoints < 0) {
-        throw new BadRequestException('포인트가 부족합니다.');
-      }
-
-      user.points = afterPaidPoints;
-      await queryRunner.manager.update(Stocks, { goods }, { count });
-      await queryRunner.manager.save(Users, user);
-
-      const newOrder = this.ordersRepository.create({
+      const makingOrder = queryRunner.manager.create(Orders, {
         user_id: userId,
-        o_name: user.name,
-        o_tel,
-        o_addr,
-        o_req,
-        o_count,
-        o_total_price: paying,
-        //goods_id 삭제함
-      });
-      const returnNewOrder = await queryRunner.manager.save(Orders, newOrder);
+        o_total_price,
+        //아마 p_status는 default(default값: false) 줘야 함
+      })
+
+      const order = await queryRunner.manager.save(Orders, makingOrder)
+
+
+      for (let i = 0; i < carts.length; i++) {
+        const ordersDetail = queryRunner.manager.create(OrdersDetails, {
+          orders_id: order.id,
+          goods_id: carts_id[i],
+          od_count: carts[i].ct_count
+        })
+
+        if (!ordersDetail) {
+          const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
+          logger.fatalLogger(fatalError, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, order = ${order}, carts = ${carts}, carts_id = ${carts_id}`)
+          throw fatalError;
+        }
+
+        await queryRunner.manager.save(OrdersDetails, ordersDetail)
+      }
 
       await queryRunner.commitTransaction();
       await queryRunner.release();
-
-      return returnNewOrder;
+      return order;
     } catch (err) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
-      console.error(err);
-      throw err;
+
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
+      logger.fatalLogger(fatalError, `userId = ${userId}, createOrderDto = ${createOrderDto}`)
+      throw fatalError;
     }
 
   }
@@ -101,14 +141,24 @@ export class OrdersService {
   // 유저별 주문 목록 전체 조회
   async findAllOrderbyUser(userId: number): Promise<Orders[]> {
     try {
+
+      if (_.isNil(userId) || userId == 0) {
+        const error = new BadRequestException('잘못된 요청입니다!') 
+        logger.errorLogger(error, `userId = ${userId}`)
+        throw error
+      }
+
       const orders = await this.ordersRepository.find({ where: { user_id: userId } });
       if (!orders || orders.length === 0) {
-        throw new NotFoundException('주문 정보가 없습니다.');
+        const error = new NotFoundException('주문 정보가 없습니다.');
+        logger.errorLogger(error, `userId = ${userId}, orders = ${orders}`)
+        throw error;
       }
       return orders;
     } catch (error) {
-      console.error(error);
-      throw error;
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
+      logger.fatalLogger(fatalError, `userId = ${userId}`)
+      throw fatalError;
     }
   }
 
@@ -117,58 +167,102 @@ export class OrdersService {
     try {
       const orders = await this.ordersRepository.find();
       if (!orders || orders.length === 0) {
-        throw new NotFoundException('주문 정보가 없습니다.');
+        const error = new NotFoundException('주문 정보가 없습니다.');
+        logger.errorLogger(error, `orders = ${orders}`)
+        throw error;
       }
       return orders;
     } catch (error) {
-      console.error(error);
-      throw error;
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
+      logger.fatalLogger(fatalError, `parameter = none`)
+      throw fatalError;
     }
   }
+
 
   // 상세 주문 정보 확인
   async findOneOrderbyBoth(orderId: number): Promise<Orders> {
     try {
+
+      if (_.isNil(orderId) || orderId == 0) {
+        const error = new BadRequestException('잘못된 요청입니다!') 
+        logger.errorLogger(error, `orderId = ${orderId}`)
+        throw error
+      }
+
       const order = await this.ordersRepository.findOne({ where: { id: orderId } });
       if (!order) {
-        throw new NotFoundException('주문 정보가 없습니다.');
+        const error = new NotFoundException('주문 정보가 없습니다.');
+        logger.errorLogger(error, `orderId = ${orderId}, order = ${order}`)
+        throw error;
       }
       return order;
     } catch (error) {
-      console.error(error);
-      throw error;
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
+      logger.fatalLogger(fatalError, `orderId = ${orderId}`)
+      throw fatalError;
     }
   }
 
   // 주문 취소
-  async cancelOrder(orderId: number): Promise<Orders> {
-    const order = await this.ordersRepository.findOne({
+  async cancelOrder(userId: number, orderId: number): Promise<Orders> {
+
+    if (_.isNil(userId) || userId == 0 || _.isNil(orderId) || orderId == 0) {
+      const error = new BadRequestException('잘못된 요청입니다!') 
+      logger.errorLogger(error, `orderId = ${orderId} userId = ${userId}`)
+      throw error
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try{
+    const order = await queryRunner.manager.findOne(Orders, {
       where: { id: orderId }
     });
     if (!order) {
-      throw new NotFoundException('주문을 찾을 수 없습니다.');
+      const error = new NotFoundException('주문을 찾을 수 없습니다.');
+      logger.errorLogger(error, `orderId  = ${orderId}, order = ${order}`) 
+      throw error
     }
 
     // 환불 로직
     // 재고 반환 로직 추가
     if (order.o_status !== '주문취소') {
       const refundAmount = order.o_total_price; // 주문 취소로 인한 환불액
-      const userPoint = await this.pointRepository.findOne({ where: { userId: order.user_id } });
+      const userPoint = await queryRunner.manager.findOne(Point, { where: { userId: order.user_id } });
       if (!userPoint) {
-        throw new NotFoundException('사용자 포인트를 찾을 수 없습니다.');//포인트 테이블에 해당 유저 데이터가 없는 경우
+        const error = new NotFoundException('사용자 포인트를 찾을 수 없습니다.');
+        logger.errorLogger(error, `orderId  = ${orderId}, order = ${order}, userPoint = ${userPoint}`) 
+        throw error//포인트 테이블에 해당 유저 데이터가 없는 경우
       }
       userPoint.possession += refundAmount; // 포인트 테이블에 환불액 기록
-      await this.pointRepository.save(userPoint);
+      await queryRunner.manager.save(Point, userPoint);
 
-      const user = await this.usersRepository.findOne({ where: { id: order.user_id } });
+      const user = await queryRunner.manager.findOne(Users, { where: { id: order.user_id } });
       if (!user) {
-        throw new NotFoundException('사용자를 찾을 수 없습니다.');
+        const error = new NotFoundException('사용자를 찾을 수 없습니다.'); 
+        logger.errorLogger(error, `orderId  = ${orderId}, order = ${order}, user = ${user}`) 
+        throw error
       }
       user.points += refundAmount; // 유저의 기존 포인트에 환불액 추가
-      await this.usersRepository.save(user);
+      await queryRunner.manager.save(Users, user);
     }
 
     order.o_status = Status.Odercancel; // 주문 상태를 '주문취소'로 변경
-    return this.ordersRepository.save(order);
+    
+    const returnOrder = await queryRunner.manager.save(Orders, order)
+
+    await queryRunner.commitTransaction();
+    await queryRunner.release();
+    return returnOrder
+  } catch(error) {
+    await queryRunner.rollbackTransaction();
+    await queryRunner.release();
+
+    const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
+    logger.fatalLogger(fatalError, `orderId = ${orderId}`)
+    throw fatalError;
   }
+}
 }

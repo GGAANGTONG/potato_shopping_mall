@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -27,7 +28,8 @@ export class GoodsService {
     private racksRepository: Repository<Racks>,
     private readonly s3FileService: S3FileService,
     @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  ) { }
+
 
   /**
    * 상품등록
@@ -36,7 +38,7 @@ export class GoodsService {
    * @returns
    */
   async create(file: Express.Multer.File, createGoodDto: CreateGoodDto) {
-    const { g_name, g_price, g_desc, g_option, rack_id } = createGoodDto;
+    const { g_name, cost_price, g_desc, g_option, rack_id } = createGoodDto;
 
     const existedCategory = await this.categoriesRepository.findOneBy({
       id: createGoodDto.category,
@@ -58,7 +60,8 @@ export class GoodsService {
       if (file) {
         fileKey = await this.s3FileService.uploadFile(file, 'goods');
       }
-      const goodData = { g_name, g_price, g_desc, g_img: fileKey, g_option };
+      const { g_name, cost_price, g_desc, g_option } = createGoodDto;
+      const goodData = { g_name, cost_price, g_desc, g_img: fileKey, g_option };
       const newGood = this.goodsRepository.create(goodData);
       newGood.category = existedCategory;
 
@@ -178,9 +181,10 @@ export class GoodsService {
     }
 
     // 새로운 파일이 있다면 업로드
-    const fileKey = file
-      ? await this.s3FileService.uploadFile(file, 'goods')
-      : good.g_img;
+
+    const fileKey = file ? await this.s3FileService.uploadFile(file, 'goods') : good.g_img;
+    
+
 
     // 수정할 상품 데이터 업데이트
     good.g_name = updateGoodDto.g_name;

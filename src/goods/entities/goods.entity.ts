@@ -13,7 +13,7 @@ import {
 import { Categories } from './categories.entity';
 import { Stocks } from './stocks.entity';
 import { OrdersDetails } from '../../orders/entities/ordersdetails.entity';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Carts } from '../../orders/entities/carts.entity';
 import { Racks } from '../../storage/entities/rack.entity';
 
@@ -43,6 +43,18 @@ export class Goods {
   @IsString()
   @Column({ type: 'varchar', length: 255, nullable: true })
   g_option: string | null;
+
+  //할인율
+  @IsNumber()
+  @IsNotEmpty()
+  @Column({ type: 'float' })
+  discount_rate: number;
+
+  //원가
+  @IsNumber()
+  @IsNotEmpty()
+  @Column({ type: 'int', nullable: true })
+  cost_price: number;
 
   @CreateDateColumn()
   created_at: Date;
