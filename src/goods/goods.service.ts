@@ -11,7 +11,7 @@ import { Categories } from './entities/categories.entity';
 import { Stocks } from './entities/stocks.entity';
 import { Repository } from 'typeorm';
 import { S3FileService } from '../common/utils/s3_fileupload';
-import { Storage } from '../storage/entities/storage.entity';
+import { Racks } from '../storage/entities/rack.entity';
 import { DataSource } from 'typeorm';
 
 @Injectable()
@@ -23,8 +23,8 @@ export class GoodsService {
     private categoriesRepository: Repository<Categories>,
     @InjectRepository(Stocks)
     private stocksRepository: Repository<Stocks>,
-    @InjectRepository(Storage)
-    private storageRepository: Repository<Storage>,
+    @InjectRepository(Racks)
+    private racksRepository: Repository<Racks>,
     private readonly s3FileService: S3FileService,
     @InjectDataSource() private dataSource: DataSource,
   ) {}
@@ -36,6 +36,8 @@ export class GoodsService {
    * @returns
    */
   async create(file: Express.Multer.File, createGoodDto: CreateGoodDto) {
+    const { g_name, g_price, g_desc, g_option, rack_id } = createGoodDto;
+
     const existedCategory = await this.categoriesRepository.findOneBy({
       id: createGoodDto.category,
     });
@@ -43,11 +45,11 @@ export class GoodsService {
       throw new NotFoundException('해당하는 카테고리를 찾을 수 없습니다.');
     }
 
-    const existedStorage = await this.storageRepository.findOneBy({
-      id: createGoodDto.storage_id,
+    const existedRack = await this.racksRepository.findOneBy({
+      id: +rack_id,
     });
-    if (!existedStorage) {
-      throw new NotFoundException('해당하는 창고를 찾을 수 없습니다.');
+    if (!existedRack) {
+      throw new NotFoundException('해당하는 랙을 찾을 수 없습니다.');
     }
 
     try {
@@ -56,7 +58,6 @@ export class GoodsService {
       if (file) {
         fileKey = await this.s3FileService.uploadFile(file, 'goods');
       }
-      const { g_name, g_price, g_desc, g_option, storage_id } = createGoodDto;
       const goodData = { g_name, g_price, g_desc, g_img: fileKey, g_option };
       const newGood = this.goodsRepository.create(goodData);
       newGood.category = existedCategory;
@@ -68,7 +69,7 @@ export class GoodsService {
       const initialStock = this.stocksRepository.create({
         count: 0,
         goods: savedGood,
-        storage: existedStorage,
+        rack: existedRack,
       });
       await this.stocksRepository.save(initialStock);
 

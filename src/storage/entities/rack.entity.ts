@@ -4,33 +4,38 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { Storage } from './storage.entity';
+import { Goods } from '../../goods/entities/goods.entity';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Stocks } from '../../goods/entities/stocks.entity';
 
 @Entity()
 export class Racks {
-  @PrimaryGeneratedColumn()
+  @IsNumber()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
+  @IsString()
+  @IsNotEmpty()
   @Column()
   name: string;
 
-  /* 최대 수량 */
-  @Column({ type: 'int', name: 'capacity' })
-  capacity: number;
-
-  @Column({ type: 'int', default: 0, name: 'current_stock' })
-  currentStock: number;
-
+  @IsString()
   @Column({
     type: 'varchar',
     length: 255,
     nullable: true,
-    name: 'location_info',
   })
-  locationInfo: string | null;
+  location_info: string | null;
 
   @ManyToOne(() => Storage, (storage) => storage.racks)
   @JoinColumn({ name: 'storage_id' })
   storage: Storage;
+
+  @OneToMany(() => Stocks, (stocks) => stocks.rack)
+  stock: Stocks[];
 }
