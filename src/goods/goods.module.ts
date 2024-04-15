@@ -14,6 +14,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Orders } from '../orders/entities/orders.entity';
 import { Like } from '../like/entities/like.entity';
 import { S3FileService } from '../common/utils/s3_fileupload';
+import { RackService } from '../storage/rack.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
