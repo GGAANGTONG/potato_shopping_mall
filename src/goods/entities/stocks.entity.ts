@@ -6,7 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Goods } from './goods.entity';
-import { Storage } from '../../storage/entities/storage.entity';
+import { Racks } from '../../storage/entities/rack.entity';
 
 @Entity({ name: 'stocks' })
 export class Stocks {
@@ -23,7 +23,7 @@ export class Stocks {
   @JoinColumn({ name: 'goods_id' })
   goods: Goods;
 
-  @ManyToOne(() => Storage, (storage) => storage.stock)
-  @JoinColumn({ name: 'storage_id' })
-  storage: Storage;
+  @ManyToOne(() => Racks, (rack) => rack.stock)
+  @JoinColumn({ name: 'rack_id' })
+  rack: Racks;
 }
