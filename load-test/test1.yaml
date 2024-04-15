@@ -29,145 +29,138 @@ config:
         - http.response_time.p95: 75
 scenarios:
 #시간이 많이 들기 때문에 flow 전체를 테스트하기 보다는 api 하나 씩 테스트 하는게 더 나음 
-  - name: 1. (Users)10000VUs [SignIn]
+  - name: 1. [Users][signIn] - 100,000VUs
     flow:
       - loop:
         - post: "/login"
         count: 1
         vus: 100000
 
-  - name: 2-1. (Goods)10000VUs [findAll => 10 * findOne]
+scenarios:
+  - name: 2-1. [Goods][findAll] - 100,000VUs
     flow:
       - loop:
         - get:
             url: "/goods"
         count: 1
         vus: 100000
-        - get:
-            url: "/goods/get-one/{{:id}}"
-        count: 10
-        vus: 10000
 
-  - name: 2-2. (Goods & Carts)10000VUs [findAll => 10 * findOne => addToCart]
+scenarios:
+  - name: 2-2. [Goods][findOne] - 10,000VUs
     flow:
       - loop:
         - get:
-            url: "/goods"
-        count: 1
-        vus: 10000
-        - get:
-            url: "/goods/get-one/{{:id}}"
+            url: "/goods/get-one/:id"
         count: 10
         vus: 10000
+
+scenarios:
+  - name: 3-1. [Carts][addToCart] - 10,000VUs
+    flow:
+      - loop:
         - post:
-            url: "/cart/add/{{:goodsId}}"
+            url: "/cart/add/:goodsId"
         count: 10
         vus: 10000
 
-    - name: 3-1. (Carts)10000VUs [getCartItems => removeFromCart]
+scenarios:
+    - name: 3-2. [Carts][getCartItems] - 10,000VUs 
     flow:
       - loop:
         - get:
             url: "/cart"
         count: 1
+        vus: 100000
+
+scenarios:
+    - name: 3-3. [Carts][updateQuantity] - 10,000VUs 
+    flow:
+      - loop:
+        - patch:
+            url: "update/{{:cartId}}"
+        count: 1
         vus: 10000
+
+scenarios:
+    - name: 3-4. [Carts][removeFromCart] - 10,000VUs 
+    flow:
+      - loop:
         - delete:
-            url: "/cart/remove/{{:cartId}}"
+            url: "/cart/remove/:cartId"
         count: 10
         vus: 10000
 
-    - name: 3-2. (Carts)10000VUs [getCartItems => clearCart]
+scenarios:
+    - name: 3-5. [Carts][clearCart] - 10,000VUs
     flow:
       - loop:
-        - get:
-            url: "/cart"
-        count: 1
-        vus: 10000
         - delete:
             url: "/cart/clear"
         count: 1
         vus: 10000
 
-    - name: 4-1. (Orders)10000VUs [getCartItems => purchase(이름 바꿔야 함)]
+scenarios:
+    - name: 4-1. [Orders][purchase(이름 바꿔야 함)] 100,000VUs
     flow:
       - loop:
-        - get:
-            url: "/cart"
-        count: 1
-        vus: 10000
         - post:
             url: "/orders"
-        count: 10
-        vus: 10000
+        count: 1
+        vus: 100000
 
-    - name: 4-2. (Orders)10000VUs [getCartItems => findAllOrderByUser]
+scenarios:
+    - name: 4-2. [Orders][findAllOrderByUser] - 100,000VUs 
     flow:
       - loop:
         - get:
-            url: "/cart"
-        count: 1
-        vus: 10000
-        - get:
             url: "/orders/user"
         count: 1
-        vus: 10000
+        vus: 100000
 
-    - name: 4-3. (Orders)10000VUs [getCartItems => findAllOrderByUser => findOneOrderByBoth(무슨 뜻이지 + ordersdetails가 전부 연동돼서 나오게 해야 함) => cancelOrder]
+scenarios:
+    - name: 4-3. [Orders][findOneOrderByBoth(무슨 뜻이지 + ordersdetails가 전부 연동돼서 나오게 해야 함)] - 100,000VUs 
     flow:
       - loop:
         - get:
-            url: "/cart"
+            url: "/orders/:id"
         count: 1
-        vus: 10000
-        - get:
-            url: "/orders/user"
-        count: 1
-        vus: 10000
-        - get:
-            url: "/orders/{{:id}}"
-        count: 10
-        vus: 10000
-        - get:
-            url: "/orders/{{:orderId}}/cancel"
-        count: 10
-        vus: 10000
+        vus: 100000
 
-    - name: 5-1. (Payments)10000VUs [getCartItems => findAllOrderByUser => findOneOrderByBoth(무슨 뜻이지) => pay]
+scenarios:
+    - name: 4-4. [Orders][cancelOrder] - 100,000VUs
     flow:
       - loop:
-        - get:
-            url: "/cart"
+        - delete:
+            url: "/orders/:orderId/cancel"
         count: 1
-        vus: 10000
-        - get:
-            url: "/orders/user"
-        count: 1
-        vus: 10000
-        - get:
-            url: "/orders/{{:id}}"
-        count: 10
-        vus: 10000
+        vus: 100000
+
+scenarios:
+    - name: 5-1. [Payments][pay] - 100,000VUs 
+    flow:
+      - loop:
         - post:
             url: "/payments"
-        count: 10
-        vus: 10000
+        count: 1
+        vus: 100000
 
-    - name: 5-2. (Payments)10000VUs []
+scenarios:
+    - name: 5-2. [Payments][findAllOrderByUser] - 100,000VUs
     flow:
       - loop:
         - get:
-            url: "/cart"
+            url: "/payments/{{:id}}"
         count: 1
-        vus: 10000
-        - get:
-            url: "/orders/user"
-        count: 1
-        vus: 10000
-        - get:
-            url: "/orders/{{:id}}"
-        count: 10
-        vus: 10000
+        vus: 100000
+
+scenarios:
+    - name: 5-3. [Payments][findOneOrderByBoth(무슨 뜻이지)] - 100,000VUs
+    flow:
+      - loop:
         - post:
-            url: "/payments"
-        count: 10
-        vus: 10000
+            url: "/payments/:paymentId/cancel"
+        count: 1
+        vus: 100000
+
+
+#[signIn - ]
