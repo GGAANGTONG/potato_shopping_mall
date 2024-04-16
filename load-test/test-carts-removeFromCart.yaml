@@ -1,0 +1,8 @@
+scenarios:
+  - name: "3-4. [Carts][removeFromCart] - 10,000VUs"
+    flow:
+      - loop:
+        - delete:
+            url: "/cart/remove/:cartId"
+        count: 10
+        vus: 10000

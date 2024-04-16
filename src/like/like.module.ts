@@ -14,10 +14,11 @@ import { GoodsService } from 'src/goods/goods.service';
 import { UserService } from 'src/user/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
+import { Racks } from '../storage/entities/rack.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Like, Goods, Users, Stocks, Categories, Point]),
+    TypeOrmModule.forFeature([Like, Goods, Users, Stocks, Categories, Point, Racks]),
     UsersModule,
     GoodsModule,
     HttpModule,

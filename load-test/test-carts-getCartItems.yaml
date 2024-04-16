@@ -1,0 +1,8 @@
+scenarios:
+  - name: "3-2. [Carts][getCartItems] - 10,000VUs"
+    flow:
+      - loop:
+        - get:
+            url: "/cart"
+        count: 1
+        vus: 100000

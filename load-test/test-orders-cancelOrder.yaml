@@ -1,0 +1,8 @@
+scenarios:
+  - name: "4-4. [Orders][cancelOrder] - 100,000VUs"
+    flow:
+      - loop:
+        - delete:
+            url: "/orders/:orderId/cancel"
+        count: 1
+        vus: 100000

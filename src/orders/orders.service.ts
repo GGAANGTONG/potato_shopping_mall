@@ -11,7 +11,7 @@ import { Carts } from './entities/carts.entity';
 import { Goods } from '../goods/entities/goods.entity';
 import logger from '../common/log/logger';
 import { OrdersDetails } from './entities/ordersdetails.entity';
-import { validation } from 'src/common/pipe/validationPipe';
+import { validation } from '../common/pipe/validationPipe';
 import _ from 'lodash';
 
 
@@ -50,33 +50,35 @@ export class OrdersService {
     await validation(CreateOrderDto, createOrderDto)
 
     const queryRunner = this.dataSource.createQueryRunner();
+
+    const { carts_id } = createOrderDto;
+    const carts = await queryRunner.manager.find(Carts, {
+      where: {
+        id: In(carts_id)
+      },
+    });
+    if (!carts) {
+      const error = new BadRequestException('존재하지 않는 상품입니다.');
+      logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${JSON.stringify(carts)} `)
+      throw  error
+    }
+    if (carts.length !== carts_id.length) {
+      const error =  new BadRequestException("유효하지 않은 요청입니다.");
+      logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${JSON.stringify(carts)} `)
+      throw  error
+    }
+    for (let element of carts) {
+      if (element.user_id !== userId) {
+        const error =  new BadRequestException("유효하지 않은 요청입니다.");
+        logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${JSON.stringify(carts)}, element = ${element} `)
+        throw  error
+      }
+    }
+
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const { carts_id } = createOrderDto;
-      const carts = await queryRunner.manager.find(Carts, {
-        where: {
-          id: In(carts_id)
-        },
-      });
-      if (!carts) {
-        const error = new BadRequestException('존재하지 않는 상품입니다.');
-        logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${JSON.stringify(carts)} `)
-        throw  error
-      }
-      if (carts.length !== carts_id.length) {
-        const error =  new BadRequestException("유효하지 않은 요청입니다.");
-        logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${JSON.stringify(carts)} `)
-        throw  error
-      }
-      for (let element of carts) {
-        if (element.user_id !== userId) {
-          const error =  new BadRequestException("유효하지 않은 요청입니다.");
-          logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${JSON.stringify(carts)}, element = ${element} `)
-          throw  error
-        }
-      }
-
+ 
       let o_total_price: number = 0;
       for (let i = 0; i < carts.length; i++) {
         const goods = await queryRunner.manager.findOne(Goods, {
@@ -214,9 +216,7 @@ export class OrdersService {
     }
 
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try{
+
     const order = await queryRunner.manager.findOne(Orders, {
       where: { id: orderId }
     });
@@ -225,6 +225,10 @@ export class OrdersService {
       logger.errorLogger(error, `orderId  = ${orderId}, order = ${order}`) 
       throw error
     }
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try{
 
     // 환불 로직
     // 재고 반환 로직 추가

@@ -1,0 +1,8 @@
+scenarios:
+  - name: "3-1. [Carts][addToCart] - 10,000VUs"
+    flow:
+      - loop:
+        - post:
+            url: "/cart/add/:goodsId"
+        count: 10
+        vus: 10000
