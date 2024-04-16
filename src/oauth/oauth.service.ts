@@ -1,68 +1,82 @@
-import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import {
+  Injectable,
+} from '@nestjs/common';
+import { compare, hash } from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import * as _ from 'lodash';
+import { UserService } from '../user/users.service';
+import { Users } from '../user/entities/user.entitiy';
+import { Oauth } from './entities/oauth.entity';
 
-interface kakaoTokenResponse { accessToken:string} 
+
 @Injectable()
 export class OauthService {
   constructor(
-    private http: HttpService,
+    @InjectRepository(Users)
+    private oauthRepository: Repository<Oauth>,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+    private readonly dataSource: DataSource,
   ) {}
 
 
+  async validateUser(email: string) {
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      return null;
+    }
+    return user;
+  }
 
-    //카카오
+  async createToken(email: string) {
+    const userEmail = await this.userService.findByEmail(email);
 
-    async kakaoLogin(
-      KAKAO_REST_API_KEY: string,
-      KAKAO_REDIRECT_URI: string,
-      code: string,
-    ) {
-      const config = {
-        grant_type: 'authorization_code',
-        client_id: KAKAO_REST_API_KEY,
-        redirect_uri: KAKAO_REDIRECT_URI,
-        code,
-      };
-      const params = new URLSearchParams(config).toString();
-      const tokenHeaders = {
-        'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
-      };
-      const tokenUrl = `https://kauth.kakao.com/oauth/token?${params}`;
-  
-      const tokenRes = await firstValueFrom(
-        this.http.post(tokenUrl, '', { headers: tokenHeaders }),
-      );
-  
-      // 'any' 타입으로 응답을 단언하여 'access_token'에 접근
-      const accessToken = (tokenRes as any).data.access_token;
-  
-      // accessToken을 사용하여 사용자 정보를 가져오는 부분
-      const userInfoUrl = `https://kapi.kakao.com/v2/user/me`;
-      const userInfoHeaders = {
-        Authorization: `Bearer ${accessToken}`,
-      };
-  
-      // 사용자 정보 요청 및 응답 처리
-      const userInfoRes = await firstValueFrom(
-        this.http.get(userInfoUrl, { headers: userInfoHeaders }),
-      );
-      console.log(userInfoRes);
+    const payload = { sub: userEmail.id };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET_KEY,
+      expiresIn: 1000 * 60 * 60 * 12,
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: process.env.REFRESH_SECRET,
+      expiresIn: 1000 * 60 * 60 * 24 * 7,
+    });
+
+
+    return { accessToken,refreshToken };
+  }
+
+
+  async createProviderUser(email: string, nickName: string, provider: string) {
+    try {
+      // Users 엔티티를 저장합니다.
+      const userRepository = this.dataSource.getRepository(Users);
+      const user = await userRepository.save({});
       
-      // const data = userInfoRes.data;
-      // // 사용자 정보를 로컬 DB에 저장
-      // let user = await this.usersRepository.findOne({
-      //   where: { email: data.email },
-      // });
-      // if (!user) {
-      //   user = new Users();
-      //   user.email = data.kakao_account.email;
-      //   user.nickname = data.properties.nickname;
-      //   // 기타 필요한 정보 추가 가능
-      //   await this.usersRepository.save(user);
-      // }
-      // return user;
+      // OAuthService를 사용하여 외부 서비스에 사용자 정보를 저장합니다.
+      const oauthUserInfo = await this.oauthRepository.save({
+        userId: user.id,
+        email: email,
+        nickName: nickName,
+        provider: provider,
+       
+      });
+  
+      // 저장된 사용자 정보를 반환합니다.
+      return oauthUserInfo;
+    } catch (error) {
+      console.error('Failed to create provider user:', error);
+      throw error;
+    }
+  }
 
-      //any type 줄이기 
 
-}}
+  async findByEmailFrom(email: string) {
+    const user = await this.oauthRepository.findOneBy({ email });
+    return user;
+  }
+  
+}
