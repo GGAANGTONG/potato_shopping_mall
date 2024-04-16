@@ -12,7 +12,7 @@ import { Categories } from './entities/categories.entity';
 import { Stocks } from './entities/stocks.entity';
 import { Repository } from 'typeorm';
 import { S3FileService } from '../common/utils/s3_fileupload';
-import { Storage } from '../storage/entities/storage.entity';
+import { Racks } from '../storage/entities/rack.entity';
 import { DataSource } from 'typeorm';
 
 @Injectable()
@@ -24,13 +24,11 @@ export class GoodsService {
     private categoriesRepository: Repository<Categories>,
     @InjectRepository(Stocks)
     private stocksRepository: Repository<Stocks>,
-    @InjectRepository(Storage)
-    private storageRepository: Repository<Storage>,
+    @InjectRepository(Racks)
+    private racksRepository: Repository<Racks>,
     private readonly s3FileService: S3FileService,
-  ) { }
     @InjectDataSource() private dataSource: DataSource,
   ) {}
-
 
   /**
    * 상품등록
@@ -39,6 +37,8 @@ export class GoodsService {
    * @returns
    */
   async create(file: Express.Multer.File, createGoodDto: CreateGoodDto) {
+    const { rack_id } = createGoodDto;
+
     const existedCategory = await this.categoriesRepository.findOneBy({
       id: createGoodDto.category,
     });
@@ -46,11 +46,11 @@ export class GoodsService {
       throw new NotFoundException('해당하는 카테고리를 찾을 수 없습니다.');
     }
 
-    const existedStorage = await this.storageRepository.findOneBy({
-      id: createGoodDto.storage_id,
+    const existedRack = await this.racksRepository.findOneBy({
+      id: +rack_id,
     });
-    if (!existedStorage) {
-      throw new NotFoundException('해당하는 창고를 찾을 수 없습니다.');
+    if (!existedRack) {
+      throw new NotFoundException('해당하는 랙을 찾을 수 없습니다.');
     }
 
     try {
@@ -59,32 +59,13 @@ export class GoodsService {
       if (file) {
         fileKey = await this.s3FileService.uploadFile(file, 'goods');
       }
-
-      const { g_name, g_desc, g_option, cost_price, discount_rate } = createGoodDto;
-
-      const endPrice = cost_price * (1 - discount_rate);
-      console.log(discount_rate)
-      if (discount_rate < 0 || discount_rate > 1) {
-        throw new BadRequestException('할인율은 0.0과 1.0 사이의 값이어야 합니다.');
-      }
-      const goodData = { g_name, g_price: endPrice, g_desc, g_img: fileKey, g_option, cost_price, discount_rate };
-
-      const { g_name, g_price, g_desc, g_option, storage_id } = createGoodDto;
-      const goodData = { g_name, g_price, g_desc, g_img: fileKey, g_option };
+      const { g_name, cost_price, g_desc, g_option } = createGoodDto;
+      const goodData = { g_name, cost_price, g_desc, g_img: fileKey, g_option };
       const newGood = this.goodsRepository.create(goodData);
       newGood.category = existedCategory;
 
       // 상품 정보 저장
       const savedGood = await this.goodsRepository.save(newGood);
-
-
-      // 초기 재고 정보 저장
-      const initialStock = this.stocksRepository.create({
-        count: 0,
-        goods: savedGood,
-        storage: existedStorage,
-      });
-      await this.stocksRepository.save(initialStock);
 
       return newGood;
     } catch (error) {
@@ -192,9 +173,9 @@ export class GoodsService {
 
     // 새로운 파일이 있다면 업로드
 
-    const fileKey = file ? await this.s3FileService.uploadFile(file, 'goods') : good.g_img;
-    
-
+    const fileKey = file
+      ? await this.s3FileService.uploadFile(file, 'goods')
+      : good.g_img;
 
     // 수정할 상품 데이터 업데이트
     good.g_name = updateGoodDto.g_name;
