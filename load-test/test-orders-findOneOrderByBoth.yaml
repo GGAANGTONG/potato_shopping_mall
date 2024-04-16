@@ -1,0 +1,8 @@
+scenarios:
+  - name: "4-3. [Orders][findOneOrderByBoth(무슨 뜻이지 + ordersdetails가 전부 연동돼서 나오게 해야 함)] - 100,000VUs" 
+    flow:
+      - loop:
+        - get:
+            url: "/orders/:id"
+        count: 1
+        vus: 100000

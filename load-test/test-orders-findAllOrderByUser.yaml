@@ -1,0 +1,8 @@
+scenarios:
+  - name: "4-2. [Orders][findAllOrderByUser] - 100,000VUs"
+    flow:
+      - loop:
+        - get:
+            url: "/orders/user"
+        count: 1
+        vus: 100000

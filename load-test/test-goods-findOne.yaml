@@ -1,0 +1,8 @@
+scenarios:
+  - name: "2-2. [Goods][findOne] - 10,000VUs"
+    flow:
+      - loop:
+        - get:
+            url: "/goods/get-one/{{:id}}"
+        count: 10
+        vus: 10000
