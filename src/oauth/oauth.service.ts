@@ -4,7 +4,7 @@ import {
 import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, DeepPartial, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as _ from 'lodash';
 import { UserService } from '../user/users.service';
 import { Users } from '../user/entities/user.entitiy';
@@ -53,17 +53,16 @@ export class OauthService {
   async createProviderUser(email: string, nickName: string, provider: string) {
     try {
       // Users 엔티티를 저장합니다.
-      type partialEntityUsers: DeepPartial<Users> = {...};
-      const userRepository = this.dataSource.getRepository(type DeepPartial<Users>);
+      const userRepository = this.dataSource.getRepository(Users);
       const user = await userRepository.save({});
-  
+      
       // OAuthService를 사용하여 외부 서비스에 사용자 정보를 저장합니다.
       const oauthUserInfo = await this.oauthRepository.save({
         userId: user.id,
         email: email,
         nickName: nickName,
         provider: provider,
-        // 추가적으로 필요한 필드
+       
       });
   
       // 저장된 사용자 정보를 반환합니다.
@@ -72,6 +71,12 @@ export class OauthService {
       console.error('Failed to create provider user:', error);
       throw error;
     }
+  }
+
+
+  async findByEmailFrom(email: string) {
+    const user = await this.oauthRepository.findOneBy({ email });
+    return user;
   }
   
 }

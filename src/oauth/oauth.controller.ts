@@ -1,4 +1,4 @@
-import { Controller, Get, Header, Res, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Header, Res, HttpStatus, Query, Req } from '@nestjs/common';
 import { OauthService } from './oauth.service';
 
 
@@ -17,16 +17,15 @@ export class OauthController {
     res.redirect(HttpStatus.TEMPORARY_REDIRECT, kakaoAuthURL);
   }
 
-  @Get('callback')
-  async getKakaoInfo(@Query() query: { code }) {
-    const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
-    const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
+  @Get('kakao/callback')
+  async kakaoCallbacks(@Req() req, @Res() res) {
+    const accessToken = req.user.accessToken;
 
-    await this.oauthService.kakaoLogin(
-      KAKAO_REST_API_KEY,
-      KAKAO_REDIRECT_URI,
-      query.code,
-    );
-    return { message: '로그인 되었습니다' };
+    res.cookie('authorization', `Bearer ${accessToken}`, {
+      maxAge: 1000 * 60 * 60 * 12,
+      httpOnly: true,
+      secure: true,
+    });
+    res.redirect('/');
   }
 }

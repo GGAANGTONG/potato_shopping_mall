@@ -4,6 +4,7 @@ import { Profile, Strategy } from 'passport-kakao';
 import { UserService } from '../user/users.service';
 import { OauthService } from '../oauth/oauth.service';
 
+
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -27,7 +28,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
       const nickName = profile.displayName;
       const provider = profile.provider;
 
-      let user = await this.userService.findByEmail(email);
+      let user = await this.oauthService.findByEmailFrom(email);
 
       if (!user) {
         user = await this.oauthService.createProviderUser(
