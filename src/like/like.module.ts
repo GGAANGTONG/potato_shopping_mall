@@ -16,6 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 
 import { Racks } from '../storage/entities/rack.entity';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Like, Goods, Users, Stocks, Categories, Point, Racks]),
