@@ -14,7 +14,6 @@ import { GoodsService } from '../goods/goods.service';
 import { UserService } from '../user/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
-import { Racks } from '../storage/entities/rack.entity';
 
 import { Racks } from '../storage/entities/rack.entity';
 @Module({
