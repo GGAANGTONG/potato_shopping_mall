@@ -2,45 +2,31 @@
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Redis, {RedisOptions} from 'ioredis';
+import Redis from 'ioredis';
 import Redlock from 'redlock';
 
 @Injectable()
 export class RedisService {
-  private readonly clientA: Redis;
-  private readonly clientB: Redis;
+  private readonly client: Redis;
   // private readonly clients: Redis[];
   // private readonly maxClients: number;
   constructor(
-    
     private readonly configService: ConfigService,
-    maxClients: number,
+    // maxClients: number,
     // options: RedisOptions
   ) {
-    this.clientA = new Redis({
+    this.client = new Redis({
       host: this.configService.get<string>('REDIS_HOST'),
       port: this.configService.get<number>('REDIS_PORT'),
       password: this.configService.get<string>('REDIS_PASSWORD'),
-    }),
-    this.clientB = new Redis({
-      host: this.configService.get<string>('REDIS_HOST'),
-      port: this.configService.get<number>('REDIS_PORT'),
-      password: this.configService.get<string>('REDIS_PASSWORD'),
-    }
-  
-  );
-
+    })
     // this.maxClients = maxClients;
     // this.clients = [];
   }
 
  getClient(): Redis {
-    return this.clientA;
+    return this.client;
   }
-
-getClientForLock(): Redis {
-  return this.clientB
-}
 
 redlock(client): Redlock {
   const redlock = new Redlock(
@@ -60,8 +46,8 @@ redlock(client): Redlock {
   )
   return redlock
 }
-
 }
+
 
 ##src/payments/payments.service.ts - pay
 import { InjectRepository } from '@nestjs/typeorm';
@@ -143,49 +129,35 @@ export class PaymentsService {
         orders_id: order.id
       }
     })
+    //redlock 
+    const client = this.redisService.getClient()
+    const redlock = this.redisService.redlock(client)
+  
+
+    const lock = await redlock.acquire([`transaction: user_id = ${userId} & order_id = ${order.id}`], 6000)
+    try{
     //트랜잭션
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      //redlock 
-      const clientB = this.redisService.getClientForLock()
-      const redlock = this.redisService.redlock(clientB)
-
-    
-    const transaction = await redlock.using([`transaction: user_id = ${userId} & order_id = ${order.id}`, null], 5000, async(signal) => {
-    
-      function transactionError() {
-        const error =  signal.error
-        logger.errorLogger(error, `트랜잭션 에러가 발생하였습니다. error detail =${console.dir(error)}`)
-        return error;
-      }
-
-      for (let i = 0; i < ordersdetails.length; i++) {
+      for (let i = 0; i < ordersDetails.length; i++) {
         const goods = await queryRunner.manager.findOne(Goods, {
           relations: ['stock'],
           where: {
-            id: ordersdetails[i].goods_id
+            id: ordersDetails[i].goods_id
           }
         })
         
-        if(signal.aborted) {
-          throw transactionError()
-         }
-
-        const count = goods.stock.count - ordersdetails[i].od_count;
+        const count = goods.stock.count - ordersDetails[i].od_count;
         if (count < 0) {
           const error = new BadRequestException('재고가 없습니다.')
 
-          logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${JSON.stringify(createPaymentDto)}, ordersdetails = ${ordersdetails}`)
+          logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${JSON.stringify(createPaymentDto)}, ordersDetails = ${ordersDetails}`)
           throw error;
         }
 
         await queryRunner.manager.update(Stocks, { id: goods.stock.id }, { count })
         //Cart >> Orders 엔티티를 만들기 위해서 재고를 갱신하고 총액을 구하는 과정
-
-        if(signal.aborted) {
-          throw transactionError()
-         }
       }
 
       const paying = order.o_total_price
@@ -200,10 +172,6 @@ export class PaymentsService {
       user.points = afterPaidPoints;
       await queryRunner.manager.save(Users, user);
 
-      if(signal.aborted) {
-        throw transactionError()
-       }
-
       const newPayments = queryRunner.manager.create(Payments, {
         orders_id,
         user_id: userId,
@@ -211,34 +179,31 @@ export class PaymentsService {
       });
       const returnNewPayments = await queryRunner.manager.save(Payments, newPayments);
 
-      if(signal.aborted) {
-        throw transactionError()
-       }
-
       await queryRunner.manager.update(Orders, { user_id: userId, id: orders_id }, { p_status: true })
-
-      if(signal.aborted) {
-        throw transactionError()
-       }
 
       await queryRunner.commitTransaction();
       await queryRunner.release();
 
-      if(signal.aborted) {
-        throw transactionError()
-       }
-
       return returnNewPayments
 
-    })
-      return transaction
+    } catch(err) {
+    const error =  new Error('트랜잭션 에러가 발생하였습니다.')
+    logger.errorLogger(error, `error detail =${console.dir(error)}`)
+    throw error;
+    }
     } catch (err) {
-      await queryRunner.rollbackTransaction();
-      await queryRunner.release();
-      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
+      const fatalError = new InternalServerErrorException('동시성 제어 관련 에러가 발생했습니다.')
       logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
       throw fatalError;
+    } finally {
+      if(lock) {
+        await lock.release()
+      }
     }
+  } catch(err) {
+    const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
+    logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
+    throw fatalError;
   }
-}
+  }
 
