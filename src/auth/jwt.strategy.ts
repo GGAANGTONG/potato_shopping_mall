@@ -51,3 +51,5 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return user;
   }
 }
+
+//accessToken을 검증하고, accessToken이 만료됐다면 refreshToken을 통해 accessToken을 재발급 하는 로직
