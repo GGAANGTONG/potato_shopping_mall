@@ -89,16 +89,20 @@ export class OrdersService {
         }
   
         const goods = await queryRunner.manager.createQueryBuilder(Goods, 'goods')
-          .leftJoinAndSelect('goods.stock', 'stock')
           .where('goods.id = :id', { id: cart.goods_id })
-          .getOne();
-  
-        if (!goods || goods.stock.count < cart.ct_count) {
+          .getMany();
+        
+        const stockCount = await queryRunner.manager.createQueryBuilder(Stocks, 'stocks')
+          .select("SUM(stocks.count)", "total")
+          .where('stocks.goods_id = :goodsId', { goodsId: cart.goods_id })
+          .getRawOne();
+      
+        if (!goods || stockCount.total < cart.ct_count) {
           const error = new BadRequestException('재고가 부족합니다.');
           logger.errorLogger(error, `userId = ${userId}, goodsId = ${cart.goods_id}`);
           throw error;
         }
-        o_total_price += carts[i].ct_count * carts[i].ct_price
+        o_total_price += cart.ct_count * cart.ct_price
         //Cart >> Orders 엔티티를 만들기 위해서 재고를 갱신하고 총액을 구하는 과정
       }
 
@@ -109,7 +113,6 @@ export class OrdersService {
       })
 
       const order = await queryRunner.manager.save(Orders, makingOrder)
-
 
       for (let i = 0; i < carts.length; i++) {
         const ordersDetail = queryRunner.manager.create(OrdersDetails, {
@@ -128,7 +131,7 @@ export class OrdersService {
       }
   
       await queryRunner.commitTransaction();
-      return order.generatedMaps[0]; // 생성된 주문 객체 반환
+      return order; // 생성된 주문 객체 반환
     } catch (err) {
       await queryRunner.rollbackTransaction();
       const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.');
