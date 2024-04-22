@@ -8,7 +8,7 @@ import {
   Param,
   Patch,
   Post,
-  Query,
+  Headers,
   Req,
   Res,
   UploadedFile,
@@ -44,7 +44,7 @@ export class UserController {
 
   // refresh토큰이 저장 되는곳이 없다 레디스에 저장하면 어떨까?
   @Post('login')
-  async signIn(@Body() signInDto: SignInDto, @Res() res) {
+  async signIn(@Body() signInDto: SignInDto ,@Res() res) {
     const user = await this.userService.signIn(signInDto);
     res.cookie('authorization', `Bearer ${user.accessToken}`);
     return res.status(HttpStatus.OK).json({
@@ -94,6 +94,19 @@ export class UserController {
   }
 
 
+  @Post('token/refresh')
+  postTokenRefresh(@Headers('authorization') rawToken: string){
+    const token = this.userService.extractTokenFromHeader(rawToken, true);
+    const newToken = this.userService.rotateToken(token, false);
+    return {
+      accessToken: newToken,
+    }
+  }
+
+
+
+
+
   // @Get('/oauth')
   // @Header('Content-Type', 'text/html')
   // redirectToKakaoAuth(@Res() res) {
@@ -117,3 +130,6 @@ export class UserController {
   //   return { message: '로그인 되었습니다' };
   // }
 }
+
+
+

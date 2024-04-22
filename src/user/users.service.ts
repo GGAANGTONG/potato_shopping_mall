@@ -18,7 +18,7 @@ import { Point } from '../point/entities/point.entity';
 import { SignInDto } from './dto/sign_in.dto';
 import { UpdateDto } from './dto/update.dto';
 import { S3FileService } from '../common/utils/s3_fileupload';
-// import { RedisService } from 'src/redis/redis.service';
+import { RedisService } from 'src/redis/redis.service';
 import { Grade } from './type/user_grade.type';
 
 //2
@@ -33,7 +33,7 @@ export class UserService {
     // private http: HttpService,
     private readonly s3FileService: S3FileService,
     private dataSource: DataSource,
-    //  private readonly redisService: RedisService
+     private readonly redisService: RedisService
   ) {}
 
   async register(signUpDto: SignUpDto, file: Express.Multer.File): Promise<Users> {
@@ -69,38 +69,40 @@ export class UserService {
   }
 
   async signIn(signInDto: SignInDto) {
-    const user = await this.usersRepository.findOne({
-      select: ['id', 'email', 'password', 'nickname', 'profile', 'name'],
-      where: { email: signInDto.email },
-    });
-    if (_.isNull(user)) {
+    const user = await this.usersRepository
+      .createQueryBuilder('user')
+      .select(['user.id', 'user.email', 'user.password', 'user.nickname', 'user.profile', 'user.name'])
+      .where('user.email = :email', { email: signInDto.email })
+      .getOne();
+  
+    if (!user) {
       throw new UnauthorizedException('이메일을 확인하세요.');
     }
-    const comparedPassword = await compare(signInDto.password, user.password);
-    if (!comparedPassword) {
+  
+    const isPasswordValid = await compare(signInDto.password, user.password);
+    if (!isPasswordValid) {
       throw new UnauthorizedException('비밀번호를 확인하세요.');
     }
+  
     const payload = { email: user.email, sub: user.id };
-
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_ACCESS_TOKEN_SECRET,
       expiresIn: '7d',
     });
-
+  
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_REFRESH_TOKEN_SECRET,
       expiresIn: '7d',
     });
-    
-   
-    // await this.redisService.saveRefreshToken(user.id.toString(), refreshToken, 604800);
-    // console.log(1,refreshToken)
+  
+    await this.redisService.saveRefreshToken(user.id.toString(), refreshToken, 604800); // 7 days in seconds
     
     return {
       accessToken,
       refreshToken,
     };
   }
+  
 
   async findAll(): Promise<Users[]> {
     const users = await this.usersRepository.find({
@@ -231,6 +233,40 @@ export class UserService {
         return 0;
     }
   }
+
+  signToken(user: Pick<Users, 'email' | 'id'>, isRefreshToken: boolean){
+    const payload = {
+        email: user.email,
+        sub: user.id,
+        type: isRefreshToken ? 'refresh' : 'access',
+    };
+    return this.jwtService.sign(payload, {
+      secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+        expiresIn: isRefreshToken ? 3600: 300,
+    })
+}
+
+
+  extractTokenFromHeader(header: string, isBearer: boolean){
+    const splitToken = header.split(' ')
+    const prefix = isBearer ? 'Bearer' : 'Basic';
+    if(splitToken.length !== 2 || splitToken[0] !== prefix){
+        throw new UnauthorizedException('잘못된 토큰입니다.')
+    }
+    const token = splitToken[1];
+    return token;
+}
+
+
+rotateToken(token: string, isRefreshToken: boolean){
+  const decoded = this.jwtService.verify(token,{
+    secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+  })
+
+  return this.signToken({
+      ...decoded,
+  }, isRefreshToken)
+}
 
   
 

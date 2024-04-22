@@ -16,4 +16,13 @@ export class RedisService {
   getClient(): Redis {
     return this.client;
   }
+
+  async saveRefreshToken(userId: string, refreshToken: string, ttl: number): Promise<void> {
+    try {
+        await this.client.set(`refreshToken:${userId}`, refreshToken, 'EX', ttl);
+    } catch (error) {
+        console.error('실패햇습니다', error);
+        throw error; // 선택적: 오류를 다시 throw하여 상위 로직에서 처리할 수 있도록 함
+    }
+}
 }

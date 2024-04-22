@@ -17,7 +17,7 @@ export class OauthController {
     res.redirect(HttpStatus.TEMPORARY_REDIRECT, kakaoAuthURL);
   }
 
-  @Get('kakao/callback')
+  @Get('/callback')
   async kakaoCallbacks(@Req() req, @Res() res) {
     const accessToken = req.user.accessToken;
 
