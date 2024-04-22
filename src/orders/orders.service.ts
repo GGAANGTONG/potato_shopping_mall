@@ -216,17 +216,20 @@ export class OrdersService {
     }
 
     const queryRunner = this.dataSource.createQueryRunner();
+
+    const order = await queryRunner.manager.findOne(Orders, {
+      where: { id: orderId }
+    });
+    if (!order) {
+      const error = new NotFoundException('주문을 찾을 수 없습니다.');
+      logger.errorLogger(error, `orderId  = ${orderId}, order = ${order}`)
+      throw error
+    }
+
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const order = await queryRunner.manager.findOne(Orders, {
-        where: { id: orderId }
-      });
-      if (!order) {
-        const error = new NotFoundException('주문을 찾을 수 없습니다.');
-        logger.errorLogger(error, `orderId  = ${orderId}, order = ${order}`)
-        throw error
-      }
+
 
       // 환불 로직
       // 재고 반환 로직 추가
