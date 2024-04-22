@@ -1,0 +1,8 @@
+scenarios:
+  - name: "4-1. [Orders][purchase(이름 바꿔야 함)] 100,000VUs"
+    flow:
+      - loop:
+        - post:
+            url: "/orders"
+        count: 1
+        vus: 100000

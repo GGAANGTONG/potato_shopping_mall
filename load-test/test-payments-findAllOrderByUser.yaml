@@ -1,0 +1,8 @@
+scenarios:
+  - name: "5-2. [Payments][findAllOrderByUser] - 100,000VUs"
+    flow:
+      - loop:
+        - get:
+            url: "/payments/{{:id}}"
+        count: 1
+        vus: 100000
