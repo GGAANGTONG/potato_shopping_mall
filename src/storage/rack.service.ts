@@ -122,7 +122,7 @@ export class RackService {
           // 중복 상품 체크
           const existingGoodsInRack = await entityManager.findOne(Stocks, {
             where: {
-              goods: { id: goods_id },
+              goods_id: goods_id ,
               rack: { id: rack_id },
             },
           });
