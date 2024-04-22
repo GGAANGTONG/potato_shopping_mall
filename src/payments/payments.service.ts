@@ -27,6 +27,8 @@ export class PaymentsService {
     private ordersRepository: Repository<Orders>,
     @InjectRepository(OrdersDetails)
     private ordersDetailsRepository: Repository<OrdersDetails>,
+    @InjectRepository(Stocks)
+    private stocksRepository: Repository<Stocks>,
     private readonly dataSource: DataSource,
   ) { }
 
@@ -40,126 +42,123 @@ export class PaymentsService {
       logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${createPaymentDto}`)
       throw error
     }
-    await validation(CreatePaymentDto, createPaymentDto)
-    const { orders_id } = createPaymentDto
+  
+    await validation(CreatePaymentDto, createPaymentDto);
+    const { orders_id } = createPaymentDto;
+  
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+  
     try {
-      const order = await queryRunner.manager.findOne(Orders, {
-        where: {
-          id: orders_id, user_id: userId
-        }
-
-      })
-
+      const order = await queryRunner.manager.createQueryBuilder(Orders, 'order')
+        .where('order.id = :orders_id AND order.user_id = :userId', { orders_id, userId })
+        .getOne();
+  
       if (!order) {
         const error = new BadRequestException('존재하지 않는 주문입니다.');
         logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, order = ${order}`)
         throw error
       }
-
-      const user = await queryRunner.manager.findOne(Users, {
-        where: {
-          id: userId,
-        },
-      });
-
+  
+      const user = await queryRunner.manager.createQueryBuilder(Users, 'user')
+        .where('user.id = :userId', { userId })
+        .getOne();
+  
       if (!user) {
         const error = new BadRequestException('존재하지 않는 유저입니다.');
         logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, order = ${user}`)
         throw error
       }
-
-      const ordersdetails = await queryRunner.manager.find(OrdersDetails, {
-        where: {
-          orders_id: order.id
-        }
-      })
-
-      for (let i = 0; i < ordersdetails.length; i++) {
-        const goods = await queryRunner.manager.findOne(Goods, {
-          relations: ['stock'],
-          where: {
-            id: ordersdetails[i].goods_id
-          }
-        })
-        const count = goods.stock.count - ordersdetails[i].od_count;
-        console.log('제육!!!!!!!!!', count)
-        if (count < 0) {
-          const error = new BadRequestException('재고가 없습니다.')
-
-          logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${JSON.stringify(createPaymentDto)}, ordersdetails = ${ordersdetails}, `)
+  
+      const details = await queryRunner.manager.createQueryBuilder(OrdersDetails, 'details')
+        .where('details.orders_id = :orders_id', { orders_id })
+        .getMany();
+  
+      for (const detail of details) {
+        const goods = await queryRunner.manager.createQueryBuilder(Goods, 'goods')
+        const stocks = await queryRunner.manager.createQueryBuilder(Stocks, 'stocks')
+          .leftJoinAndSelect('goods.stock', 'stock')
+          .where('goods.id = :goods_id', { goods_id: detail.goods_id })
+          .getOne();
+  
+        if (!goods || stocks.count < detail.od_count) {
+          const error = new BadRequestException('재고가 없습니다.');
+          logger.errorLogger(error, `userId = ${userId}, goodsId = ${detail.goods_id}`);
           throw error;
         }
-
-        await queryRunner.manager.update(Stocks, { id: goods.stock.id }, { count })
-        //Cart >> Orders 엔티티를 만들기 위해서 재고를 갱신하고 총액을 구하는 과정
+  
+        const newStockCount = stocks.count - detail.od_count;
+        await queryRunner.manager.createQueryBuilder()
+          .update(Stocks)
+          .set({ count: newStockCount })
+          .where('id = :stockId', { stockId: stocks.id })
+          .execute();
       }
-
-
-      const paying = order.o_total_price
-      const afterPaidPoints = user.points - paying; // 포인트가 부족한 경우를 확인하기 위해 변경
-
-
-
-      if (afterPaidPoints < 0) {
+  
+      const paymentAmount = order.o_total_price;
+      const newPoints = user.points - paymentAmount;
+  
+      if (newPoints < 0) {
         const error = new BadRequestException('포인트가 부족합니다.');
-        logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${createPaymentDto}`)
+        logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${createPaymentDto}`) 
         throw error
       }
-
-      user.points = afterPaidPoints;
-      await queryRunner.manager.save(Users, user);
-
-      const newPayments = await this.paymentsRepository.create({
+  
+      await queryRunner.manager.createQueryBuilder()
+        .update(Users)
+        .set({ points: newPoints })
+        .where('id = :userId', { userId })
+        .execute();
+  
+      const newPayments = queryRunner.manager.create(Payments, {
         orders_id,
         user_id: userId,
-        p_total_price: paying,
+        p_total_price: paymentAmount,
       });
       const returnNewPayments = await queryRunner.manager.save(Payments, newPayments);
-      await queryRunner.manager.update(Orders, { user_id: userId, id: orders_id }, { p_status: true, o_status: Status.PayDone })
-      if (order.o_status == Status.PayDone) {
-        const error = new BadRequestException('이미 결제된 주문입니다.');
-        throw error
-      }
+      await queryRunner.manager.update(Orders, { user_id: userId, id: orders_id }, { p_status: true })
       await queryRunner.commitTransaction();
       await queryRunner.release();
-
-      return returnNewPayments
-    } catch (err) {
+      return returnNewPayments;
+    } catch (error) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
-      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
-      logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}`)
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.');
+      logger.fatalLogger(fatalError, `userId = ${userId}, orders_id = ${orders_id}`);
       throw fatalError;
     }
-
   }
+  
 
 
   // 유저별 결제 목록 전체 조회
   async findAllOrderbyUser(userId: number): Promise<Payments[]> {
     if (_.isNil(userId) || userId == 0) {
-      const error = new BadRequestException('잘못된 요청입니다!')
+      const error = new BadRequestException('잘못된 요청입니다!') 
       logger.errorLogger(error, `userId = ${userId}`)
       throw error
     }
+  
     try {
-      // null,undefined,0 들어올 경우 대비 로직 추가 //완료
-      const payments = await this.paymentsRepository.find({ where: { user_id: userId } });
+      const payments = await this.paymentsRepository
+        .createQueryBuilder("payment")
+        .where("payment.user_id = :userId", { userId })
+        .getMany();
+  
       if (!payments || payments.length === 0) {
         const error = new NotFoundException('결제 정보가 없습니다.');
-        logger.errorLogger(error, `userId = ${userId}, payments = ${payments}`)
+        logger.errorLogger(error, `userId = ${userId}, payments = ${payments}`) 
         throw error;
       }
       return payments;
     } catch (error) {
-      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
-      logger.fatalLogger(fatalError, `userId = ${userId}`)
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.');
+      logger.fatalLogger(fatalError, `userId = ${userId}`);
       throw fatalError;
     }
   }
+  
 
   // 전체 결제 정보 확인
   async findAllOrderbyAdmin(): Promise<Payments[]> {
@@ -181,24 +180,31 @@ export class PaymentsService {
   // 상세 결제 정보 확인
   async findOneOrderbyBoth(paymentsId: number): Promise<Payments> {
     if (_.isNil(paymentsId) || paymentsId == 0) {
-      const error = new BadRequestException('잘못된 요청입니다!')
+      const error = new BadRequestException('잘못된 요청입니다!') 
       logger.errorLogger(error, `paymentsId = ${paymentsId}`)
       throw error
     }
+  
     try {
-      const payments = await this.paymentsRepository.findOne({ where: { id: paymentsId } });
+      // 쿼리 빌더를 사용하여 결제 정보 조회
+      const payments = await this.paymentsRepository
+        .createQueryBuilder("payment")
+        .where("payment.id = :id", { id: paymentsId })
+        .getOne();
+  
       if (!payments) {
         const error = new NotFoundException('결제 정보가 없습니다.');
-        logger.errorLogger(error, `paymentsId = ${paymentsId}, payments = ${payments}`)
+        logger.errorLogger(error, `paymentsId = ${paymentsId}, payments = ${payments}`) 
         throw error;
       }
       return payments;
     } catch (error) {
-      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
-      logger.fatalLogger(fatalError, `paymentsId = ${paymentsId}`)
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.');
+      logger.fatalLogger(fatalError, `paymentsId = ${paymentsId}`);
       throw fatalError;
     }
   }
+  
 
   // 결제 취소
   //트랜잭션 필요

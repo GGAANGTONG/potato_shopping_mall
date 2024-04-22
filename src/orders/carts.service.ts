@@ -9,8 +9,9 @@ import { Point } from '../point/entities/point.entity';
 import { Payments } from '../payments/entities/payments.entity';
 import { Orders } from './entities/orders.entity';
 import _ from 'lodash';
-import logger from 'src/common/log/logger';
-import { validation } from 'src/common/pipe/validationPipe';
+import logger from '../common/log/logger';
+import { validation } from '../common/pipe/validationPipe';
+import { Stocks } from '../goods/entities/stocks.entity';
 
 @Injectable()
 export class CartService {
@@ -21,6 +22,8 @@ export class CartService {
     private readonly goodsRepository: Repository<Goods>,
     @InjectRepository(Orders)
     private readonly ordersRepository: Repository<Orders>,
+    @InjectRepository(Stocks)
+    private stocksRepository: Repository<Stocks>,
 
 
   ) { }
@@ -48,15 +51,22 @@ export class CartService {
         id: goodsId,
       },
     });
+
+    const stocks = await this.stocksRepository.findOne({
+      where:{
+        count: ctCount,
+    },
+  });
+
     if (!goods) {
       const error = new BadRequestException('존재하지 않는 상품입니다.');
       logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}, goods = ${goods}`)
       throw error
     }
 
-    const count = goods.stock.count - ctCount;
+    const counts = stocks.count - ctCount;
 
-    if (count < 0) {
+    if (counts < 0) {
       const error = new BadRequestException('재고가 없습니다.');
       logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}`)
       throw error

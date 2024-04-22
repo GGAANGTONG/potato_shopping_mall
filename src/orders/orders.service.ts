@@ -13,6 +13,7 @@ import logger from '../common/log/logger';
 import { OrdersDetails } from './entities/ordersdetails.entity';
 import { validation } from '../common/pipe/validationPipe';
 import _ from 'lodash';
+import { Stocks } from 'src/goods/entities/stocks.entity';
 
 
 @Injectable()
@@ -80,18 +81,21 @@ export class OrdersService {
     try {
 
       let o_total_price: number = 0;
-      for (let i = 0; i < carts.length; i++) {
-        const goods = await queryRunner.manager.findOne(Goods, {
-          relations: ['stock'],
-          where: {
-            id: carts[i].goods_id
-          }
-        })
-        const count = goods.stock.count - carts[i].ct_count;
-        if (count < 0) {
-          const error = new BadRequestException('재고가 없습니다.')
-
-          logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${carts}, carts_id = ${carts_id}`)
+      for (const cart of carts) {
+        if (cart.user_id !== userId) {
+          const error = new BadRequestException('유효하지 않은 요청: 카트 소유권이 일치하지 않습니다.');
+          logger.errorLogger(error, `userId = ${userId}, cartId = ${cart.id}`);
+          throw error;
+        }
+  
+        const goods = await queryRunner.manager.createQueryBuilder(Goods, 'goods')
+          .leftJoinAndSelect('goods.stock', 'stock')
+          .where('goods.id = :id', { id: cart.goods_id })
+          .getOne();
+  
+        if (!goods || goods.stock.count < cart.ct_count) {
+          const error = new BadRequestException('재고가 부족합니다.');
+          logger.errorLogger(error, `userId = ${userId}, goodsId = ${cart.goods_id}`);
           throw error;
         }
         o_total_price += carts[i].ct_count * carts[i].ct_price
@@ -122,19 +126,17 @@ export class OrdersService {
 
         await queryRunner.manager.save(OrdersDetails, ordersDetail)
       }
-
+  
       await queryRunner.commitTransaction();
-      await queryRunner.release();
-      return order;
+      return order.generatedMaps[0]; // 생성된 주문 객체 반환
     } catch (err) {
       await queryRunner.rollbackTransaction();
-      await queryRunner.release();
-
-      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
-      logger.fatalLogger(fatalError, `userId = ${userId}, createOrderDto = ${createOrderDto}`)
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.');
+      logger.fatalLogger(fatalError, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}`);
       throw fatalError;
+    } finally {
+      await queryRunner.release();
     }
-
   }
 
 
@@ -143,44 +145,51 @@ export class OrdersService {
   // 유저별 주문 목록 전체 조회
   async findAllOrderbyUser(userId: number): Promise<Orders[]> {
     try {
-
       if (_.isNil(userId) || userId == 0) {
         const error = new BadRequestException('잘못된 요청입니다!')
         logger.errorLogger(error, `userId = ${userId}`)
         throw error
       }
-
-      const orders = await this.ordersRepository.find({ where: { user_id: userId } });
+  
+      const orders = await this.ordersRepository
+        .createQueryBuilder("order")
+        .where("order.user_id = :userId", { userId: userId })
+        .getMany();
+  
       if (!orders || orders.length === 0) {
         const error = new NotFoundException('주문 정보가 없습니다.');
-        logger.errorLogger(error, `userId = ${userId}, orders = ${orders}`)
+        logger.errorLogger(error, `userId = ${userId}, orders = ${orders}`);
         throw error;
       }
       return orders;
     } catch (error) {
-      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
-      logger.fatalLogger(fatalError, `userId = ${userId}`)
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.');
+      logger.fatalLogger(fatalError, `userId = ${userId}`);
       throw fatalError;
     }
   }
+  
 
   // 전체 주문 정보 확인
   async findAllOrderbyAdmin(): Promise<Orders[]> {
     try {
-      const orders = await this.ordersRepository.find();
+      const orders = await this.ordersRepository
+        .createQueryBuilder("order")
+        .getMany();
+  
       if (!orders || orders.length === 0) {
         const error = new NotFoundException('주문 정보가 없습니다.');
-        logger.errorLogger(error, `orders = ${orders}`)
+        logger.errorLogger(error, `orders = ${orders}`);
         throw error;
       }
       return orders;
     } catch (error) {
-      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
-      logger.fatalLogger(fatalError, `parameter = none`)
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.');
+      logger.fatalLogger(fatalError, `parameter = none`);
       throw fatalError;
     }
   }
-
+  
 
   // 상세 주문 정보 확인
   async findOneOrderbyBoth(orderId: number): Promise<Orders> {
@@ -191,20 +200,26 @@ export class OrdersService {
         logger.errorLogger(error, `orderId = ${orderId}`)
         throw error
       }
-
-      const order = await this.ordersRepository.findOne({ where: { id: orderId } });
+  
+      // 쿼리 빌더를 사용하여 주문 데이터 조회
+      const order = await this.ordersRepository
+        .createQueryBuilder("order")
+        .where("order.id = :id", { id: orderId })
+        .getOne();
+  
       if (!order) {
         const error = new NotFoundException('주문 정보가 없습니다.');
-        logger.errorLogger(error, `orderId = ${orderId}, order = ${order}`)
+        logger.errorLogger(error, `orderId = ${orderId}, order = ${order}`);
         throw error;
       }
       return order;
     } catch (error) {
-      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
-      logger.fatalLogger(fatalError, `orderId = ${orderId}`)
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.');
+      logger.fatalLogger(fatalError, `orderId = ${orderId}`);
       throw fatalError;
     }
   }
+  
 
   // 주문 취소
   async cancelOrder(userId: number, orderId: number): Promise<Orders> {
@@ -214,7 +229,7 @@ export class OrdersService {
       logger.errorLogger(error, `orderId = ${orderId} userId = ${userId}`)
       throw error
     }
-
+  
     const queryRunner = this.dataSource.createQueryRunner();
 
     const order = await queryRunner.manager.findOne(Orders, {
