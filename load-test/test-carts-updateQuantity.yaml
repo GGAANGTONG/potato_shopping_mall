@@ -1,0 +1,8 @@
+scenarios:
+  - name: "3-3. [Carts][updateQuantity] - 10,000VUs"
+    flow:
+      - loop:
+        - patch:
+            url: "update/{{:cartId}}"
+        count: 1
+        vus: 10000

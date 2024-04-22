@@ -15,6 +15,7 @@ import { RedisModule } from './redis/redis.module';
 import { BoardsModule } from './boards/boards.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { StorageModule } from './storage/storage.module';
+import { OauthModule } from './oauth/oauth.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { StorageModule } from './storage/storage.module';
     RedisModule,
     BoardsModule,
     StorageModule,
+    OauthModule
   ],
   controllers: [AppController],
   providers: [],
