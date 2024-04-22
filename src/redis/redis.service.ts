@@ -22,28 +22,28 @@ export class RedisService {
     // this.clients = [];
   }
 
- getClient(): Redis {
+  getClient(): Redis {
     return this.client;
   }
 
-redlock(client): Redlock {
-  const redlock = new Redlock(
-    [client],
-    {
-      //시간 동기화
-      driftFactor: 0.01,
-      //재시도 횟수
-      retryCount: 10,
-      //재시도 간 간격
-      retryDelay: 200,
-      //최대 딜레이 시간
-      retryJitter:300,
-      //잠금 만료 연장 하는 시점
-      automaticExtensionThreshold: 100,
-    }
-  )
-  return redlock
-}
+  redlock(client): Redlock {
+    const redlock = new Redlock(
+      [client],
+      {
+        //시간 동기화
+        driftFactor: 0.01,
+        //재시도 횟수
+        retryCount: 10,
+        //재시도 간 간격
+        retryDelay: 200,
+        //최대 딜레이 시간
+        retryJitter: 300,
+        //잠금 만료 연장 하는 시점
+        automaticExtensionThreshold: 100,
+      }
+    )
+    return redlock
+  }
 }
 
 
