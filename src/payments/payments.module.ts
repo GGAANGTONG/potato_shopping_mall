@@ -7,8 +7,9 @@ import { Users } from '../user/entities/user.entitiy';
 import { Point } from '../point/entities/point.entity';
 import { Orders } from '../orders/entities/orders.entity';
 import { OrdersDetails } from '../orders/entities/ordersdetails.entity';
+import { Stocks } from '../goods/entities/stocks.entity';
 @Module({
-    imports: [TypeOrmModule.forFeature([Payments, Users, Point, Orders, OrdersDetails])],
+    imports: [TypeOrmModule.forFeature([Payments, Users, Point, Orders, OrdersDetails, Stocks])],
     providers: [PaymentsService],
     controllers: [PaymentsController],
     exports: [PaymentsService],
