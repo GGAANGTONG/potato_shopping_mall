@@ -8,8 +8,8 @@ import { UserService } from 'src/user/users.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Point } from 'src/point/entities/point.entity';
-import { S3FileService } from 'src/common/utils/s3_fileupload';
-
+import { S3FileService } from '../common/utils/s3_fileupload';
+import { RedisService } from '../redis/redis.service';
 @Module({
   imports: [
     JwtModule.registerAsync({
@@ -21,6 +21,6 @@ import { S3FileService } from 'src/common/utils/s3_fileupload';
     TypeOrmModule.forFeature([Users, Point]),
     HttpModule],
   controllers: [OauthController],
-  providers: [OauthService, UserService, S3FileService],
+  providers: [OauthService, UserService, S3FileService, RedisService],
 })
 export class OauthModule {}
