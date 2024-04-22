@@ -27,6 +27,8 @@ export class PaymentsService {
     private ordersRepository: Repository<Orders>,
     @InjectRepository(OrdersDetails)
     private ordersDetailsRepository: Repository<OrdersDetails>,
+    @InjectRepository(Stocks)
+    private stocksRepository: Repository<Stocks>,
     private readonly dataSource: DataSource,
   ) { }
 
@@ -75,21 +77,22 @@ export class PaymentsService {
   
       for (const detail of details) {
         const goods = await queryRunner.manager.createQueryBuilder(Goods, 'goods')
+        const stocks = await queryRunner.manager.createQueryBuilder(Stocks, 'stocks')
           .leftJoinAndSelect('goods.stock', 'stock')
           .where('goods.id = :goods_id', { goods_id: detail.goods_id })
           .getOne();
   
-        if (!goods || goods.stock.count < detail.od_count) {
+        if (!goods || stocks.count < detail.od_count) {
           const error = new BadRequestException('재고가 없습니다.');
           logger.errorLogger(error, `userId = ${userId}, goodsId = ${detail.goods_id}`);
           throw error;
         }
   
-        const newStockCount = goods.stock.count - detail.od_count;
+        const newStockCount = stocks.count - detail.od_count;
         await queryRunner.manager.createQueryBuilder()
           .update(Stocks)
           .set({ count: newStockCount })
-          .where('id = :stockId', { stockId: goods.stock.id })
+          .where('id = :stockId', { stockId: stocks.id })
           .execute();
       }
   
@@ -108,7 +111,7 @@ export class PaymentsService {
         .where('id = :userId', { userId })
         .execute();
   
-      const payment = queryRunner.manager.create(Payments, {
+      const newPayments = queryRunner.manager.create(Payments, {
         orders_id,
         user_id: userId,
         p_total_price: paymentAmount,
@@ -117,7 +120,7 @@ export class PaymentsService {
       await queryRunner.manager.update(Orders, { user_id: userId, id: orders_id }, { p_status: true })
       await queryRunner.commitTransaction();
       await queryRunner.release();
-      return savedPayment;
+      return returnNewPayments;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
@@ -184,17 +187,17 @@ export class PaymentsService {
   
     try {
       // 쿼리 빌더를 사용하여 결제 정보 조회
-      const payment = await this.paymentsRepository
+      const payments = await this.paymentsRepository
         .createQueryBuilder("payment")
         .where("payment.id = :id", { id: paymentsId })
         .getOne();
   
-      if (!payment) {
+      if (!payments) {
         const error = new NotFoundException('결제 정보가 없습니다.');
         logger.errorLogger(error, `paymentsId = ${paymentsId}, payments = ${payments}`) 
         throw error;
       }
-      return payment;
+      return payments;
     } catch (error) {
       const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.');
       logger.fatalLogger(fatalError, `paymentsId = ${paymentsId}`);
