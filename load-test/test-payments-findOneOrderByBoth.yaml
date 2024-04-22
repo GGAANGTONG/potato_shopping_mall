@@ -1,0 +1,8 @@
+scenarios:
+  - name: "5-3. [Payments][findOneOrderByBoth(무슨 뜻이지)] - 100,000VUs"
+    flow:
+      - loop:
+        - post:
+            url: "/payments/:paymentId/cancel"
+        count: 1
+        vus: 100000

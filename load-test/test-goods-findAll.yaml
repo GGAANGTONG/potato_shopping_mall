@@ -1,0 +1,8 @@
+scenarios:
+  - name: "2-1. [Goods][findAll] - 100,000VUs"
+    flow:
+      - loop:
+        - get:
+            url: "/goods"
+        count: 1
+        vus: 100000

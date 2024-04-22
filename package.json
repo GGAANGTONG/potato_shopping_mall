@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prepare": "if [ -z \"$CI\" ]; then husky install; fi"
+    "prepare": "if '%CI%'=='' (husky install)"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
@@ -33,6 +33,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.3.0",
     "@nestjs/typeorm": "^10.0.2",
+    "@opensearch-project/opensearch": "^2.7.0",
     "@types/bcrypt": "^5.0.2",
     "@types/lodash": "^4.17.0",
     "@types/multer": "^1.4.11",
@@ -57,6 +58,7 @@
     "passport-kakao": "^1.0.1",
     "passport-naver-v2": "^2.0.8",
     "redis": "^4.6.13",
+    "redlock": "^5.0.0-beta.2",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "sharp": "^0.33.3",

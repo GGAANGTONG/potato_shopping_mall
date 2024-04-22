@@ -35,7 +35,7 @@ export class CartService {
     await validation(CreateCartDto, createCartDto)
 
     if (_.isNil(userId) || userId == 0 || _.isNil(goodsId) || goodsId == 0) {
-      const error = new BadRequestException('잘못된 요청입니다!') 
+      const error = new BadRequestException('잘못된 요청입니다!')
       logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}`)
       throw error
     }
@@ -49,7 +49,7 @@ export class CartService {
       },
     });
     if (!goods) {
-      const error = new BadRequestException('존재하지 않는 상품입니다.'); 
+      const error = new BadRequestException('존재하지 않는 상품입니다.');
       logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}, goods = ${goods}`)
       throw error
     }
@@ -57,7 +57,7 @@ export class CartService {
     const count = goods.stock.count - ctCount;
 
     if (count < 0) {
-      const error = new BadRequestException('재고가 없습니다.'); 
+      const error = new BadRequestException('재고가 없습니다.');
       logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}`)
       throw error
     }
@@ -90,7 +90,7 @@ export class CartService {
   // 장바구니 특정 상품 삭제(cartId를 goodsId로 바꾸는게 나을 거 같은데<-완료)
   async removeFromCart(userId: number, goodsId: number) {
     if (_.isNil(userId) || userId == 0 || _.isNil(goodsId) || goodsId == 0) {
-      const error = new BadRequestException('잘못된 요청입니다!') 
+      const error = new BadRequestException('잘못된 요청입니다!')
       logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}`)
       throw error
     }
@@ -103,7 +103,7 @@ export class CartService {
     })
 
     if (!cartInfo) {
-      const  error = new NotFoundException('장바구니에 해당 상품이 존재하지 않습니다.');
+      const error = new NotFoundException('장바구니에 해당 상품이 존재하지 않습니다.');
       logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}, cartInfo = ${JSON.stringify(cartInfo)}`)
       throw error
     }
@@ -124,13 +124,13 @@ export class CartService {
   async updateQuantity(userId: number, cartId: number, ctCounts: number): Promise<Carts> {
 
     if (_.isNil(userId) || userId == 0 || _.isNil(cartId) || cartId == 0 || _.isNil(ctCounts) || ctCounts == 0) {
-      const error = new BadRequestException('잘못된 요청입니다!') 
+      const error = new BadRequestException('잘못된 요청입니다!')
       logger.errorLogger(error, `userId = ${userId}, cartId = ${cartId}`)
       throw error
     }
 
     if (_.isNil(ctCounts) || ctCounts == 0) {
-      const error = new BadRequestException('변경할 수량을 입력해 주세요.') 
+      const error = new BadRequestException('변경할 수량을 입력해 주세요.')
       logger.errorLogger(error, `userId = ${userId}, cartId = ${cartId}, ctCounts = ${ctCounts}`)
       throw error
     }
@@ -140,7 +140,7 @@ export class CartService {
     });
 
     if (!cartItem) {
-      const  error = new NotFoundException('장바구니에 상품을 찾을 수 없습니다.');
+      const error = new NotFoundException('장바구니에 상품을 찾을 수 없습니다.');
       logger.errorLogger(error, `userId = ${userId}, cartId = ${cartId}, cartItem = ${JSON.stringify(cartItem)}`)
       throw error
     }
@@ -150,7 +150,7 @@ export class CartService {
       where: { id: cartItem.goods_id },
     });
     if (!goods) {
-      const  error = new NotFoundException('해당 상품을 찾을 수 없습니다.');
+      const error = new NotFoundException('해당 상품을 찾을 수 없습니다.');
       logger.errorLogger(error, `userId = ${userId}, cartId = ${cartId}, cartItem = ${JSON.stringify(cartItem)}, goods = ${goods}`)
       throw error
     }
@@ -163,13 +163,13 @@ export class CartService {
   async getCartItems(userId: number): Promise<Carts[]> {
 
     if (_.isNil(userId) || userId == 0) {
-      const error = new BadRequestException('잘못된 요청입니다!') 
+      const error = new BadRequestException('잘못된 요청입니다!')
       logger.errorLogger(error, `userId = ${userId}`)
       throw error
     }
 
     const carts = await this.cartsRepository.find({
-      where: { id: userId, },
+      where: { user_id: userId, },
     });
 
     return carts
@@ -179,10 +179,10 @@ export class CartService {
   //장바구니 비우기
   async clearCart(userId: number): Promise<void> {
     if (_.isNil(userId) || userId == 0) {
-      const error = new BadRequestException('잘못된 요청입니다!') 
+      const error = new BadRequestException('잘못된 요청입니다!')
       logger.errorLogger(error, `userId = ${userId}`)
       throw error
     }
-    await this.cartsRepository.delete({ id: userId });
+    await this.cartsRepository.delete({ user_id: userId });
   }
 }

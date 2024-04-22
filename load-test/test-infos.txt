@@ -27,17 +27,19 @@ config:
       thresholds:
         - http.response_time.p99: 100
         - http.response_time.p95: 75
+
 scenarios:
 #시간이 많이 들기 때문에 flow 전체를 테스트하기 보다는 api 하나 씩 테스트 하는게 더 나음 
-  - name: 1. [Users][signIn] - 100,000VUs
+  - name: "1. [Users][signIn] - 100,000VUs"
+    weight: 1
     flow:
       - loop:
-        - post: "/login"
+        - post: 
+            url: "/login"
         count: 1
         vus: 100000
 
-scenarios:
-  - name: 2-1. [Goods][findAll] - 100,000VUs
+  - name: "2-1. [Goods][findAll] - 100,000VUs"
     flow:
       - loop:
         - get:
@@ -45,8 +47,7 @@ scenarios:
         count: 1
         vus: 100000
 
-scenarios:
-  - name: 2-2. [Goods][findOne] - 10,000VUs
+  - name: "2-2. [Goods][findOne] - 10,000VUs"
     flow:
       - loop:
         - get:
@@ -54,8 +55,7 @@ scenarios:
         count: 10
         vus: 10000
 
-scenarios:
-  - name: 3-1. [Carts][addToCart] - 10,000VUs
+  - name: "3-1. [Carts][addToCart] - 10,000VUs"
     flow:
       - loop:
         - post:
@@ -63,8 +63,7 @@ scenarios:
         count: 10
         vus: 10000
 
-scenarios:
-    - name: 3-2. [Carts][getCartItems] - 10,000VUs 
+  - name: "3-2. [Carts][getCartItems] - 10,000VUs"
     flow:
       - loop:
         - get:
@@ -72,8 +71,7 @@ scenarios:
         count: 1
         vus: 100000
 
-scenarios:
-    - name: 3-3. [Carts][updateQuantity] - 10,000VUs 
+  - name: "3-3. [Carts][updateQuantity] - 10,000VUs"
     flow:
       - loop:
         - patch:
@@ -81,8 +79,7 @@ scenarios:
         count: 1
         vus: 10000
 
-scenarios:
-    - name: 3-4. [Carts][removeFromCart] - 10,000VUs 
+  - name: "3-4. [Carts][removeFromCart] - 10,000VUs"
     flow:
       - loop:
         - delete:
@@ -90,8 +87,7 @@ scenarios:
         count: 10
         vus: 10000
 
-scenarios:
-    - name: 3-5. [Carts][clearCart] - 10,000VUs
+  - name: "3-5. [Carts][clearCart] - 10,000VUs"
     flow:
       - loop:
         - delete:
@@ -99,8 +95,7 @@ scenarios:
         count: 1
         vus: 10000
 
-scenarios:
-    - name: 4-1. [Orders][purchase(이름 바꿔야 함)] 100,000VUs
+  - name: "4-1. [Orders][purchase(이름 바꿔야 함)] 100,000VUs"
     flow:
       - loop:
         - post:
@@ -108,8 +103,7 @@ scenarios:
         count: 1
         vus: 100000
 
-scenarios:
-    - name: 4-2. [Orders][findAllOrderByUser] - 100,000VUs 
+  - name: "4-2. [Orders][findAllOrderByUser] - 100,000VUs"
     flow:
       - loop:
         - get:
@@ -117,8 +111,7 @@ scenarios:
         count: 1
         vus: 100000
 
-scenarios:
-    - name: 4-3. [Orders][findOneOrderByBoth(무슨 뜻이지 + ordersdetails가 전부 연동돼서 나오게 해야 함)] - 100,000VUs 
+  - name: "4-3. [Orders][findOneOrderByBoth(무슨 뜻이지 + ordersdetails가 전부 연동돼서 나오게 해야 함)] - 100,000VUs" 
     flow:
       - loop:
         - get:
@@ -126,8 +119,7 @@ scenarios:
         count: 1
         vus: 100000
 
-scenarios:
-    - name: 4-4. [Orders][cancelOrder] - 100,000VUs
+  - name: "4-4. [Orders][cancelOrder] - 100,000VUs"
     flow:
       - loop:
         - delete:
@@ -135,8 +127,7 @@ scenarios:
         count: 1
         vus: 100000
 
-scenarios:
-    - name: 5-1. [Payments][pay] - 100,000VUs 
+  - name: "5-1. [Payments][pay] - 100,000VUs"
     flow:
       - loop:
         - post:
@@ -144,8 +135,7 @@ scenarios:
         count: 1
         vus: 100000
 
-scenarios:
-    - name: 5-2. [Payments][findAllOrderByUser] - 100,000VUs
+  - name: "5-2. [Payments][findAllOrderByUser] - 100,000VUs"
     flow:
       - loop:
         - get:
@@ -153,8 +143,7 @@ scenarios:
         count: 1
         vus: 100000
 
-scenarios:
-    - name: 5-3. [Payments][findOneOrderByBoth(무슨 뜻이지)] - 100,000VUs
+  - name: "5-3. [Payments][findOneOrderByBoth(무슨 뜻이지)] - 100,000VUs"
     flow:
       - loop:
         - post:
@@ -162,5 +151,5 @@ scenarios:
         count: 1
         vus: 100000
 
-
-#[signIn - ]
+#     로그인     => 상품 전체조회(메인) => 상품 상세 조회   =>     장바구니 담기   =>    장바구니 조회       =>     상품 주문       =>       주문 전체내역 확인      =>        주문내역 상세조회       =>    결제      
+#[Users][signIn] => [Goods][findAll] => [Goods][findOne] => [Carts][addToCart] => [Carts][getCartItems] => [Orders][purchase] => [Orders][findAllOrderByUser] => [Orders][findOneOrderByBoth] => [Payments][pay]

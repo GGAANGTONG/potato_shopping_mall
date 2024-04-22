@@ -31,11 +31,14 @@ export class PaymentsService {
   ) { }
 
   // 전체적으로 추가적인 보안요소 필요
-  async pay(userId: number, createPaymentDto: CreatePaymentDto): Promise<Payments> {
-    if (_.isNil(userId) || userId === 0) {
-      const error = new BadRequestException('잘못된 요청입니다!');
-      logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${JSON.stringify(createPaymentDto)}`);
-      throw error;
+  async pay(
+    userId: number,
+    createPaymentDto: CreatePaymentDto // 포스트맨의 body,
+  ) {
+    if (_.isNil(userId) || userId == 0) {
+      const error = new BadRequestException('잘못된 요청입니다!')
+      logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${createPaymentDto}`)
+      throw error
     }
   
     await validation(CreatePaymentDto, createPaymentDto);
@@ -52,8 +55,8 @@ export class PaymentsService {
   
       if (!order) {
         const error = new BadRequestException('존재하지 않는 주문입니다.');
-        logger.errorLogger(error, `userId = ${userId}, orders_id = ${orders_id}`);
-        throw error;
+        logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, order = ${order}`)
+        throw error
       }
   
       const user = await queryRunner.manager.createQueryBuilder(Users, 'user')
@@ -62,8 +65,8 @@ export class PaymentsService {
   
       if (!user) {
         const error = new BadRequestException('존재하지 않는 유저입니다.');
-        logger.errorLogger(error, `userId = ${userId}`);
-        throw error;
+        logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, order = ${user}`)
+        throw error
       }
   
       const details = await queryRunner.manager.createQueryBuilder(OrdersDetails, 'details')
@@ -95,8 +98,8 @@ export class PaymentsService {
   
       if (newPoints < 0) {
         const error = new BadRequestException('포인트가 부족합니다.');
-        logger.errorLogger(error, `userId = ${userId}`);
-        throw error;
+        logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${createPaymentDto}`) 
+        throw error
       }
   
       await queryRunner.manager.createQueryBuilder()
@@ -110,14 +113,8 @@ export class PaymentsService {
         user_id: userId,
         p_total_price: paymentAmount,
       });
-  
-      const savedPayment = await queryRunner.manager.save(Payments, payment);
-      await queryRunner.manager.createQueryBuilder()
-        .update(Orders)
-        .set({ p_status: true })
-        .where({ id: orders_id, user_id: userId })
-        .execute();
-  
+      const returnNewPayments = await queryRunner.manager.save(Payments, newPayments);
+      await queryRunner.manager.update(Orders, { user_id: userId, id: orders_id }, { p_status: true })
       await queryRunner.commitTransaction();
       await queryRunner.release();
       return savedPayment;
@@ -134,10 +131,10 @@ export class PaymentsService {
 
   // 유저별 결제 목록 전체 조회
   async findAllOrderbyUser(userId: number): Promise<Payments[]> {
-    if (_.isNil(userId) || userId === 0) {
-      const error = new BadRequestException('잘못된 요청입니다!');
-      logger.errorLogger(error, `userId = ${userId}`);
-      throw error;
+    if (_.isNil(userId) || userId == 0) {
+      const error = new BadRequestException('잘못된 요청입니다!') 
+      logger.errorLogger(error, `userId = ${userId}`)
+      throw error
     }
   
     try {
@@ -148,7 +145,7 @@ export class PaymentsService {
   
       if (!payments || payments.length === 0) {
         const error = new NotFoundException('결제 정보가 없습니다.');
-        logger.errorLogger(error, `userId = ${userId}, payments = ${payments}`);
+        logger.errorLogger(error, `userId = ${userId}, payments = ${payments}`) 
         throw error;
       }
       return payments;
@@ -166,7 +163,7 @@ export class PaymentsService {
       const payments = await this.paymentsRepository.find();
       if (!payments || payments.length === 0) {
         const error = new NotFoundException('결제 정보가 없습니다.');
-        logger.errorLogger(error, `payments = ${payments}`) 
+        logger.errorLogger(error, `payments = ${payments}`)
         throw error;
       }
       return payments;
@@ -179,10 +176,10 @@ export class PaymentsService {
 
   // 상세 결제 정보 확인
   async findOneOrderbyBoth(paymentsId: number): Promise<Payments> {
-    if (_.isNil(paymentsId) || paymentsId === 0) {
-      const error = new BadRequestException('잘못된 요청입니다!');
-      logger.errorLogger(error, `paymentsId = ${paymentsId}`);
-      throw error;
+    if (_.isNil(paymentsId) || paymentsId == 0) {
+      const error = new BadRequestException('잘못된 요청입니다!') 
+      logger.errorLogger(error, `paymentsId = ${paymentsId}`)
+      throw error
     }
   
     try {
@@ -194,7 +191,7 @@ export class PaymentsService {
   
       if (!payment) {
         const error = new NotFoundException('결제 정보가 없습니다.');
-        logger.errorLogger(error, `paymentsId = ${paymentsId}, payment = ${payment}`);
+        logger.errorLogger(error, `paymentsId = ${paymentsId}, payments = ${payments}`) 
         throw error;
       }
       return payment;
@@ -211,7 +208,7 @@ export class PaymentsService {
   async cancelPay(userId: number, paymentsId: number): Promise<Payments> {
 
     if (_.isNil(paymentsId) || paymentsId == 0 || _.isNil(userId) || userId == 0) {
-      const error = new BadRequestException('잘못된 요청입니다!') 
+      const error = new BadRequestException('잘못된 요청입니다!')
       logger.errorLogger(error, `paymentsId = ${paymentsId}, userId = ${userId}`)
       throw error
     }
@@ -228,7 +225,7 @@ export class PaymentsService {
         where: { id: paymentsId, user_id: userId }
       });
       if (!payments) {
-        const error = new NotFoundException('결제 정보를 찾을 수 없습니다.'); 
+        const error = new NotFoundException('결제 정보를 찾을 수 없습니다.');
         logger.errorLogger(error, `userId = ${userId}, paymentsId = ${paymentsId}, payments = ${payments}`)
         throw error
       }
@@ -238,7 +235,7 @@ export class PaymentsService {
       const refundAmount = payments.p_total_price; // 결제 취소로 인한 환불액
       const userPoint = await queryRunner.manager.findOne(Point, { where: { userId: payments.user_id } });
       if (!userPoint) {
-        const error = new NotFoundException('사용자 포인트를 찾을 수 없습니다.'); 
+        const error = new NotFoundException('사용자 포인트를 찾을 수 없습니다.');
         logger.errorLogger(error, `userId = ${userId}, paymentsId = ${paymentsId}, payments = ${payments}, userPoint = ${userPoint}`)
         throw error
       }
@@ -251,7 +248,7 @@ export class PaymentsService {
       if (!user) {
         const error = new NotFoundException('사용자를 찾을 수 없습니다.');
         logger.errorLogger(error, `userId = ${userId}, paymentsId = ${paymentsId}, payments = ${payments}, user = ${user}`)
-        throw error 
+        throw error
       }
       user.points += refundAmount; // 유저의 기존 포인트에 환불액 추가
       await queryRunner.manager.save(Users, user);
@@ -265,7 +262,7 @@ export class PaymentsService {
       if (order.o_status == Status.PayCanceled) {
         const error = new BadRequestException('이미 취소된 주문입니다.');
         logger.errorLogger(error, `userId = ${userId}, paymentsId = ${paymentsId}, payments = ${payments}, order = ${order}`)
-        throw error 
+        throw error
       }
 
       await queryRunner.manager.save(Payments, payments);

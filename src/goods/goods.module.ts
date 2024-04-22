@@ -14,7 +14,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Orders } from '../orders/entities/orders.entity';
 import { Like } from '../like/entities/like.entity';
 import { S3FileService } from '../common/utils/s3_fileupload';
-import { RackService } from '../storage/rack.service';
+import { RedisService } from '../redis/redis.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -28,7 +28,7 @@ import { RackService } from '../storage/rack.service';
     ]),
   ],
   controllers: [GoodsController, CategoriesController, StocksController],
-  providers: [GoodsService, CategoriesService, StocksService, S3FileService],
-  exports: [GoodsService, S3FileService],
+  providers: [GoodsService, CategoriesService, StocksService, S3FileService, RedisService],
+  exports: [GoodsService, S3FileService, RedisService],
 })
 export class GoodsModule {}
