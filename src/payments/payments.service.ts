@@ -13,6 +13,8 @@ import logger from '../common/log/logger';
 import { Goods } from '../goods/entities/goods.entity';
 import { Status } from '../orders/types/order.type';
 import _ from 'lodash';
+import { Redis } from 'ioredis';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class PaymentsService {
@@ -29,6 +31,7 @@ export class PaymentsService {
     private ordersDetailsRepository: Repository<OrdersDetails>,
     @InjectRepository(Stocks)
     private stocksRepository: Repository<Stocks>,
+    private redisService: RedisService,
     private readonly dataSource: DataSource,
   ) { }
 
@@ -74,14 +77,29 @@ export class PaymentsService {
       const details = await queryRunner.manager.createQueryBuilder(OrdersDetails, 'details')
         .where('details.orders_id = :orders_id', { orders_id })
         .getMany();
+
+    
+        //redlock 
+        const client = this.redisService.getClient()
+        const redlock = this.redisService.redlock(client)
+      
+    
+        const lock = await redlock.acquire([`transaction: user_id = ${userId} & order_id = ${order.id}`], 6000)
+        try{
+        //트랜잭션
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
   
       for (const detail of details) {
         const goods = await queryRunner.manager.createQueryBuilder(Goods, 'goods')
         const stocks = await queryRunner.manager.createQueryBuilder(Stocks, 'stocks')
-          .leftJoinAndSelect('goods.stock', 'stock')
-          .where('goods.id = :goods_id', { goods_id: detail.goods_id })
-          .getOne();
-  
+        .leftJoinAndSelect('Goods', 'goods', 'stocks.goods_id = goods.id')
+        .where('goods.id = :goods_id', { goods_id: detail.goods_id })
+        .getOne();
+
+        
+
         if (!goods || stocks.count < detail.od_count) {
           const error = new BadRequestException('재고가 없습니다.');
           logger.errorLogger(error, `userId = ${userId}, goodsId = ${detail.goods_id}`);
@@ -121,15 +139,27 @@ export class PaymentsService {
       await queryRunner.commitTransaction();
       await queryRunner.release();
       return returnNewPayments;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      await queryRunner.release();
-      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.');
-      logger.fatalLogger(fatalError, `userId = ${userId}, orders_id = ${orders_id}`);
+
+    } catch(err) {
+      const error =  new Error('트랜잭션 에러가 발생하였습니다.')
+      logger.errorLogger(error, `error detail =${console.dir(error)}`)
+      throw error;
+      }
+      } catch (err) {
+        const fatalError = new InternalServerErrorException('동시성 제어 관련 에러가 발생했습니다.')
+        logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
+        throw fatalError;
+      } finally {
+        if(lock) {
+          await lock.release()
+        }
+      }
+    } catch(err) {
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
+      logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
       throw fatalError;
     }
-  }
-  
+    }
 
 
   // 유저별 결제 목록 전체 조회
