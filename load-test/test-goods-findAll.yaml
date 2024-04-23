@@ -1,8 +1,12 @@
+##나중에 request.query로 처리할 수 있어야 함
+# config:
+#   payload:
+#     path: "fake_data_goods.csv"
+#     fields: 
+
 scenarios:
   - name: "2-1. [Goods][findAll] - 100,000VUs"
     flow:
       - loop:
         - get:
             url: "/goods"
-        count: 1
-        vus: 100000

@@ -1,8 +1,15 @@
+config:
+  payload:
+    path: "fake_data_orders.csv"
+    fields: 
+      - "orderId"
+      - "req"
+
 scenarios:
   - name: "4-4. [Orders][cancelOrder] - 100,000VUs"
     flow:
       - loop:
         - delete:
-            url: "/orders/:orderId/cancel"
-        count: 1
-        vus: 100000
+            url: "/orders/{{ orderId }}/cancel"
+          cookie:
+            authorization: "{{ accessToken }}"

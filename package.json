@@ -57,6 +57,7 @@
     "passport-kakao": "^1.0.1",
     "passport-naver-v2": "^2.0.8",
     "redis": "^4.6.13",
+    "redlock": "^5.0.0-beta.2",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "sharp": "^0.33.3",

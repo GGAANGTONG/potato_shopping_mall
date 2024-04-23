@@ -31,51 +31,38 @@ const AppDataSource = new DataSource({
   logging: false,
 });
 
-function randomFloat(min:number, max:number) {
-  return Math.random() * (max - min + 0.1) + min
-}
+const arrayRole = [0, 1]
+const arrayGrade = [0, 1, 2]
+
+//원하는 수 만큼 넣으세요.
+const count = 0;
 
 async function createDummyData() {
 
+  //oauth랑 user랑 합치고, user에 이렇게 남겨놓으면 될듯?
   await AppDataSource.initialize()
     .then(
-
       async() => {
-        //카테고리
-        for(let i = 0; i < 5; i++) {
-          const category = new Categories()
-          category.c_name = faker.commerce.product()
-          category.c_desc = faker.commerce.productDescription()
-          await AppDataSource.manager.save(category)
-        
-        //상품
-        for(let i = 0; i < 100; i++) {
-        const goods = new Goods()
-        goods.g_name = faker.commerce.productName()
-        goods.g_desc = faker.commerce.productDescription()
-        goods.g_img = faker.image.url({
-          width: 400, 
-          height: 400
-        })
-        goods.g_option = faker.commerce.productMaterial()
-        goods.discount_rate = randomFloat(0.1, 1)
-        goods.cost_price = +faker.commerce.price()
-        goods.g_price = goods.cost_price * goods.discount_rate
-        
-        goods.category = category
+        //유저
+        for(let i = 0; i < count; i++) {
 
-        await AppDataSource.manager.save(goods)
+          const randomIndexRole = Math.floor(Math.random() * arrayRole.length)
+          const randomIndexGrade = Math.floor(Math.random() * arrayGrade.length) 
 
-        //재고
-        for(let i = 0; i < 1; i++) {
-          const stock = new Stocks()
-          stock.count = +faker.string.numeric()
-          
-          stock.goods = goods
-        
-          await AppDataSource.manager.save(stock)
-        }
-      }
+          const user = new Users()
+          //얘만 sns에서 받아와서 인증하고
+          user.email = faker.internet.email()
+          //나머지는 직접 입력
+          user.nickname = faker.internet.userName()
+          user.profile = faker.image.url({
+            width: 400,
+            height: 400
+          })
+          user.role = randomIndexRole
+          user.grade = randomIndexGrade
+          user.points = 1000000
+          user.bank = +faker.random.numeric(10)
+          await AppDataSource.manager.save(user)
     }
   }
     ).catch(error => console.error(error))

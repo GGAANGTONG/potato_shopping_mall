@@ -1,11 +1,20 @@
+config:
+  payload:
+    path: "fake_data_payments.csv"
+    fields: 
+      - "createPaymentDto"
+      - "req"
+
 scenarios:
   - name: "5-1. [Payments][pay] - 100,000VUs"
     flow:
       - loop:
         - post:
             url: "/payments"
-        count: 1
-        vus: 100000
+          cookie:
+            authorization: "{{ accessToken }}"
+            json:
+              orders_id: "{{ createPaymentDto }}"
 
 #     로그인     => 상품 전체조회(메인) => 상품 상세 조회   =>     장바구니 담기   =>    장바구니 조회       =>     상품 주문       =>       주문 전체내역 확인      =>        주문내역 상세조회       =>    결제      
 #[Users][signIn] => [Goods][findAll] => [Goods][findOne] => [Carts][addToCart] => [Carts][getCartItems] => [Orders][purchase] => [Orders][findAllOrderByUser] => [Orders][findOneOrderByBoth] => [Payments][pay]
