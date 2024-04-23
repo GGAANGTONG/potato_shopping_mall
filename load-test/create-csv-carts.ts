@@ -19,10 +19,6 @@ function generateFakeData(numRows: number) {
       //createCartDto
       createCartDtoCtCount: faker.number.int({ min: 1, max: 1000 }),
       updateCount: faker.number.int({ min: 1, max: 1000 }),
-      //cookie
-      accessToken: `Bearer ${jwtService.sign(payload, {
-        secret: JWT_ACCESS_TOKEN_SECRET
-      })}`,
   }
     data.push(cart)
   }

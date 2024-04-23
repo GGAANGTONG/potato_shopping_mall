@@ -16,6 +16,8 @@ import { Like } from '../src/like/entities/like.entity';
 import dotenv from 'dotenv'
 import { Racks } from '../src/storage/entities/rack.entity'
 import { Storage } from '../src/storage/entities/storage.entity';
+import { JwtService } from '@nestjs/jwt';
+import fs from 'fs';
 
 dotenv.config()
 
@@ -36,34 +38,54 @@ const arrayGrade = [0, 1, 2]
 
 //원하는 수 만큼 넣으세요.
 const count = 0;
-
+const jwtService = new JwtService()
+const JWT_ACCESS_TOKEN_SECRET = 'adkjfadjfdasjfasdf'
 async function createDummyData() {
-
+  const data = [];
   //oauth랑 user랑 합치고, user에 이렇게 남겨놓으면 될듯?
   await AppDataSource.initialize()
     .then(
       async() => {
         //유저
         for(let i = 0; i < count; i++) {
-
-          const randomIndexRole = Math.floor(Math.random() * arrayRole.length)
-          const randomIndexGrade = Math.floor(Math.random() * arrayGrade.length) 
-
-          const user = new Users()
-          //얘만 sns에서 받아와서 인증하고
-          user.email = faker.internet.email()
-          //나머지는 직접 입력
-          user.nickname = faker.internet.userName()
-          user.profile = faker.image.url({
+          const id = i + 1
+          const email = faker.internet.email()
+          const nickname = faker.internet.userName()
+          const profile = faker.image.url({
             width: 400,
             height: 400
           })
-          user.role = randomIndexRole
-          user.grade = randomIndexGrade
-          user.points = 1000000
-          user.bank = +faker.random.numeric(10)
+          const randomIndexRole = Math.floor(Math.random() * arrayRole.length)
+          const randomIndexGrade = Math.floor(Math.random() * arrayGrade.length) 
+          const role = randomIndexRole
+          const grade = randomIndexGrade
+          const points = 1000000
+          const bank = faker.number.int(10)
+
+          //DB 입력
+          const user = new Users()
+          
+          user.email = email
+          user.nickname = nickname
+          user.profile = profile
+          user.role = role
+          user.grade = grade
+          user.points = points
+          user.bank = bank
           await AppDataSource.manager.save(user)
+
+          //csv 파일 생성
+          const payload = {email, sub: id}
+          const csv = {
+            accessToken: `Bearer ${jwtService.sign(payload, {
+              secret: JWT_ACCESS_TOKEN_SECRET
+            })}`
+          }
+          data.push(csv)
     }
+    const filename = 'fake_data_user.csv'
+    const csvData = data.map(csv => `${csv.accessToken}`).join('\n');
+    fs.writeFileSync(filename, `accessToken\n${csvData}`);
   }
     ).catch(error => console.error(error))
 }

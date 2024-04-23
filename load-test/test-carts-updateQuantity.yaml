@@ -1,6 +1,4 @@
 config:
-  # This is a test server run by team Artillery
-  # It's designed to be highly scalable
   target: 'http://localhost:3000/api'
   phases:
     - duration: 60
@@ -15,8 +13,6 @@ config:
       arrivalRate: 100
       rampTo: 30
       name: Spike phase
-  # Load & configure a couple of useful plugins
-  # https://docs.art/reference/extensions
   # plugins:
   #     ensure: {}
   #     apdex: {}
@@ -39,9 +35,10 @@ config:
 scenarios:
   - name: "3-3. [Carts][updateQuantity] - 10,000VUs"
     flow:
+      - log: "{{ cartId }}, {{ accessToken }}, {{ updateCount }}"
       - patch:
           url: "/cart/update/{{ cartId }}"
-        cookie:
-          authorization: "{{ accessToken }}"
-        body: 
+          cookie:
+            authorization: "{{ accessToken }}"
+          json: 
             count: "{{ updateCount }}"
