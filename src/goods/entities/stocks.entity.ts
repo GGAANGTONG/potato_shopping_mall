@@ -5,7 +5,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Goods } from './goods.entity';
 import { Racks } from '../../storage/entities/rack.entity';
 import { IsNumber, IsPositive } from 'class-validator';
 
@@ -18,7 +17,7 @@ export class Stocks {
   @IsNumber({}, { message: '상품 id는 숫자 형식으로 입력되어야 합니다.' })
   @IsPositive({ message: '상품 id는 양수로 입력되어야 합니다.' })
   @Column({ type: 'int' })
-  goods_id: number; 
+  goods_id: number;
 
   @IsNumber()
   @IsNumber({}, { message: '재고 수량은 숫자 형식으로 입력되어야 합니다.' })

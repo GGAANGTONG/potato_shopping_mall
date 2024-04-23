@@ -8,11 +8,11 @@ export class ElasticsearchService {
 
   constructor() {
     this.client = new Client({
-      node: 'https://search-potato-elastic-search-xf4b3i5akrizfst6jnoxvsdimy.ap-northeast-2.es.amazonaws.com',
-      auth: {
-        username: 'potato-ElasticSearch-king',
-        password: 'Potatomaster1!'  
-      },
+      nodes: [process.env.OPENSEARCH_ENDPOINT],
+            auth: {
+                username: process.env.OPENSEARCH_USERNAME,
+                password: process.env.OPENSEARCH_PASSWORD,
+            },
       ssl: {
         rejectUnauthorized: false 
       }

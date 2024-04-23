@@ -13,7 +13,13 @@ import {
 import { Categories } from './categories.entity';
 import { Stocks } from './stocks.entity';
 import { OrdersDetails } from '../../orders/entities/ordersdetails.entity';
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Carts } from '../../orders/entities/carts.entity';
 import { Racks } from '../../storage/entities/rack.entity';
 
@@ -57,7 +63,7 @@ export class Goods {
   cost_price: number;
 
   @IsBoolean()
-  @Column({ type: 'boolean', default:true })
+  @Column({ type: 'boolean', default: true })
   g_state: boolean;
 
   @CreateDateColumn()
