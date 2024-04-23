@@ -43,7 +43,7 @@ export class StocksService {
     }
     const newStock = this.stocksRepository.create({
       count: createStockDto.count,
-      goods: goods,
+      goods_id: createStockDto.goods_id,
       rack: rack,
     });
 
@@ -59,14 +59,14 @@ export class StocksService {
     const query = this.stocksRepository
       .createQueryBuilder('stocks')
       .leftJoinAndSelect('stocks.goods', 'goods')
-      .leftJoinAndSelect('stocks.storage', 'storage')
+      .leftJoinAndSelect('stocks.rack', 'racks')
       .select([
         'stocks.id',
         'stocks.count',
         'goods.id',
         'goods.g_price',
         'goods.g_name',
-        'storage.name',
+        'racks.name',
       ]);
 
     return query.getMany();
@@ -80,7 +80,7 @@ export class StocksService {
   async findOne(id: number): Promise<Stocks> {
     const stock = await this.stocksRepository.findOne({
       where: { id },
-      relations: ['goods', 'storage'],
+      relations: ['goods', 'rack'],
     });
     if (!stock) {
       throw new NotFoundException('해당 상품 재고 정보를 찾을 수 없습니다.');
@@ -93,16 +93,16 @@ export class StocksService {
    * @param goodsId 상품 ID
    * @returns Promise<Stocks>
    */
-  async findOneByGoodsId(goodsId: number): Promise<Stocks> {
+  async findOneByGoodsId(goodsId: number): Promise<Stocks[]> {
     const good = await this.goodsRepository.findOneBy({ id: goodsId });
 
     if (!good) {
       throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
     }
 
-    const stock = await this.stocksRepository.findOne({
-      where: { goods: { id: goodsId } },
-      relations: ['goods', 'storage'],
+    const stock = await this.stocksRepository.find({
+      where: { goods_id: goodsId },
+      relations: ['goods', 'rack'],
     });
 
     if (!stock) {

@@ -22,28 +22,37 @@ export class RedisService {
     // this.clients = [];
   }
 
- getClient(): Redis {
+  getClient(): Redis {
     return this.client;
   }
 
-redlock(client): Redlock {
-  const redlock = new Redlock(
-    [client],
-    {
-      //시간 동기화
-      driftFactor: 0.01,
-      //재시도 횟수
-      retryCount: 10,
-      //재시도 간 간격
-      retryDelay: 200,
-      //최대 딜레이 시간
-      retryJitter:300,
-      //잠금 만료 연장 하는 시점
-      automaticExtensionThreshold: 100,
+  async saveRefreshToken(userId: string, refreshToken: string, ttl: number): Promise<void> {
+    try {
+        await this.client.set(`refreshToken:${userId}`, refreshToken, 'EX', ttl);
+    } catch (error) {
+        console.error('실패햇습니다', error);
+        throw error; // 선택적: 오류를 다시 throw하여 상위 로직에서 처리할 수 있도록 함
     }
-  )
-  return redlock
-}
+  }
+
+  redlock(client): Redlock {
+    const redlock = new Redlock(
+      [client],
+      {
+        //시간 동기화
+        driftFactor: 0.01,
+        //재시도 횟수
+        retryCount: 10,
+        //재시도 간 간격
+        retryDelay: 200,
+        //최대 딜레이 시간
+        retryJitter: 300,
+        //잠금 만료 연장 하는 시점
+        automaticExtensionThreshold: 100,
+      }
+    )
+    return redlock
+  }
 }
 
 

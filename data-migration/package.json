@@ -1,0 +1,10 @@
+{
+  "name": "lambda-mysql-to-opensearch-migration",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "mysql2": "^3.9.4",
+    "@opensearch-project/opensearch": "^2.7.0",
+    "aws-sdk": "^2.800.0"
+  }
+}

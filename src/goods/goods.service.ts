@@ -14,6 +14,9 @@ import { Repository } from 'typeorm';
 import { S3FileService } from '../common/utils/s3_fileupload';
 import { Racks } from '../storage/entities/rack.entity';
 import { DataSource } from 'typeorm';
+import logger from 'src/common/log/logger';
+import { RedisService } from '../redis/redis.service';
+import * as _ from 'lodash';
 
 @Injectable()
 export class GoodsService {
@@ -28,6 +31,7 @@ export class GoodsService {
     private racksRepository: Repository<Racks>,
     private readonly s3FileService: S3FileService,
     @InjectDataSource() private dataSource: DataSource,
+    private readonly redisService: RedisService
   ) {}
 
   /**
@@ -82,7 +86,20 @@ export class GoodsService {
    * @returns
    */
   async findAll(g_name?: string, cate_id?: string) {
-    const query = this.goodsRepository
+    if(!_.isNil(cate_id) && _.isNil(g_name)) {
+      const data = await this.redisService.getClient().get(`cate_id = ${cate_id}`)
+      
+      if(!_.isNil(data)) {       
+      return data
+      }
+    } else if(_.isNil(g_name)) {
+    const getCachedData = await this.redisService.getClient().get('goods-findAll')
+    
+    if(!_.isNil(getCachedData)) { 
+      return getCachedData;
+    }
+  }
+      const query = this.goodsRepository
       .createQueryBuilder('goods')
       .leftJoinAndSelect('goods.category', 'category')
       .select([
@@ -92,15 +109,27 @@ export class GoodsService {
         'goods.g_desc',
         'category.c_name',
       ]);
+    if (cate_id) {
+      query.andWhere('goods.cate_id = :cate_id', { cate_id });
+    }  
 
     if (g_name) {
       query.andWhere('goods.g_name LIKE :g_name', { g_name: `%${g_name}%` });
     }
+    const data = await query.getMany();
 
-    if (cate_id) {
-      query.andWhere('goods.cate_id = :cate_id', { cate_id });
+    if(_.isNil(data)) {
+      const error = new NotFoundException('데이터를 찾을 수 없습니다.')
+      logger.errorLogger(error, `g_name=${g_name}, cate_id=${cate_id}`)
+      throw error
     }
-    return query.getMany();
+
+   if (_.isNil(cate_id) && _.isNil(g_name)) {
+      await this.redisService.getClient().set('goods-findAll', JSON.stringify(data),'EX', 20);
+    } else if (cate_id) {
+      await this.redisService.getClient().set(`cate_id = ${cate_id}`, JSON.stringify(data), 'EX', 60);
+    }
+    return data;
   }
 
   /**
@@ -109,16 +138,17 @@ export class GoodsService {
    * @returns
    */
   async findOne(id: number): Promise<Goods> {
-    const good = await this.goodsRepository.findOne({
-      where: { id },
-      relations: ['category'],
-    });
+    const good = await this.goodsRepository.createQueryBuilder('goods')
+      .leftJoinAndSelect('goods.category', 'category')
+      .where('goods.id = :id', { id })
+      .getOne();
+
     if (!good) {
       throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
     }
+
     return good;
   }
-
   /**
    * 상품 정보 (재고 합계 포함하여)
    * @param id

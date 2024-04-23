@@ -4,5 +4,6 @@ export enum Status {
   Deliverydone = '배송완료',
   Odercancel = '주문취소',
   Deliverycancel = '배송취소',
-  PayCanceled = '결제취소및환불'
+  PayCanceled = '결제취소및환불',
+  PayDone = '결제완료'
 }
