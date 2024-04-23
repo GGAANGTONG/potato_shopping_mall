@@ -1,8 +1,14 @@
+config:
+  payload:
+    path: "fake_data_payments.csv"
+    fields: 
+      - "req"
+
 scenarios:
   - name: "5-2. [Payments][findAllOrderByUser] - 100,000VUs"
     flow:
       - loop:
         - get:
-            url: "/payments/{{:id}}"
-        count: 1
-        vus: 100000
+            url: "/payments/user"
+          cookie:
+            authorization: "{{ accessToken }}"

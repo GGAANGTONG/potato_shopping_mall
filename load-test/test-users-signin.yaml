@@ -1,9 +1,0 @@
-scenarios:
-  - name: "1. [Users][signIn] - 100,000VUs"
-    weight: 1
-    flow:
-      - loop:
-        - post: 
-            url: "/login"
-        count: 1
-        vus: 100000

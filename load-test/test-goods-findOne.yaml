@@ -1,8 +1,11 @@
+config:
+  payload:
+    path: "fake_data_goods.csv"
+    fields: 
+      - "goodsId"
+
 scenarios:
   - name: "2-2. [Goods][findOne] - 10,000VUs"
     flow:
-      - loop:
         - get:
-            url: "/goods/get-one/{{:id}}"
-        count: 10
-        vus: 10000
+            url: "/goods/get-one/{{ goodsId }}"

@@ -1,8 +1,14 @@
+config:
+  payload:
+    path: "fake_data_orders.csv"
+    fields: 
+      - "req"
+
 scenarios:
   - name: "4-2. [Orders][findAllOrderByUser] - 100,000VUs"
     flow:
       - loop:
         - get:
             url: "/orders/user"
-        count: 1
-        vus: 100000
+          cookie:
+            authorization: "{{ accessToken }}"

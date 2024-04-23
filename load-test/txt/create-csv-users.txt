@@ -1,0 +1,53 @@
+
+import { faker } from '@faker-js/faker';
+import { Users } from '../src/user/entities/user.entitiy';
+import fs from 'fs';
+import { DeepPartial } from 'typeorm';
+
+
+function randomFloat(min:number, max:number) {
+  return Math.random() * (max - min + 0.1) + min
+}
+
+const arrayRole = [0, 1]
+const arrayGrade = [0, 1, 2]
+
+  //oauth랑 user랑 합치고, user에 이렇게 남겨놓으면 될듯?
+  function generateFakeData(numRows: number): DeepPartial<Users>[] {
+        
+        //유저
+        const data:DeepPartial<Users>[] = []
+        for(let i = 0; i < numRows; i++) {
+
+          const randomIndexRole = Math.floor(Math.random() * arrayRole.length)
+          const randomIndexGrade = Math.floor(Math.random() * arrayGrade.length) 
+
+          const user: DeepPartial<Users> = {
+          //얘만 sns에서 받아와서 인증하고
+          email: faker.internet.email(),
+          //나머지는 직접 입력
+          nickname: faker.internet.userName(),
+          profile: faker.image.url({
+            width: 400,
+            height: 400
+          }),
+          role: randomIndexRole,
+          grade: randomIndexGrade,
+          points: 1000000,
+          bank: +faker.string.numeric(10)
+    }
+    data.push(user)
+  }
+  return data
+  }
+
+  function writeToCSV(filename: string, numRows: number): void {
+    const data = generateFakeData(numRows);
+    const csvData = data.map(user => `${user.id},${user.email},${user.nickname}, ${user.profile}, ${user.role}, ${user.grade} ${user.points}, ${user.bank}`).join('\n');
+    fs.writeFileSync(filename, `id, email, nickname, profile, role, grade, points, bank\n${csvData}`);
+}
+
+const NUM_ROWS = 100;
+const FILENAME = 'fake_data_user.csv';
+
+writeToCSV(FILENAME, NUM_ROWS);

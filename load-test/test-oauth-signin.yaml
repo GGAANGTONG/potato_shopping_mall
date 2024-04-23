@@ -28,21 +28,18 @@ config:
         - http.response_time.p99: 100
         - http.response_time.p95: 75
   payload:
-    path: "fake_data_cart.csv"
+    path: "fake_data_oauth.csv"
     fields: 
-        - "cartId"
-        - "goodsId"
-        - "createCartDtoCtCount"
-        - "updateCount"
-        - "accessToken"
+      - "socialUser"
+      - "res"
 
 scenarios:
-  - name: "3-1. [Carts][addToCart] - 10,000VUs"
+  - name: "1. [Oauth][kakaoCallbacks] - 100,000VUs"
+    weight: 1
     flow:
-      - log: "국밥 - {{ goodsId }}, {{ createCartDtoCtCount }}, {{ accessToken }}"
-      - post:
-          url: "/cart/add/{{ goodsId }}"
-          cookie:
-            authorization: "{{ accessToken }}"
-          json:
-              ctCount: "{{ createCartDtoCtCount }}"
+      - loop:
+        - post: 
+            url: "/kakao/callback"
+            json:
+              socialUser: "{{ socialUser }}"
+              res: "{{ res }}"
