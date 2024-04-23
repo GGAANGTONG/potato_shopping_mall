@@ -2,7 +2,6 @@ import { ExecutionContext, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import {Profile, Strategy} from 'passport-kakao'
 import { UserService } from '../user/users.service';
-import { OauthService } from '../oauth/oauth.service';
 import dotenv from 'dotenv'
 
 dotenv.config();
