@@ -29,16 +29,6 @@ export class Users {
   @Column({ type: 'varchar' })
   name: string;
 
-  @IsStrongPassword(
-    {},
-    {
-      message:
-        '비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다.',
-    },
-  )
-  @IsNotEmpty()
-  @Column({ type: 'varchar', select: false })
-  password: string;
 
   @IsEmail()
   @IsNotEmpty()

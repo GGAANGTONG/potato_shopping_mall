@@ -9,7 +9,6 @@ import { UserService } from 'src/user/users.service';
 import { HttpModule } from '@nestjs/axios';
 import { Point } from 'src/point/entities/point.entity';
 import { PointModule } from 'src/point/point.module';
-import { Oauth } from 'src/oauth/entities/oauth.entity';
 import { KakaoStrategy } from './kakao.strategy';
 
 @Module({
@@ -20,7 +19,7 @@ import { KakaoStrategy } from './kakao.strategy';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Users, Point, Oauth]),
+    TypeOrmModule.forFeature([Users, Point]),
     UsersModule,
     HttpModule,
     PointModule,

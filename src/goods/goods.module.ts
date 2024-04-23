@@ -28,7 +28,13 @@ import { RedisService } from '../redis/redis.service';
     ]),
   ],
   controllers: [GoodsController, CategoriesController, StocksController],
-  providers: [GoodsService, CategoriesService, StocksService, S3FileService, RedisService],
+  providers: [
+    GoodsService,
+    CategoriesService,
+    StocksService,
+    S3FileService,
+    RedisService,
+  ],
   exports: [GoodsService, S3FileService, RedisService],
 })
 export class GoodsModule {}
