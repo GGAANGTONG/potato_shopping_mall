@@ -41,7 +41,7 @@ export class CartService {
     const { ctCount } = createCartDto;
   
     const goods = await this.goodsRepository.createQueryBuilder("goods")
-      .leftJoinAndSelect("goods.stock", "stock")
+      .leftJoinAndSelect("goods", "stock")
       .where("goods.id = :goodsId", { goodsId })
       .getOne();
   
