@@ -45,7 +45,7 @@ const AppDataSource = new DataSource({
 
 
 
-const count_orders = 100000
+const count_orders = 75000
 const count_ordersDetails = 3
  
 async function createDummyData() {

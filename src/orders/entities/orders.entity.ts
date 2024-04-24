@@ -44,10 +44,10 @@ export class Orders {
   p_status: boolean;
 
   @CreateDateColumn()
-  created_At: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updated_At: Date;
+  updated_at: Date;
 
   @ManyToOne(() => Users, (user) => user.orders, {
     onDelete: 'CASCADE',

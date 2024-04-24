@@ -116,7 +116,7 @@ export class UserController {
   ) {}
 
   
-// 로그인 & 회원가입
+// 로그인 & 회원가입//
 @UseGuards(KakaoAuthGuard)
 @Get('kakao/callback')
 async kakaoCallbacks (
@@ -124,7 +124,9 @@ async kakaoCallbacks (
   @Res({passthrough: true}) res
 ): Promise<void> {
   const {email, nickName} = socialUser
+  console.log(socialUser)
   const user = await this.userService.findByEmail(email)
+  console.log(user)
 
   if(_.isNil(user)) {
    const user = await this.userService.createUser(email, nickName)
@@ -142,32 +144,33 @@ async kakaoCallbacks (
   }); 
 
   await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken)
-  
-  res.cookie('accessToken', accessToken)
+  console.log('비빔밥', accessToken)
+  res.cookie('accessToken', `Bearer ${accessToken}`)
   return res.redirect('/health-check')
   }
 
 
   const payload = {sub:user.id}
   const accessToken = this.jwtService.sign(payload, {
-    secret: process.env.JWT_SECRET_KEY,
+    secret: process.env.JWT_SECRET,
     expiresIn: 1000 * 60 * 60 * 12,
   });
 
   const refreshToken = this.jwtService.sign(payload, {
-    secret: process.env.REFRESH_SECRET,
+    secret: process.env.JWT_SECRET,
     expiresIn: 1000 * 60 * 60 * 24 * 7,
   });
 
 
   await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken)
   
-  console.log('국밥 토큰', accessToken)
-  res.cookie('accessToken', accessToken)
+  
+  res.cookie('accessToken', `Bearer ${accessToken}`)
+  console.log('비빔밥', accessToken)
   return res.redirect('/health-check')
 }
 
-  //회원정보 수정
+  //회원정보 수정(으아아아아아아)
   @UseGuards(AuthGuard('jwt'))
   @Patch('update/:id')
   async update(@Param('id') id: number, @Body() updateDto: UpdateDto) {
@@ -203,7 +206,6 @@ async kakaoCallbacks (
   const token = this.userService.extractTokenFromHeader(rawToken, true);
   const newAccessToken = this.userService.rotateToken(token);
 
-  res.clearCookie('accessToken')
   res.cookie('accessToken', newAccessToken)
   return {
     message: '토큰이 재발급 되었습니다.',

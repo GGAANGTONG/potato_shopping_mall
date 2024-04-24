@@ -22,12 +22,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
-      secretOrKey: configService.get('JWT_ACCESS_TOKEN_SECRET'),
+      secretOrKey: configService.get('JWT_SECRET'),
     });
   }
   private static extractJWT(req: RequestType): string | null {
     const { authorization } = req.cookies;
-    console.log(authorization);
+    console.log('국밥55', authorization);
     if (authorization) {
       const [tokenType, token] = authorization.split(' ');
       if (tokenType !== 'Bearer')
@@ -41,8 +41,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    console.log(2, payload.email);
-    const user = await this.userService.findByEmail(payload.email);
+    console.log(2, payload.sub);
+    const user = await this.userService.findOne(payload.sub);
     console.log(user);
     if (_.isNil(user)) {
       throw new NotFoundException('해당하는 사용자를 찾을 수 없습니다.');
