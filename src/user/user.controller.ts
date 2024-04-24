@@ -94,43 +94,8 @@
 //   }
 
 
-//   @Post('token/refresh')
-//   postTokenRefresh(@Headers('authorization') rawToken: string){
-//     const token = this.userService.extractTokenFromHeader(rawToken, true);
-//     const newToken = this.userService.rotateToken(token, false);
-//     return {
-//       accessToken: newToken,
-//     }
-//   }
-
-
-
-
-
-  // @Get('/oauth')
-  // @Header('Content-Type', 'text/html')
-  // redirectToKakaoAuth(@Res() res) {
-  //   const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
-  //   const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
-  //   const kakaoAuthURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}`;
-
-  //   res.redirect(HttpStatus.TEMPORARY_REDIRECT, kakaoAuthURL);
-  // }
-
-  // @Get('/oauth/callback')
-  // async getKakaoInfo(@Query() query: { code }) {
-  //   const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
-  //   const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
-
-  //   await this.userService.kakaoLogin(
-  //     KAKAO_REST_API_KEY,
-  //     KAKAO_REDIRECT_URI,
-  //     query.code,
-  //   );
-  //   return { message: '로그인 되었습니다' };
-  // }
 // }
-import { Controller, Get, Header, Res, HttpStatus, Query, Req, UseGuards, Patch, Body, Delete, Param } from '@nestjs/common';
+import { Controller, Get, Headers, Res, HttpStatus, Query, Req, UseGuards, Patch, Body, Delete, Param, Post } from '@nestjs/common';
 
 import { KakaoAuthGuard } from 'src/auth/kakao.guard';
 import { SocialUser, SocialUserAfterAuth } from 'src/user/decorator/user.decorator';
@@ -139,6 +104,7 @@ import { UserService } from './users.service';
 import { RedisService } from 'src/redis/redis.service';
 import _ from 'lodash';
 import { UpdateDto } from './dto/update.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 
 @Controller('oauth')
@@ -202,6 +168,7 @@ async kakaoCallbacks (
 }
 
   //회원정보 수정
+  @UseGuards(AuthGuard('jwt'))
   @Patch('update/:id')
   async update(@Param('id') id: number, @Body() updateDto: UpdateDto) {
     const data = await this.userService.update(+id, updateDto);
@@ -209,6 +176,7 @@ async kakaoCallbacks (
   }
 
   //회원정보 삭제
+  @UseGuards(AuthGuard('jwt'))
   @Delete('delete/:id')
   async remove(@Param('id') id: number) {
    const data = await this.userService.remove(id);
@@ -219,6 +187,7 @@ async kakaoCallbacks (
   }
 
   //회원정보 찾기
+  @UseGuards(AuthGuard('jwt'))
   @Get('find-one/:id')
   async findOne(@Param('id') id: number) {
    const data = await this.userService.findOne(id);
@@ -228,6 +197,19 @@ async kakaoCallbacks (
     };
   }
 
+  //토큰 갱신
+  @Post('token/refresh')
+  postTokenRefresh(@Headers('authorization') rawToken: string, @Res() res){
+  const token = this.userService.extractTokenFromHeader(rawToken, true);
+  const newAccessToken = this.userService.rotateToken(token);
+
+  res.clearCookie('accessToken')
+  res.cookie('accessToken', newAccessToken)
+  return {
+    message: '토큰이 재발급 되었습니다.',
+    accessToken: newAccessToken,
+  }
+  }
 
 }
 

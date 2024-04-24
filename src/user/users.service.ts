@@ -234,46 +234,17 @@
 //     }
 //   }
 
-//   signToken(user: Pick<Users, 'email' | 'id'>, isRefreshToken: boolean){
-//     const payload = {
-//         email: user.email,
-//         sub: user.id,
-//         type: isRefreshToken ? 'refresh' : 'access',
-//     };
-//     return this.jwtService.sign(payload, {
-//       secret: process.env.JWT_REFRESH_TOKEN_SECRET,
-//         expiresIn: isRefreshToken ? 3600: 300,
-//     })
-// }
 
 
-//   extractTokenFromHeader(header: string, isBearer: boolean){
-//     const splitToken = header.split(' ')
-//     const prefix = isBearer ? 'Bearer' : 'Basic';
-//     if(splitToken.length !== 2 || splitToken[0] !== prefix){
-//         throw new UnauthorizedException('잘못된 토큰입니다.')
-//     }
-//     const token = splitToken[1];
-//     return token;
-// }
 
 
-// rotateToken(token: string, isRefreshToken: boolean){
-//   const decoded = this.jwtService.verify(token,{
-//     secret: process.env.JWT_REFRESH_TOKEN_SECRET,
-//   })
-
-//   return this.signToken({
-//       ...decoded,
-//   }, isRefreshToken)
-// }
-// }
 
 
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -282,6 +253,7 @@ import { DataSource, Repository } from 'typeorm';
 import * as _ from 'lodash';
 import { Users } from '../user/entities/user.entitiy';
 import { UpdateDto } from './dto/update.dto';
+import { RedisService } from 'src/redis/redis.service';
 
 
 @Injectable()
@@ -292,6 +264,7 @@ import { UpdateDto } from './dto/update.dto';
     private usersRepository: Repository<Users>,
     private readonly jwtService: JwtService,
     private readonly dataSource: DataSource,
+    private readonly redisService: RedisService
   ) {}
 
     //회원정보 생성
@@ -362,5 +335,42 @@ import { UpdateDto } from './dto/update.dto';
     return user;
   }
 
+  //토큰 갱신 과정
+  extractTokenFromHeader(header: string, isBearer: boolean){
+    const splitToken = header.split(' ')
+    const prefix = isBearer ? 'Bearer' : null;
+    if(splitToken.length !== 2 || splitToken[0] !== prefix){
+        throw new UnauthorizedException('잘못된 토큰입니다.')
+    }
+    const token = splitToken[1];
+    return token;
+}
 
+ signToken(user: Pick<Users, 'email' | 'id'>){
+    const payload = {
+        email: user.email,
+        sub: user.id,
+    };
+
+    return this.jwtService.sign(payload, {
+      secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+        expiresIn: 3600,
+    })
+}
+
+async rotateToken(token: string){
+    const decoded = this.jwtService.verify(token,{
+      secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+    })
+
+    const refreshToken = await this.redisService.getClient().get(`refreshToken for ${decoded.id}`)
+
+    if(_.isNil(refreshToken)) {
+      throw new UnauthorizedException('인증되지 않은 사용자입니다.')
+    }
+
+    return this.signToken({
+        ...decoded,
+    })
+  }
 }
