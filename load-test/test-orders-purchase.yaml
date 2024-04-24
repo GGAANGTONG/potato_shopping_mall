@@ -1,17 +1,66 @@
 config:
+  target: 'http://localhost:3000/api'
+  phases:
+    - duration: 20
+      arrivalRate: 30
+      rampTo: 50
+      name: Warm up phase
+    - duration: 20
+      arrivalRate: 50
+      rampTo: 75
+      name: Ramp up load
+    - duration: 20
+      arrivalRate: 80
+      rampTo: 35
+      name: Spike phase
+  # plugins:
+  #     ensure: {}
+  #     apdex: {}
+  #     metrics-by-endpoint: {}
+  apdex:
+    threshold: 100
+  ensure:
+      thresholds:
+        - http.response_time.p99: 100
+        - http.response_time.p95: 75
   payload:
-    path: "fake_data_addToCart.csv"
-    fields: 
-      - "createOrderDto"
-      - "req"
+   - path: "fake_data_orders.csv"
+     fields: 
+      - "createOrderDto1"
+      - "orderId"
+     order: sequence
+   - path: "fake_data_token.csv"
+     fields:
+        - "accessToken"
+     order: sequence
 
 scenarios:
   - name: "4-1. [Orders][purchase(이름 바꿔야 함)] 100,000VUs"
     flow:
-      - loop:
+        - log: "{{ accessToken }}, {{ createOrderDto1 }}, {{ createOrderDto2 }}, {{ createOrderDto3 }}"
         - post:
             url: "/orders"
-          cookie:
-            authorization: "{{ accessToken }}"
-            json:
-              createOrderDto: "{{ createOrderDto }}"
+            cookie:
+              authorization: "{{ accessToken }}"
+            body: |
+               [
+                   {"carts_id": "{{ createOrderDto1 }}"}
+               ]
+            headers:
+              content-type: application/json
+          # form:
+          #   carts_id: [{{ createOrderDto1 }}]
+
+
+# scenarios:
+#   - name: "3-1. [Carts][addToCart] - 10,000VUs"
+#     flow:
+#       - log: "국밥 - {{ goodsId }}, {{ createCartDtoCtCount }}, {{ accessToken }}"
+#       - post:
+#           url: "/cart/add/{{ goodsId }}"
+#           cookie:
+#             authorization: "{{ accessToken }}"
+#           json:
+#             ctCount: "{{ createCartDtoCtCount }}"
+
+

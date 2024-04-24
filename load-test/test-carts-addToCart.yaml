@@ -3,17 +3,17 @@ config:
   # It's designed to be highly scalable
   target: 'http://localhost:3000/api'
   phases:
-    - duration: 60
-      arrivalRate: 50
-      rampTo: 100
+    - duration: 20
+      arrivalRate: 30
+      rampTo: 50
       name: Warm up phase
-    - duration: 60
-      arrivalRate: 100
-      rampTo: 150
+    - duration: 20
+      arrivalRate: 50
+      rampTo: 75
       name: Ramp up load
-    - duration: 30
-      arrivalRate: 100
-      rampTo: 30
+    - duration: 20
+      arrivalRate: 80
+      rampTo: 35
       name: Spike phase
   # Load & configure a couple of useful plugins
   # https://docs.art/reference/extensions
@@ -28,13 +28,19 @@ config:
         - http.response_time.p99: 100
         - http.response_time.p95: 75
   payload:
-    path: "fake_data_cart.csv"
-    fields: 
+   - path: "fake_data_cart.csv"
+     fields: 
         - "cartId"
         - "goodsId"
         - "createCartDtoCtCount"
         - "updateCount"
         - "accessToken"
+     order: sequence
+   - path: "fake_data_token.csv"
+     fields:
+        - "accessToken"
+     order: sequence
+
 
 scenarios:
   - name: "3-1. [Carts][addToCart] - 10,000VUs"
@@ -45,4 +51,4 @@ scenarios:
           cookie:
             authorization: "{{ accessToken }}"
           json:
-              ctCount: "{{ createCartDtoCtCount }}"
+            ctCount: "{{ createCartDtoCtCount }}"
