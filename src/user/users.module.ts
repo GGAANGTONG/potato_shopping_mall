@@ -17,7 +17,7 @@ import { RedisService } from 'src/redis/redis.service';
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
         signOptions: { expiresIn: '1h' },
-        secret: config.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+        secret: config.get<string>('JWT_SECRET'),
       }),
       inject: [ConfigService],
     }),

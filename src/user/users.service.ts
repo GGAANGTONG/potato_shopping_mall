@@ -320,6 +320,7 @@ import { RedisService } from 'src/redis/redis.service';
     return user
   }
 
+  //로그인 시에만 사용함
   async findByEmail(email: string) {
     const user = await this.usersRepository.findOneBy({ email });
     return user;
@@ -353,14 +354,14 @@ import { RedisService } from 'src/redis/redis.service';
     };
 
     return this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+      secret: process.env.JWT_SECRET,
         expiresIn: 3600,
     })
 }
 
 async rotateToken(token: string){
     const decoded = this.jwtService.verify(token,{
-      secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+      secret: process.env.JWT_SECRET,
     })
 
     const refreshToken = await this.redisService.getClient().get(`refreshToken for ${decoded.id}`)

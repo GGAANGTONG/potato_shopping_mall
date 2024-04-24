@@ -13,7 +13,6 @@ import { LikeModule } from './like/like.module';
 import { PointModule } from './point/point.module';
 import { RedisModule } from './redis/redis.module';
 import { BoardsModule } from './boards/boards.module';
-import { CacheModule } from '@nestjs/cache-manager';
 import { StorageModule } from './storage/storage.module';
 import { ElasticsearchModule } from './elasticsearch/elasticsearch.module';
 
@@ -23,7 +22,6 @@ import { ElasticsearchModule } from './elasticsearch/elasticsearch.module';
       isGlobal: true,
       validationSchema: configModuleValidationSchema,
     }),
-    CacheModule.register({isGlobal: true}),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     AuthModule,
     UsersModule,
