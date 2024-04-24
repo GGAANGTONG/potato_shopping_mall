@@ -9,7 +9,6 @@ function generateFakeData(numRows: number) {
     }
     data.push(goods)
   }
-
     return data
   }
 
@@ -22,7 +21,7 @@ function writeToCSV(filename: string, numRows: number): void {
     fs.writeFileSync(filename, `goodsId\n${csvData}`);
 }
 
-const NUM_ROWS = 100;
+const NUM_ROWS = 500;
 const FILENAME = 'fake_data_goods.csv';
 
 writeToCSV(FILENAME, NUM_ROWS);

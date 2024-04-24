@@ -2,13 +2,17 @@ import { faker } from '@faker-js/faker';
 import fs from 'fs';
 import _ from 'lodash';
 
+//paymentId
+//createPaymentDto = {order_id: faker.number.int()}
+
+
 function generateFakeData(numRows: number) {
     const data = [];
 
     for(let i = 0; i < numRows; i++) {
       const order = {
-      createOrderDtoCarts_id1: `[${i + 1}, ${i + 2}, ${i + 3}]`,
-      orderId: i + 1
+      createPaymentDtoOrder_id: i + 1,
+      paymentId: i + 1
         }
         data.push(order)
       }
@@ -17,12 +21,12 @@ function generateFakeData(numRows: number) {
 
 function writeToCSV(filename: string, numRows: number): void {
     const data = generateFakeData(numRows);
-    const csvData = data.map(order => `${order.createOrderDtoCarts_id1}, ${order.orderId}`).join('\n');
-    fs.writeFileSync(filename, `createOrderDtoCarts_id1, orderId\n${csvData}`);
+    const csvData = data.map(payment => `${payment.createPaymentDtoOrder_id}, ${payment.paymentId}`).join('\n');
+    fs.writeFileSync(filename, `createPaymentDto, paymentId\n${csvData}`);
 }
 
 const NUM_ROWS = 500;
-const FILENAME = 'fake_data_orders.csv';
+const FILENAME = 'fake_data_payments.csv';
 
 writeToCSV(FILENAME, NUM_ROWS);
 

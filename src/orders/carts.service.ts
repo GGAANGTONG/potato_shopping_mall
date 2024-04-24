@@ -40,8 +40,12 @@ export class CartService {
   
     const { ctCount } = createCartDto;
   
-    const goods = await this.goodsRepository.createQueryBuilder("goods")
-      .leftJoinAndSelect("goods.stock", "stock")
+    // const goods = await this.goodsRepository.createQueryBuilder("goods")
+    //   .leftJoinAndSelect("goods", "stocks")
+    //   .where("goods.id = :goodsId", { goodsId })
+    //   .getOne();
+      const goods = await this.goodsRepository.createQueryBuilder("goods")
+      .leftJoinAndSelect("stocks", "stocks", "stocks.goods_id = goods.id") // "stocks" 테이블과 조인합니다.
       .where("goods.id = :goodsId", { goodsId })
       .getOne();
   
@@ -49,10 +53,10 @@ export class CartService {
       const error = new BadRequestException('존재하지 않는 상품입니다.');
       logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}, goods = ${goods}`);
       throw error;
-    }
+    } 
   
-    const stocks = await this.stocksRepository.createQueryBuilder("stock")
-      .where("stock.goods_id = :goodsId", { goodsId })
+    const stocks = await this.stocksRepository.createQueryBuilder("stocks")
+      .where("stocks.goods_id = :goodsId", { goodsId })
       .getOne();
   
     const newStockCount = stocks.count - ctCount;

@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 import { Boards } from '../src/boards/entities/boards.entity';
 import { Comments } from '../src/boards/entities/comments.entity';
 import { Categories } from '../src/goods/entities/categories.entity';
-import { Goods } from '../src/goods/entities/goods.entity';
+
 import { Stocks } from '../src/goods/entities/stocks.entity';
 import { Carts } from '../src/orders/entities/carts.entity';
 import { Orders } from '../src/orders/entities/orders.entity';
@@ -15,57 +15,64 @@ import { Reviews } from '../src/orders/entities/review.entity';
 import { Like } from '../src/like/entities/like.entity';
 import dotenv from 'dotenv'
 import { Racks } from '../src/storage/entities/rack.entity'
-import { Storage } from '../src/storage/entities/storage.entity';
+import { Storage } from 'src/storage/entities/storage.entity';
+import { Goods } from 'src/goods/entities/goods.entity';
 
 dotenv.config()
 
 const AppDataSource = new DataSource({
   type: 'mysql',
-  host: process.env.DB_HOST,
-  port: +process.env.DB_PORT,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: 'potato-db.cbyo86kq8krr.ap-northeast-2.rds.amazonaws.com',
+  port: 3306,
+  username: 'root',
+  password: 'potatomaster!',
+  database: 'potato_shop',
+  // type: 'mysql',
+  // host: 'localhost',
+  // port: 3306,
+  // username: 'ggangtong1',
+  // password: '3617',
+  // database: 'potato_shopping_mall',
+  // host: process.env.DB_HOST,
+  // port: +process.env.DB_PORT,
+  // username: process.env.DB_USERNAME,
+  // password: process.env.DB_PASSWORD,
+  // database: process.env.DB_NAME,
   entities: [Users, Point, Payments, Orders, Reviews, OrdersDetails, Orders, Carts, Like, Stocks, Goods, Categories, Comments, Boards, Racks, Storage],
   synchronize: true,
   logging: false,
 });
 
-const arrayRole = [0, 1]
-const arrayGrade = [0, 1, 2]
 
-//원하는 수 만큼 넣으세요.
-const count = 0;
 
+const count_carts = 100000
 async function createDummyData() {
 
-  //oauth랑 user랑 합치고, user에 이렇게 남겨놓으면 될듯?
   await AppDataSource.initialize()
     .then(
       async() => {
-        //유저
-        for(let i = 0; i < count; i++) {
-
-          const randomIndexRole = Math.floor(Math.random() * arrayRole.length)
-          const randomIndexGrade = Math.floor(Math.random() * arrayGrade.length) 
-
-          const user = new Users()
-          //얘만 sns에서 받아와서 인증하고
-          user.email = faker.internet.email()
-          //나머지는 직접 입력
-          user.nickname = faker.internet.userName()
-          user.profile = faker.image.url({
-            width: 400,
-            height: 400
+        let count = 1
+        for(let i = 0; i < count_carts; i++) {
+          console.log(`-------------dummy data #${count} input start------------------`)
+          const cart = new Carts()
+          cart.user_id = i + 1
+          cart.goods_id = i + 1
+          cart.ct_count = faker.number.int({
+            min: 1,
+            max: 999
           })
-          user.role = randomIndexRole
-          user.grade = randomIndexGrade
-          user.points = 1000000
-          user.bank = +faker.random.numeric(10)
-          await AppDataSource.manager.save(user)
+          cart.ct_price = faker.number.int({
+            min: 50000,
+            max: 1000000
+          })
+          await AppDataSource.manager.save(cart)
+          console.log(`-------------dummy data #${count} input ends------------------`)
+          count++
+        }
+
+
     }
-  }
-    ).catch(error => console.error(error))
+  ).catch(error => console.error(error))
 }
 
 createDummyData()

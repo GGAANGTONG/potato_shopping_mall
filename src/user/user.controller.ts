@@ -130,12 +130,15 @@
   //   return { message: '로그인 되었습니다' };
   // }
 // }
-import { Controller, Get, Header, Res, HttpStatus, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Header, Res, HttpStatus, Query, Req, UseGuards, Patch, Body, Delete, Param } from '@nestjs/common';
 
 import { KakaoAuthGuard } from 'src/auth/kakao.guard';
 import { SocialUser, SocialUserAfterAuth } from 'src/user/decorator/user.decorator';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './users.service';
+import { RedisService } from 'src/redis/redis.service';
+import _ from 'lodash';
+import { UpdateDto } from './dto/update.dto';
 
 
 @Controller('oauth')
@@ -143,24 +146,42 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly redisService: RedisService
   ) {}
 
   
-
+// 로그인 & 회원가입
 @UseGuards(KakaoAuthGuard)
 @Get('kakao/callback')
 async kakaoCallbacks (
   @SocialUser() socialUser: SocialUserAfterAuth,
   @Res({passthrough: true}) res
 ): Promise<void> {
-
-  const {email, password, nickname} = socialUser
+  const {email, nickName} = socialUser
   const user = await this.userService.findByEmail(email)
-  // if(!user) {
-  //   user = await this.oauthService.createUser({
-  //     createUserDto: CreateUserDto
-  //   })
-  // }
+
+  if(_.isNil(user)) {
+   const user = await this.userService.createUser(email, nickName)
+
+   const payload = {sub: user.id}
+
+   const accessToken = this.jwtService.sign(payload, {
+    secret: process.env.JWT_SECRET_KEY,
+    expiresIn: 1000 * 60 * 60 * 12,
+  });
+
+  const refreshToken = this.jwtService.sign(payload, {
+    secret: process.env.REFRESH_SECRET,
+    expiresIn: 1000 * 60 * 60 * 24 * 7,
+  }); 
+
+  await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken)
+  
+  res.cookie('accessToken', accessToken)
+  return res.redirect('/health-check')
+  }
+
+
   const payload = {sub:user.id}
   const accessToken = this.jwtService.sign(payload, {
     secret: process.env.JWT_SECRET_KEY,
@@ -172,14 +193,41 @@ async kakaoCallbacks (
     expiresIn: 1000 * 60 * 60 * 24 * 7,
   });
 
-  // refreshToken은 레디스에 넣어서 보관
-  // await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken)
+
+  await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken)
   
-  console.log('위대한 국밥', refreshToken)
-  console.log('완벽한 국밥', accessToken)
+  console.log('국밥 토큰', accessToken)
   res.cookie('accessToken', accessToken)
   return res.redirect('/health-check')
 }
+
+  //회원정보 수정
+  @Patch('update/:id')
+  async update(@Param('id') id: number, @Body() updateDto: UpdateDto) {
+    const data = await this.userService.update(+id, updateDto);
+    return { message: '수정되었습니다', data };
+  }
+
+  //회원정보 삭제
+  @Delete('delete/:id')
+  async remove(@Param('id') id: number) {
+   const data = await this.userService.remove(id);
+    return { 
+      message: '삭제 되었습니다',
+      data
+    };
+  }
+
+  //회원정보 찾기
+  @Get('find-one/:id')
+  async findOne(@Param('id') id: number) {
+   const data = await this.userService.findOne(id);
+    return { 
+      message: '회원정보입니다.',
+      data
+    };
+  }
+
 
 }
 
