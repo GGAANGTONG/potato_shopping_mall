@@ -69,7 +69,7 @@ async function createDummyData() {
             ordersDetails.orders_id = order.id
             ordersDetails.goods_id = faker.number.int({
               min: 1,
-              max: 500
+              max: 25000
             })
             ordersDetails.od_count = faker.number.int({
               min: 1,

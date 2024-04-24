@@ -56,10 +56,13 @@ async function createDummyData() {
           console.log(`-------------dummy data #${count} input start------------------`)
           const cart = new Carts()
           cart.user_id = i + 1
-          cart.goods_id = i + 1
+          cart.goods_id = faker.number.int({
+            min: 1,
+            max: 25000
+          })
           cart.ct_count = faker.number.int({
             min: 1,
-            max: 999
+            max: 15
           })
           cart.ct_price = faker.number.int({
             min: 50000,
