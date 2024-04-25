@@ -15,7 +15,7 @@ export class PaymentsController {
     async pay(@Req() req, @Body() createPaymentDto: CreatePaymentDto) {
         const userId = req.user.id;
         logger.traceLogger(`Payments - pay`, `req.user = ${JSON.stringify(req.user)}, createPaymentDto = ${JSON.stringify(createPaymentDto)}`)
-        return this.paymentsService.pay(userId, createPaymentDto);
+        return await this.paymentsService.pay(userId, createPaymentDto);
     }
 
     // 유저 결제 목록 전체 조회

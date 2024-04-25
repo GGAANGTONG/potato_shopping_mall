@@ -30,7 +30,7 @@ export class Payments {
 
     @IsEnum(PayMethod)
     @IsNotEmpty()
-    @Column({ type: 'enum', enum: PayMethod })
+    @Column({ type: 'enum', enum: PayMethod, default: 'point' })
     paid_by: PayMethod;
 
     @CreateDateColumn()
