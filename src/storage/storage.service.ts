@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { Storage } from './entities/storage.entity';
 import { Racks } from './entities/rack.entity';
+import { KakaoGeocoder } from '../common/utils/kakao-geocoder.util';
 
 @Injectable()
 export class StorageService {
@@ -17,6 +18,7 @@ export class StorageService {
     private storageRepository: Repository<Storage>,
     @InjectRepository(Racks)
     private racksRepository: Repository<Racks>,
+    private kakaoGeocoder: KakaoGeocoder,
   ) {}
 
   /**
@@ -25,6 +27,10 @@ export class StorageService {
    * @returns newStorage
    */
   async create(createStorageDto: CreateStorageDto) {
+    const coordinates = await this.kakaoGeocoder.getCoordinates(createStorageDto.address);
+    // 좌표 정보를 DTO에 추가
+    createStorageDto.latitude = coordinates.lat;
+    createStorageDto.longitude = coordinates.lng;
     const newStorage = this.storageRepository.create(createStorageDto);
     await this.storageRepository.save(newStorage);
     return newStorage;
@@ -98,12 +104,18 @@ export class StorageService {
       throw new NotFoundException('해당 창고를 찾을 수 없습니다.');
     }
 
+    if (updateStorageDto.address) {
+      const coordinates = await this.kakaoGeocoder.getCoordinates(updateStorageDto.address);
+      storage.latitude = coordinates.lat;
+      storage.longitude = coordinates.lng;
+    }
+
     try {
       await this.storageRepository.save(storage);
       return { message: '창고 정보가 성공적으로 업데이트되었습니다.', storage };
     } catch (error) {
       throw new InternalServerErrorException(
-        `#${id} 창고 정보 업데이트 중 문제가 발생했습니다.`,
+        '창고 정보 업데이트 중 문제가 발생했습니다.',
       );
     }
   }

@@ -8,4 +8,6 @@ export class CreateStorageDto extends PickType(Storage, [
   'contact_name',
   'contact_phone',
   'is_available',
+  'latitude',
+  'longitude',
 ] as const) {}

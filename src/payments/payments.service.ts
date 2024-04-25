@@ -15,6 +15,7 @@ import { Status } from '../orders/types/order.type';
 import _ from 'lodash';
 import { Redis } from 'ioredis';
 import { RedisService } from '../redis/redis.service';
+import { KakaoGeocoder } from '../common/utils/kakao-geocoder.util';
 
 @Injectable()
 export class PaymentsService {
@@ -33,6 +34,7 @@ export class PaymentsService {
     private stocksRepository: Repository<Stocks>,
     private redisService: RedisService,
     private readonly dataSource: DataSource,
+    private kakaoGeocoder: KakaoGeocoder,  
   ) { }
 
   // 전체적으로 추가적인 보안요소 필요
@@ -312,5 +314,18 @@ export class PaymentsService {
     }
 
   }
+
+  /**
+   * 주소로 좌표찾기
+   * @param address 
+   * @returns 
+   */
+  async getCoordinates(address: string): Promise<{lat: number, lng: number}> {
+    const coordinates = await this.kakaoGeocoder.getCoordinates(address);
+    let lat = coordinates.lat;
+    let lng = coordinates.lng;
+    return coordinates;
+  }
+
 }
 
