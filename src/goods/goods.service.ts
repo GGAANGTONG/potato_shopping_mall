@@ -104,16 +104,7 @@ export class GoodsService {
         return getCachedData;
       }
     }
-    // const query = this.goodsRepository
-    //   .createQueryBuilder('goods')
-    //   .leftJoinAndSelect('goods.category', 'category')
-    //   .select([
-    //     'goods.id',
-    //     'goods.g_name',
-    //     'goods.g_price',
-    //     'goods.g_desc',
-    //     'category.c_name',
-    //   ]);
+
     let searchQuery = {
       index: 'goods_index', 
       body: {
@@ -125,23 +116,14 @@ export class GoodsService {
       }
     };
 
-    // if (g_name) {
-    //   query.andWhere('goods.g_name LIKE :g_name', { g_name: `%${g_name}%` });
-    // }
     if (g_name) {
       searchQuery.body.query.bool.must.push({
-        match: {
-          name : {
-            query: g_name,
-            operator: "and"
-          }
+        wildcard : {
+          name : g_name+'*'
         }
       });
     }
 
-    // if (cate_id) {
-    //   query.andWhere('goods.cate_id = :cate_id', { cate_id });
-    // }
     if (cate_id) {
       searchQuery.body.query.bool.must.push({
         match: {
@@ -174,8 +156,6 @@ export class GoodsService {
           .set(`cate_id = ${cate_id}`, JSON.stringify(body.hits.hits.map(hit => hit._source)), 'EX', 60);
       }
 
-      console.log(JSON.stringify(body.hits.hits.map(hit => hit._source)))
-  
       return body.hits.hits.map(hit => hit._source);
     } catch (error) {
       console.error('오픈 서치 연결 실패:', error.message);
@@ -190,11 +170,6 @@ export class GoodsService {
    * @returns
    */
   async findOne(id: number): Promise<Goods> {
-    // const good = await this.goodsRepository
-    //   .createQueryBuilder('goods')
-    //   .leftJoinAndSelect('goods.category', 'category')
-    //   .where('goods.id = :id', { id })
-    //   .getOne();
     const query = {
       query: {
         match: {

@@ -1,8 +1,10 @@
-import { Body, Controller, Get, NotFoundException, Param, ParseIntPipe, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import { PaymentsService } from "./payments.service";
 import { AuthGuard } from "@nestjs/passport";
 import { CreatePaymentDto } from "../orders/dto/create-payment.dto";
 import logger from "src/common/log/logger";
+import { Response } from 'express';
+
 
 @Controller('payments')
 export class PaymentsController {
@@ -35,7 +37,7 @@ export class PaymentsController {
 
     // 결제 정보 상세 조회
     @UseGuards(AuthGuard('jwt'))
-    @Get(':id')
+    @Get('get-one/:id')
     async findOneOrderByBoth(@Param('id', ParseIntPipe) id: number) {
         logger.traceLogger('Payments - findOneOrderByBoth', `id = ${id}`)
         return this.paymentsService.findOneOrderbyBoth(id);
@@ -62,6 +64,23 @@ export class PaymentsController {
                 logger.fatalLogger(fatalError, `req.user = ${JSON.stringify(req.user)}, paymentsId = ${paymentsId}`)
                 throw fatalError// 그 외의 오류는 일반적인 오류 메시지를 반환.
             }
+        }
+    }
+
+    @Get('/find-location')
+    async findLocation(@Query('address') address: string, @Res() res: Response) {
+        if (!address) {
+            throw new HttpException('배송지를 입력하세요.', HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+        const coordinates = await this.paymentsService.getCoordinates(address);
+        res.status(HttpStatus.OK).json({
+            message: '좌표 반환 완료',
+            data: coordinates
+        });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

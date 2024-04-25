@@ -4,8 +4,6 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-  ManyToMany,
-  JoinTable,
   OneToMany,
 } from 'typeorm';
 import { Storage } from './storage.entity';
