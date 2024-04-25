@@ -34,14 +34,14 @@ export class OrdersService {
 
   }
 
-  // 
+  // purchase 메서드 안에 dto 안에 있는 o_addr, o_detail_addr, o_tel이 저장되게 하면 됨(좌표를 저장되게 할 필요는 없음)
+  // 기술, 시간 한계로 인해 일단은 배송이 시작되면 환불이 안되도록 함
 
   async purchase(
     userId: number,
     createOrderDto: CreateOrderDto,
     // 포스트맨의 body,
   ) {
-    // !userId, _.isNil(userId) 걸러주는 로직 필요 + await validation(CreateOrderDto, createOrderDto)
     if (_.isNil(userId) || userId == 0) {
       const error = new BadRequestException('잘못된 요청입니다!')
       logger.errorLogger(error, `userId = ${userId}`)
@@ -53,7 +53,7 @@ export class OrdersService {
     await queryRunner.startTransaction();
 
     await validation(CreateOrderDto, createOrderDto)
-    const { carts_id, o_addr, o_detail_addr } = createOrderDto;
+    const { carts_id, o_addr, o_detail_addr, o_tel } = createOrderDto;
     const carts = await queryRunner.manager.find(Carts, {
       where: {
         id: In(carts_id),
@@ -111,6 +111,9 @@ export class OrdersService {
       const makingOrder = queryRunner.manager.create(Orders, {
         user_id: userId,
         o_total_price,
+        o_tel,
+        o_addr,
+        o_detail_addr
         //아마 p_status는 default(default값: false) 줘야 함
       })
 
