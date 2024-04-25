@@ -79,7 +79,6 @@ export class PaymentsService {
       const details = await queryRunner.manager.createQueryBuilder(OrdersDetails, 'details')
         .where('details.orders_id = :orders_id', { orders_id })
         .getMany();
-
     
         //redlock 
         const client = this.redisService.getClient()
@@ -92,16 +91,34 @@ export class PaymentsService {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-  
+
+          const paymentAmount = order.o_total_price;
+          console.log('paymentAmount?', paymentAmount)
+          const newPoints = user.points - paymentAmount;
+      
+          if (newPoints < 0) {
+            const error = new BadRequestException('포인트가 부족합니다.');
+            logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${createPaymentDto}`) 
+            throw error
+          }
+
+          const destination = await this.kakaoGeocoder.getCoordinates(order.o_addr)
+          console.log('국밥1-1', destination)
+          const storage = await this.kakaoGeocoder.getClosestStorage(destination)
+          console.log('국밥1-2', storage)
       for (const detail of details) {
-        const goods = await queryRunner.manager.createQueryBuilder(Goods, 'goods')
+        const goods = queryRunner.manager.createQueryBuilder(Goods, 'goods')
         const stocks = await queryRunner.manager.createQueryBuilder(Stocks, 'stocks')
-        .leftJoinAndSelect('Goods', 'goods', 'stocks.goods_id = goods.id')
-        .where('goods.id = :goods_id', { goods_id: detail.goods_id })
-        .getOne();
-
+        // , 'racks.*', 'storage.*'
+        .select(['stocks.*', 'goods.*'])
+        .leftJoin('goods', 'goods', 'stocks.goods_id = goods.id')
+        .leftJoin('racks', 'racks', 'stocks.rack_id = racks.id')
+        .leftJoin('storage', 'storage', 'racks.storage_id = storage.id')
+        .where('goods.id = :goodsId', { goodsId: detail.goods_id })
+        .andWhere('storage.id = :storageId', { storageId: storage.id })
+        .getRawOne();
+        console.log('국밥1-4', stocks)
         
-
         if (!goods || stocks.count < detail.od_count) {
           const error = new BadRequestException('재고가 없습니다.');
           logger.errorLogger(error, `userId = ${userId}, goodsId = ${detail.goods_id}`);
@@ -115,51 +132,47 @@ export class PaymentsService {
           .where('id = :stockId', { stockId: stocks.id })
           .execute();
       }
-  
-      const paymentAmount = order.o_total_price;
-      const newPoints = user.points - paymentAmount;
-  
-      if (newPoints < 0) {
-        const error = new BadRequestException('포인트가 부족합니다.');
-        logger.errorLogger(error, `userId = ${userId}, createPaymentDto = ${createPaymentDto}`) 
-        throw error
-      }
-  
+      console.log('국밥ㅇ')
       await queryRunner.manager.createQueryBuilder()
         .update(Users)
         .set({ points: newPoints })
         .where('id = :userId', { userId })
         .execute();
-  
+        console.log('국밥?')
       const newPayments = queryRunner.manager.create(Payments, {
         orders_id,
         user_id: userId,
         p_total_price: paymentAmount,
       });
+      console.log('국밥ㅁ')
       const returnNewPayments = await queryRunner.manager.save(Payments, newPayments);
+      console.log('국밥ㅁ-1', returnNewPayments)
       await queryRunner.manager.update(Orders, { user_id: userId, id: orders_id }, { p_status: true })
+      console.log('국밥ㅂ')
+
       await queryRunner.commitTransaction();
       await queryRunner.release();
+      console.log('국밥ㄹ')
       return returnNewPayments;
-
     } catch(err) {
-      const error =  new Error('트랜잭션 에러가 발생하였습니다.')
-      logger.errorLogger(error, `error detail =${console.dir(error)}`)
-      throw error;
+      console.dir(err)
+      // const error =  new Error('트랜잭션 에러가 발생하였습니다.')
+      // logger.errorLogger(error, `error detail =${console.dir(error)}`)
+      // throw error;
       }
       } catch (err) {
-        const fatalError = new InternalServerErrorException('동시성 제어 관련 에러가 발생했습니다.')
-        logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
-        throw fatalError;
+        // const fatalError = new InternalServerErrorException('동시성 제어 관련 에러가 발생했습니다.')
+        // logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
+        // throw fatalError;
       } finally {
         if(lock) {
           await lock.release()
         }
       }
     } catch(err) {
-      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
-      logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
-      throw fatalError;
+      // const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
+      // logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
+      // throw fatalError;
     }
     }
 
