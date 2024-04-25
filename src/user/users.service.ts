@@ -347,7 +347,7 @@ import { RedisService } from 'src/redis/redis.service';
     return token;
 }
 
- signToken(user: Pick<Users, 'email' | 'id'>){
+  signToken(user: Pick<Users, 'email' | 'id'>){
     const payload = {
         email: user.email,
         sub: user.id,

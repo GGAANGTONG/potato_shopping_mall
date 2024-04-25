@@ -29,7 +29,6 @@ export class Users {
   @Column({ type: 'varchar' })
   name: string;
 
-
   @IsEmail()
   @IsNotEmpty()
   @Column({ type: 'varchar', unique: true })
@@ -60,6 +59,16 @@ export class Users {
   @IsNumber()
   @Column({ type: 'int', nullable: true })
   bank: number;
+
+  @IsString()
+  @IsOptional()
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  address: string;
+
+  @IsString()
+  @IsOptional()
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  detail_address: string;
 
   @OneToMany(() => Like, (like) => like.user)
   like: Like[];

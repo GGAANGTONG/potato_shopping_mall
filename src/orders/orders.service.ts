@@ -48,25 +48,29 @@ export class OrdersService {
       throw error
     }
 
-    await validation(CreateOrderDto, createOrderDto)
-
     const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const { carts_id } = createOrderDto;
+    await validation(CreateOrderDto, createOrderDto)
+    const { carts_id, o_addr, o_detail_addr } = createOrderDto;
     const carts = await queryRunner.manager.find(Carts, {
       where: {
-        id: In(carts_id)
+        id: In(carts_id),
+        user_id: userId 
       },
     });
-    if (!carts) {
-      const error = new BadRequestException('존재하지 않는 상품입니다.');
+
+    if (carts.length === 0) {
+      const error = new NotFoundException('존재하지 않는 상품입니다.');
       logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${JSON.stringify(carts)} `)
-      throw error
+      throw error;
     }
+
     if (carts.length !== carts_id.length) {
       const error = new BadRequestException("유효하지 않은 요청입니다.");
       logger.errorLogger(error, `userId = ${userId}, createOrderDto = ${JSON.stringify(createOrderDto)}, carts = ${JSON.stringify(carts)} `)
-      throw error
+      throw error;
     }
     for (let element of carts) {
       if (element.user_id !== userId) {
@@ -76,8 +80,6 @@ export class OrdersService {
       }
     }
 
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
     try {
 
       let o_total_price: number = 0;
