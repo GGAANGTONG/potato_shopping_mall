@@ -31,6 +31,11 @@ export class Orders {
   o_total_price: number;
 
   @IsString()
+  @IsNotEmpty()
+  @Column({nullable: true })
+  o_tel: string;
+
+  @IsString()
   @IsOptional()
   @Column({ type: 'varchar', length: 255, nullable: true })
   o_addr: string;
