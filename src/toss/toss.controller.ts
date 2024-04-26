@@ -21,6 +21,10 @@ export class TossController {
     console.log('토스 국밥')
     console.log('토스 국밥-1', process.cwd())
     console.log('토스 국밥-2',join(process.cwd(), 'src/toss/success.html'))
+
+    //결제 정보를 생성하고, 이 정보를 payments table에 등록하는 로직
+    
+
     return res.redirect(join(process.cwd(), 'src/toss/success.html'));
   }
 

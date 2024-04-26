@@ -1,15 +1,16 @@
-import { Body, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import { PaymentsService } from "./payments.service";
 import { AuthGuard } from "@nestjs/passport";
 import { CreatePaymentDto } from "../orders/dto/create-payment.dto";
 import logger from "src/common/log/logger";
 import { Response } from 'express';
+import _ from "lodash";
 
 
 @Controller('payments')
 export class PaymentsController {
     constructor(private readonly paymentsService: PaymentsService) { }
-    //결제
+    //포인트 결제
     @UseGuards(AuthGuard('jwt'))
     @Post()
     async pay(@Req() req, @Body() createPaymentDto: CreatePaymentDto) {
@@ -17,6 +18,36 @@ export class PaymentsController {
         logger.traceLogger(`Payments - pay`, `req.user = ${JSON.stringify(req.user)}, createPaymentDto = ${JSON.stringify(createPaymentDto)}`)
         return await this.paymentsService.pay(userId, createPaymentDto);
     }
+    //토스페이 - 결제 인증 요청
+    //check.html로 렌더링
+    //렌더링 시 orderName, orderId, amount(o_total_price) 같이 가야 함
+    @UseGuards(AuthGuard('jwt'))
+    @Post()
+   async payCash (@Req() req, @Body() createPaymentDto: CreatePaymentDto, @Res() res) {
+    const userId = req.user.id;
+    logger.traceLogger(`Payments - payCash`, `req.user = ${JSON.stringify(req.user)}, createPaymentDto = ${JSON.stringify(createPaymentDto)}`)
+    const data = await this.paymentsService.payCash(userId, createPaymentDto)
+    return res.render('checkout.html', {
+        orderName: data.message,
+        orderId: data.data.toss_orders_id,
+        amount: data.data.o_total_price
+    })
+   }
+   //토스페이 결제 승인 요청
+   @Post('payCash-confirm')
+   async payCashConfirm(@Body() requestData, @Res() res) {
+    const {paymentKey, orderId, amount} = requestData
+
+    if(_.isNil(paymentKey) || paymentKey == 0 || _.isNil(orderId) || orderId == 0 || _.isNil(amount)) {
+        throw new BadRequestException('잘못된 요청입니다!')
+    }
+
+    const data = await this.paymentsService.payCashConfirm(requestData)
+
+    return res.status(200).json({
+        message: '결제 준비가 완료되었습니다.' 
+    })
+   }
 
     // 유저 결제 목록 전체 조회
     @UseGuards(AuthGuard('jwt'))
