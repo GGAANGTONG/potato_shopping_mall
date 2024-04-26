@@ -16,7 +16,7 @@ import { Like } from '../src/like/entities/like.entity';
 import dotenv from 'dotenv'
 import { Racks } from '../src/storage/entities/rack.entity'
 import { Storage } from '../src/storage/entities/storage.entity';
-import { Oauth } from '../src/oauth/entities/oauth.entity';
+
 
 dotenv.config()
 
@@ -27,7 +27,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  entities: [Users, Point, Payments, Orders, Reviews, OrdersDetails, Orders, Carts, Like, Stocks, Goods, Categories, Comments, Boards, Racks, Storage, Oauth],
+  entities: [Users, Point, Payments, Orders, Reviews, OrdersDetails, Orders, Carts, Like, Stocks, Goods, Categories, Comments, Boards, Racks, Storage],
   synchronize: true,
   logging: false,
 });

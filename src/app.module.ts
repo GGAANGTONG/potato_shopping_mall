@@ -16,6 +16,7 @@ import { BoardsModule } from './boards/boards.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { StorageModule } from './storage/storage.module';
 import { ElasticsearchModule } from './elasticsearch/elasticsearch.module';
+import { TossModule } from './toss/toss.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { ElasticsearchModule } from './elasticsearch/elasticsearch.module';
     RedisModule,
     BoardsModule,
     StorageModule,
-    ElasticsearchModule
+    ElasticsearchModule,
+    TossModule
   ],
   controllers: [AppController],
   providers: [],
