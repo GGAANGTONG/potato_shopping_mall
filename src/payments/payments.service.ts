@@ -16,6 +16,8 @@ import _ from 'lodash';
 import { Redis } from 'ioredis';
 import { RedisService } from '../redis/redis.service';
 import { KakaoGeocoder } from '../common/utils/kakao-geocoder.util';
+import { TossHistory } from './entities/tossHistory.entity';
+import { faker } from '@faker-js/faker';
 
 @Injectable()
 export class PaymentsService {
@@ -32,6 +34,8 @@ export class PaymentsService {
     private ordersDetailsRepository: Repository<OrdersDetails>,
     @InjectRepository(Stocks)
     private stocksRepository: Repository<Stocks>,
+    @InjectRepository(TossHistory)
+    private tossRepository: Repository<TossHistory>,
     private redisService: RedisService,
     private readonly dataSource: DataSource,
     private kakaoGeocoder: KakaoGeocoder,  
@@ -52,8 +56,6 @@ export class PaymentsService {
     const { orders_id } = createPaymentDto;
   
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
   
     try {
       const order = await queryRunner.manager.createQueryBuilder(Orders, 'order')
@@ -85,7 +87,7 @@ export class PaymentsService {
         const redlock = this.redisService.redlock(client)
       
     
-        const lock = await redlock.acquire([`transaction: user_id = ${userId} & order_id = ${order.id}`], 6000)
+        const lock = await redlock.acquire([`transaction-point: user_id = ${userId} & order_id = ${order.id}`], 6000)
         try{
         //트랜잭션
         await queryRunner.connect();
@@ -93,7 +95,7 @@ export class PaymentsService {
         try {
 
           const paymentAmount = order.o_total_price;
-          console.log('paymentAmount?', paymentAmount)
+
           const newPoints = user.points - paymentAmount;
       
           if (newPoints < 0) {
@@ -103,9 +105,9 @@ export class PaymentsService {
           }
 
           const destination = await this.kakaoGeocoder.getCoordinates(order.o_addr)
-          console.log('국밥1-1', destination)
+
           const storage = await this.kakaoGeocoder.getClosestStorage(destination)
-          console.log('국밥1-2', storage)
+
       for (const detail of details) {
         const goods = queryRunner.manager.createQueryBuilder(Goods, 'goods')
         const stocks = await queryRunner.manager.createQueryBuilder(Stocks, 'stocks')
@@ -117,7 +119,7 @@ export class PaymentsService {
         .where('goods.id = :goodsId', { goodsId: detail.goods_id })
         .andWhere('storage.id = :storageId', { storageId: storage.id })
         .getRawOne();
-        console.log('국밥1-4', stocks)
+
         
         if (!goods || stocks.count < detail.od_count) {
           const error = new BadRequestException('재고가 없습니다.');
@@ -132,50 +134,174 @@ export class PaymentsService {
           .where('id = :stockId', { stockId: stocks.id })
           .execute();
       }
-      console.log('국밥ㅇ')
+
       await queryRunner.manager.createQueryBuilder()
         .update(Users)
         .set({ points: newPoints })
         .where('id = :userId', { userId })
         .execute();
-        console.log('국밥?')
+
+
       const newPayments = queryRunner.manager.create(Payments, {
         orders_id,
         user_id: userId,
         p_total_price: paymentAmount,
       });
-      console.log('국밥ㅁ')
+      
       const returnNewPayments = await queryRunner.manager.save(Payments, newPayments);
-      console.log('국밥ㅁ-1', returnNewPayments)
+      
       await queryRunner.manager.update(Orders, { user_id: userId, id: orders_id }, { p_status: true })
-      console.log('국밥ㅂ')
+      
 
       await queryRunner.commitTransaction();
       await queryRunner.release();
-      console.log('국밥ㄹ')
+      
       return returnNewPayments;
-    } catch(err) {
-      console.dir(err)
-      // const error =  new Error('트랜잭션 에러가 발생하였습니다.')
-      // logger.errorLogger(error, `error detail =${console.dir(error)}`)
-      // throw error;
-      }
+    } catch(err) {}
       } catch (err) {
-        // const fatalError = new InternalServerErrorException('동시성 제어 관련 에러가 발생했습니다.')
-        // logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
-        // throw fatalError;
+        const fatalError = new InternalServerErrorException('동시성 제어 관련 에러가 발생했습니다.')
+        logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
+        throw fatalError;
       } finally {
         if(lock) {
           await lock.release()
         }
       }
     } catch(err) {
-      // const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
-      // logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
-      // throw fatalError;
+      const fatalError = new InternalServerErrorException('알 수 없는 에러가 발생했습니다.')
+      logger.fatalLogger(fatalError, `userId = ${userId}, createPaymentDto = ${createPaymentDto}, error detail = ${console.dir(fatalError)}`)
+      throw fatalError;
     }
     }
 
+    //토스페이 -결제 인증 요청
+    async payCash (userId: number, createPaymentDto: CreatePaymentDto) {
+      await validation(CreatePaymentDto, createPaymentDto)
+      if (_.isNil(userId) || userId == 0) {
+        const error = new BadRequestException('잘못된 요청입니다!') 
+        logger.errorLogger(error, `userId = ${userId}`)
+        throw error
+      }
+      
+      let toss_orders_id;
+      let duplicate;
+      do{
+      toss_orders_id = faker.random.alphaNumeric(10)
+      duplicate = await this.tossRepository.findOneBy({toss_orders_id})
+      }
+      while(!_.isNil(duplicate))
+
+      const { orders_id} = createPaymentDto
+
+      const order = await this.ordersRepository.findOne({
+        relations: ['ordersdetails'],
+        where: {
+          id: orders_id
+        }
+      })
+
+      if(_.isNil(order)) {
+        throw new NotFoundException('주문 내역을 찾을 수 없습니다.')
+      }
+
+      const data = this.tossRepository.create({
+        user_id: userId,
+        orders_id,
+        toss_orders_id,
+        o_total_price: order.o_total_price
+      })
+
+      await this.tossRepository.save(data)
+      return {
+        message: `${order.ordersdetails[0].goods_id}번 상품 외 ${order.ordersdetails.length - 1} 건`,
+        data
+      }
+    }
+
+    //토스페이 - 결제 승인 요청
+    async payCashConfirm(requestData) {
+      const {paymentKey, orderId, amount } = requestData
+      
+      if(_.isNil(paymentKey) || paymentKey == 0 || _.isNil(orderId) || orderId == 0 || _.isNil(amount)) {
+        throw new BadRequestException('잘못된 요청입니다!')
+    }
+      
+      //redlock 
+      const client = this.redisService.getClient()
+      const redlock = this.redisService.redlock(client)
+
+      const queryRunner = this.dataSource.createQueryRunner();
+
+      const tossPayment = await queryRunner.manager.createQueryBuilder(TossHistory, 'toss')
+      .leftJoinAndSelect('orders', 'orders', 'toss.orders_id = orders.id')
+      .where('toss.toss_orders_id = :orderId' , { orderId })
+      .getOne();
+
+    if (!tossPayment) {
+      const error = new BadRequestException('존재하지 않는 주문입니다.');
+      logger.errorLogger(error, `requestData = ${JSON.stringify(requestData)}`)
+      throw error
+    }      
+            
+      const lock = await redlock.acquire([`transaction-toss: order_id = ${orderId}`], 6000)
+    try{
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      try{
+      const details = await queryRunner.manager.createQueryBuilder(OrdersDetails, 'details')
+      .where('details.orders_id = :orders_id', { orders_id: tossPayment.orders_id })
+      .getMany();
+
+      const destination = await this.kakaoGeocoder.getCoordinates(tossPayment.orders.o_addr)
+      const storage = await this.kakaoGeocoder.getClosestStorage(destination)
+  
+  for (const detail of details) {
+    const goods = queryRunner.manager.createQueryBuilder(Goods, 'goods')
+    const stocks = await queryRunner.manager.createQueryBuilder(Stocks, 'stocks')
+    // , 'racks.*', 'storage.*'
+    .select(['stocks.*', 'goods.*'])
+    .leftJoin('goods', 'goods', 'stocks.goods_id = goods.id')
+    .leftJoin('racks', 'racks', 'stocks.rack_id = racks.id')
+    .leftJoin('storage', 'storage', 'racks.storage_id = storage.id')
+    .where('goods.id = :goodsId', { goodsId: detail.goods_id })
+    .andWhere('storage.id = :storageId', { storageId: storage.id })
+    .getRawOne();
+
+    if (!goods || stocks.count < detail.od_count) {
+      const error = new BadRequestException('재고가 없습니다.');
+      logger.errorLogger(error, `goodsId = ${detail.goods_id}`);
+      throw error;
+    }
+
+    const newStockCount = stocks.count - detail.od_count;
+    await queryRunner.manager.createQueryBuilder()
+      .update(Stocks)
+      .set({ count: newStockCount })
+      .where('id = :stockId', { stockId: stocks.id })
+      .execute();
+  }
+      tossPayment.p_total_price = tossPayment.o_total_price
+      tossPayment.p_status = true
+      await queryRunner.manager.save(TossHistory, tossPayment);
+      await queryRunner.manager.update(Orders, { user_id: tossPayment.user_id, id: tossPayment.orders_id }, { p_status: true })
+
+    await queryRunner.commitTransaction()
+    await queryRunner.release()
+}catch(error) {}
+return {
+  data: requestData 
+ }
+} catch(error) {
+   const fatalError = new InternalServerErrorException('동시성 제어 관련 에러가 발생했습니다.')
+   logger.fatalLogger(fatalError, `JSON.stringify = ${JSON.stringify(requestData)}, error detail = ${console.dir(fatalError)}`)
+   throw fatalError;
+} finally {
+  if(lock) {
+    lock.release()
+  }
+}
+
+    } 
 
   // 유저별 결제 목록 전체 조회
   async findAllOrderbyUser(userId: number): Promise<Payments[]> {
