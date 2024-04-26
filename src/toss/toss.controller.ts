@@ -1,4 +1,4 @@
-import { Controller, Post, Body,Get, Res, HttpException } from '@nestjs/common';
+import { Controller, Post, Body,Get, Res, HttpException, Render } from '@nestjs/common';
 import { TossService } from './toss.service';
 import { join } from 'path';
 
@@ -17,12 +17,22 @@ export class TossController {
   }
 
   @Get('success')
-  sendSuccessPage(@Res() res: Response) {
-    return { url: join(process.cwd(), 'public/success.html') };
+  sendSuccessPage(@Res() res) {
+    console.log('토스 국밥')
+    console.log('토스 국밥-1', process.cwd())
+    console.log('토스 국밥-2',join(process.cwd(), 'src/toss/success.html'))
+    return res.redirect(join(process.cwd(), 'src/toss/success.html'));
   }
+
+  // @Get('success')
+  // @Render('success')
+  // sendSuccessPage() {
+
+  //   return {title: 'Success Page'}
+  // }
 
   @Get('fail')
   sendFailPage(@Res() res: Response) {
-    return { url: join(process.cwd(), 'public/fail.html') };
+    return { url: join(process.cwd(), 'fail.html') };
   }
 }
