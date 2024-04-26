@@ -14,6 +14,7 @@ import { OrdersDetails } from './entities/ordersdetails.entity';
 import { validation } from '../common/pipe/validationPipe';
 import _ from 'lodash';
 import { Stocks } from 'src/goods/entities/stocks.entity';
+import { getDeliveryInqResult } from './delivery'
 
 
 @Injectable()
@@ -30,6 +31,8 @@ export class OrdersService {
     @InjectRepository(Goods)
     private goodsRepository: Repository<Goods>,
     private readonly dataSource: DataSource,
+
+
   ) {
 
   }
@@ -87,16 +90,16 @@ export class OrdersService {
           logger.errorLogger(error, `userId = ${userId}, cartId = ${cart.id}`);
           throw error;
         }
-  
+
         const goods = await queryRunner.manager.createQueryBuilder(Goods, 'goods')
           .where('goods.id = :id', { id: cart.goods_id })
           .getMany();
-        
+
         const stockCount = await queryRunner.manager.createQueryBuilder(Stocks, 'stocks')
           .select("SUM(stocks.count)", "total")
           .where('stocks.goods_id = :goodsId', { goodsId: cart.goods_id })
           .getRawOne();
-      
+
         if (!goods || stockCount.total < cart.ct_count) {
           const error = new BadRequestException('재고가 부족합니다.');
           logger.errorLogger(error, `userId = ${userId}, goodsId = ${cart.goods_id}`);
@@ -129,7 +132,7 @@ export class OrdersService {
 
         await queryRunner.manager.save(OrdersDetails, ordersDetail)
       }
-  
+
       await queryRunner.commitTransaction();
       return order; // 생성된 주문 객체 반환
     } catch (err) {
@@ -144,7 +147,6 @@ export class OrdersService {
 
 
 
-
   // 유저별 주문 목록 전체 조회
   async findAllOrderbyUser(userId: number): Promise<Orders[]> {
     try {
@@ -153,12 +155,12 @@ export class OrdersService {
         logger.errorLogger(error, `userId = ${userId}`)
         throw error
       }
-  
+
       const orders = await this.ordersRepository
         .createQueryBuilder("order")
         .where("order.user_id = :userId", { userId: userId })
         .getMany();
-  
+
       if (!orders || orders.length === 0) {
         const error = new NotFoundException('주문 정보가 없습니다.');
         logger.errorLogger(error, `userId = ${userId}, orders = ${orders}`);
@@ -171,7 +173,7 @@ export class OrdersService {
       throw fatalError;
     }
   }
-  
+
 
   // 전체 주문 정보 확인
   async findAllOrderbyAdmin(): Promise<Orders[]> {
@@ -179,7 +181,7 @@ export class OrdersService {
       const orders = await this.ordersRepository
         .createQueryBuilder("order")
         .getMany();
-  
+
       if (!orders || orders.length === 0) {
         const error = new NotFoundException('주문 정보가 없습니다.');
         logger.errorLogger(error, `orders = ${orders}`);
@@ -192,7 +194,7 @@ export class OrdersService {
       throw fatalError;
     }
   }
-  
+
 
   // 상세 주문 정보 확인
   async findOneOrderbyBoth(orderId: number): Promise<Orders> {
@@ -203,13 +205,13 @@ export class OrdersService {
         logger.errorLogger(error, `orderId = ${orderId}`)
         throw error
       }
-  
+
       // 쿼리 빌더를 사용하여 주문 데이터 조회
       const order = await this.ordersRepository
         .createQueryBuilder("order")
         .where("order.id = :id", { id: orderId })
         .getOne();
-  
+
       if (!order) {
         const error = new NotFoundException('주문 정보가 없습니다.');
         logger.errorLogger(error, `orderId = ${orderId}, order = ${order}`);
@@ -222,7 +224,7 @@ export class OrdersService {
       throw fatalError;
     }
   }
-  
+
 
   // 주문 취소
   async cancelOrder(userId: number, orderId: number): Promise<Orders> {
@@ -232,7 +234,7 @@ export class OrdersService {
       logger.errorLogger(error, `orderId = ${orderId} userId = ${userId}`)
       throw error
     }
-  
+
     const queryRunner = this.dataSource.createQueryRunner();
 
     const order = await queryRunner.manager.findOne(Orders, {
@@ -287,5 +289,13 @@ export class OrdersService {
       logger.fatalLogger(fatalError, `orderId = ${orderId}`)
       throw fatalError;
     }
+
+  }
+
+  // getDeliveryInqResult
+
+  async getDeliveryInqResult(t_invoice: string): Promise<any> {
+    const result = getDeliveryInqResult(t_invoice)
+    return result;
   }
 }
