@@ -13,7 +13,6 @@ import logger from '../common/log/logger';
 import { Goods } from '../goods/entities/goods.entity';
 import { Status } from '../orders/types/order.type';
 import _ from 'lodash';
-import { Redis } from 'ioredis';
 import { RedisService } from '../redis/redis.service';
 import { KakaoGeocoder } from '../common/utils/kakao-geocoder.util';
 import { TossHistory } from './entities/tossHistory.entity';
