@@ -115,15 +115,15 @@
             await paymentMethodWidget.updateAmount(amount);
           }
         });
-        console.log('인터넷 국밥1', amount)
-        console.log('인터넷 국밥2', orderId)
-        console.log('인터넷 국밥3', orderName)
+        console.log('인터넷 국밥1', amount);
+        console.log('인터넷 국밥2', orderId);
+        console.log('인터넷 국밥3', orderName);
         // ------ '결제하기' 버튼 누르면 결제창 띄우기 ------
         button.addEventListener('click', async function () {
           await paymentWidget.requestPayment({
             orderId: `${orderId}`,
             orderName: `${orderName}`,
-            successUrl: 'http://localhost:3000/api/success',
+            successUrl: 'http://localhost:3000/payments/payCashValidationSuccess',
             failUrl: 'http://localhost:3000/api/fail',
           });
         });
