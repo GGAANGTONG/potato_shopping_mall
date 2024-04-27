@@ -16,9 +16,14 @@ import { BoardsModule } from './boards/boards.module';
 import { StorageModule } from './storage/storage.module';
 import { ElasticsearchModule } from './elasticsearch/elasticsearch.module';
 import { TossModule } from './toss/toss.module';
-
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'client', 'dist'),
+      exclude : ['/api*'],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: configModuleValidationSchema,
