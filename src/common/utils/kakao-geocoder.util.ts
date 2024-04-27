@@ -17,6 +17,7 @@ export class KakaoGeocoder {
 
     async getCoordinates(address: string): Promise<{ lat: number, lng: number }> {
         try {
+
             const response = await axios.get(this.baseUrl, {
                 headers: {
                     'Authorization': `KakaoAK ${this.KAKAO_API_KEY}`
@@ -25,7 +26,7 @@ export class KakaoGeocoder {
                     query: address
                 }
             }).catch(error => {
-                console.error('Kakao API 호출 중 문제가 발생했습니다:', error);
+                // console.error('Kakao API 호출 중 문제가 발생했습니다:', error);
                 throw new InternalServerErrorException('Kakao API 호출 중 문제가 발생했습니다.');
             });
 
@@ -36,7 +37,7 @@ export class KakaoGeocoder {
                 throw new NotFoundException('결과가 없습니다.');
             }
         } catch (error) {
-            console.error('좌표값 찾기 실패:', error);
+            // console.error('좌표값 찾기 실패:', error);
             throw new InternalServerErrorException('Kakao API 호출 중 문제가 발생했습니다.');
         }
     }
@@ -56,6 +57,7 @@ export class KakaoGeocoder {
             currentDate.setDate(currentDate.getDate() + 1)
             const deliveryDate = currentDate.toISOString().slice(0, 16).replace(/[-T:]/g, '');
             const storages = await this.storageRepository.find()
+
             const list = [];
             for(let i = 0; i < storages.length; i++) {
             const data = await axios.get(this.baseUrlDelivery, {
@@ -75,16 +77,28 @@ export class KakaoGeocoder {
                 console.error('Kakao API 호출 중 문제가 발생했습니다:', error);
                 throw new InternalServerErrorException('Kakao API 호출 중 문제가 발생했습니다.');
             })
+            if(_.isNil(data)) {
+                continue;
+            }
+            //섬 같이 아예 연결이 안된 곳은 거리 계산 자체가 불가함, api가 멈춰버림
+            const distance = data.data.routes[0].summary.distance
+            console.log('국바압 ><', distance)
+
+           if(!_.isNil(distance)) {
             list.push({id: storages[i].id,
-                distance: data.data.distance
+                distance: data.data.routes[0].summary.distance
             })
+            console.log('국밥명단', list)
         }
+        }
+        console.log('국바압?', list)
       const result = list.reduce((acc, curr) => {
            return acc.distance > curr.distance ? curr : acc
         })
+        console.log('국바압!', result)
         return storages[result.id]
     } catch(error) {
-        console.error('좌표값 찾기 실패:', error);
+        // console.error('좌표값 찾기 실패:', error);
         throw new InternalServerErrorException('Kakao API 호출 중 문제가 발생했습니다.');
     }
     }
