@@ -22,17 +22,22 @@ export class PaymentsController {
     //check.html로 렌더링
     //렌더링 시 orderName, orderId, amount(o_total_price) 같이 가야 함
     @UseGuards(AuthGuard('jwt'))
-    @Post()
+
+    @Post('payCash')
    async payCash (@Req() req, @Body() createPaymentDto: CreatePaymentDto, @Res() res) {
     const userId = req.user.id;
-    logger.traceLogger(`Payments - payCash`, `req.user = ${JSON.stringify(req.user)}, createPaymentDto = ${JSON.stringify(createPaymentDto)}`)
+    console.log('국밥아저씨', createPaymentDto)
+        // const userId = 1;
+    // logger.traceLogger(`Payments - payCash`, `req.user = ${JSON.stringify(req.user)}, createPaymentDto = ${JSON.stringify(createPaymentDto)}`)
     const data = await this.paymentsService.payCash(userId, createPaymentDto)
-    return res.render('checkout.html', {
+    console.log('국밥아가씨', data)
+        return res.json({
         orderName: data.message,
         orderId: data.data.toss_orders_id,
         amount: data.data.o_total_price
     })
    }
+
    //토스페이 결제 승인 요청
    @Post('payCash-confirm')
    async payCashConfirm(@Body() requestData, @Res() res) {

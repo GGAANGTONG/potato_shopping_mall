@@ -20,7 +20,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prepare": "if [ -z \"$CI\" ]; then husky install; fi"
+    "prepare": "if '%CI%'=='' (husky install) "
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
@@ -50,6 +50,7 @@
     "concurrently": "^8.2.2",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
     "got": "^14.2.1",
     "ioredis": "^5.3.2",
     "joi": "^17.12.2",

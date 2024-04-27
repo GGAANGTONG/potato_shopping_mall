@@ -174,7 +174,7 @@ export class PaymentsService {
     }
 
     //토스페이 -결제 인증 요청
-    async payCash (userId: number, createPaymentDto: CreatePaymentDto) {
+    async payCash (userId: number, createPaymentDto) {
       await validation(CreatePaymentDto, createPaymentDto)
       if (_.isNil(userId) || userId == 0) {
         const error = new BadRequestException('잘못된 요청입니다!') 
@@ -184,14 +184,15 @@ export class PaymentsService {
       
       let toss_orders_id;
       let duplicate;
+      console.log('페이먼츠 국밥')
       do{
-      toss_orders_id = faker.random.alphaNumeric(10)
+      toss_orders_id = faker.string.alphanumeric(10)
       duplicate = await this.tossRepository.findOneBy({toss_orders_id})
       }
       while(!_.isNil(duplicate))
-
+        console.log('페이먼츠 국밥2')
       const { orders_id} = createPaymentDto
-
+      console.log('페이먼츠 국밥3', orders_id)
       const order = await this.ordersRepository.findOne({
         relations: ['ordersdetails'],
         where: {
@@ -209,7 +210,7 @@ export class PaymentsService {
         toss_orders_id,
         o_total_price: order.o_total_price
       })
-
+      console.log('페이먼츠 국밥4', data)
       await this.tossRepository.save(data)
       return {
         message: `${order.ordersdetails[0].goods_id}번 상품 외 ${order.ordersdetails.length - 1} 건`,
@@ -232,17 +233,17 @@ export class PaymentsService {
       const queryRunner = this.dataSource.createQueryRunner();
 
       const tossPayment = await queryRunner.manager.createQueryBuilder(TossHistory, 'toss')
-      .leftJoinAndSelect('orders', 'orders', 'toss.orders_id = orders.id')
-      .where('toss.toss_orders_id = :orderId' , { orderId })
+      .leftJoinAndSelect('toss.orders', 'orders')
+      .where('toss.toss_orders_id = :orderId', { orderId })
       .getOne();
-
+      console.log('토스 국밥1', tossPayment)
     if (!tossPayment) {
       const error = new BadRequestException('존재하지 않는 주문입니다.');
       logger.errorLogger(error, `requestData = ${JSON.stringify(requestData)}`)
       throw error
     }      
             
-      const lock = await redlock.acquire([`transaction-toss: order_id = ${orderId}`], 6000)
+      const lock = await redlock.acquire([`transaction-toss: order_id = ${orderId}`], 30000)
     try{
       await queryRunner.connect();
       await queryRunner.startTransaction();
@@ -252,38 +253,45 @@ export class PaymentsService {
       .getMany();
 
       const destination = await this.kakaoGeocoder.getCoordinates(tossPayment.orders.o_addr)
+      console.log('토스 국밥22222', destination)
       const storage = await this.kakaoGeocoder.getClosestStorage(destination)
-  
+      console.log('토스 국밥2222', storage)
   for (const detail of details) {
+    console.log('토스 국밥 2-0')
     const goods = queryRunner.manager.createQueryBuilder(Goods, 'goods')
+    console.log('토스 국밥 2-1', goods)
     const stocks = await queryRunner.manager.createQueryBuilder(Stocks, 'stocks')
-    // , 'racks.*', 'storage.*'
-    .select(['stocks.*', 'goods.*'])
-    .leftJoin('goods', 'goods', 'stocks.goods_id = goods.id')
-    .leftJoin('racks', 'racks', 'stocks.rack_id = racks.id')
-    .leftJoin('storage', 'storage', 'racks.storage_id = storage.id')
+    .select(['stocks.*', 'goods.*' , 'racks.*', 'storage.*'])
+    .leftJoinAndSelect('goods', 'goods', 'stocks.goods_id = goods.id')
+    .leftJoinAndSelect('racks', 'racks', 'stocks.rack_id = racks.id')
+    .leftJoinAndSelect('storage', 'storage', 'racks.storage_id = storage.id')
     .where('goods.id = :goodsId', { goodsId: detail.goods_id })
     .andWhere('storage.id = :storageId', { storageId: storage.id })
-    .getRawOne();
+    .getOne();
 
     if (!goods || stocks.count < detail.od_count) {
       const error = new BadRequestException('재고가 없습니다.');
       logger.errorLogger(error, `goodsId = ${detail.goods_id}`);
       throw error;
     }
-
+    console.log('토스 국밥 2-1', stocks.count)
+    console.log('토스 국밥 2-1', detail.od_count)
     const newStockCount = stocks.count - detail.od_count;
+    console.log('토스 국밥 2-1-1', stocks)
     await queryRunner.manager.createQueryBuilder()
       .update(Stocks)
       .set({ count: newStockCount })
       .where('id = :stockId', { stockId: stocks.id })
       .execute();
   }
+  console.log('토스 국밥 2-1-2', tossPayment)
       tossPayment.p_total_price = tossPayment.o_total_price
       tossPayment.p_status = true
+      console.log('토스 국밥2-2', tossPayment)
       await queryRunner.manager.save(TossHistory, tossPayment);
+      console.log('토스 국밥2-3', tossPayment)
       await queryRunner.manager.update(Orders, { user_id: tossPayment.user_id, id: tossPayment.orders_id }, { p_status: true })
-
+      console.log('토스 국밥3', tossPayment)
     await queryRunner.commitTransaction()
     await queryRunner.release()
 }catch(error) {}
