@@ -6,7 +6,7 @@ import { join } from 'path';
 export class TossController {
   constructor(private readonly tossService: TossService) {}
 
-  @Post('confirm')
+  @Post('/confirm')
   async confirmPayment(@Body() body: { paymentKey: string, orderId: string, amount: number }) {
     try {
       const response = await this.tossService.confirmPayment(body);
@@ -16,12 +16,12 @@ export class TossController {
     }
   }
 
-  @Get('success')
+  @Get('/success')
   sendSuccessPage(@Res() res: Response) {
     return { url: join(process.cwd(), 'public/success.html') };
   }
 
-  @Get('fail')
+  @Get('/fail')
   sendFailPage(@Res() res: Response) {
     return { url: join(process.cwd(), 'public/fail.html') };
   }

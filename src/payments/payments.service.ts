@@ -47,7 +47,12 @@ export class PaymentsService {
     }
   
     await validation(CreatePaymentDto, createPaymentDto);
-    const { orders_id } = createPaymentDto;
+    const { orders_id, PayMethod  } = createPaymentDto;
+
+    
+  if (PayMethod !== 'point') {
+    return; // 포인트 결제가 아닌 경우 함수 실행을 중단하거나 다른 처리를 할 수 있습니다.
+  }
   
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
