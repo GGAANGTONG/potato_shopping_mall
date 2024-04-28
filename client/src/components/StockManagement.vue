@@ -11,7 +11,7 @@
     <h2>상품 정보</h2>
     <li class="goods_info"> {{ responseGoods }} </li>
     <h3>재고 정보</h3>
-    <li v-for="stock in responseStocks">
+    <li v-for="(stock, index) in responseStocks" :key = "index">
           {{ stock }}
         </li>
       </ul>
@@ -39,14 +39,10 @@
       //상품 정보
       const responseGoods = await axios.get(`http://localhost:3000/api/goods/get-one/${goodsId}`)
       this.responseGoods = responseGoods.data
-      // //현재 창고 이름
-      // const responseStorageCurrent = await axios.get(`http://localhost:3000/api/storage/get-one/${storageIdCurrent}`)
-      // const storageNameCurrent = responseStorageCurrent.data.name
 
       //stock_id
       const responseStocks = await axios.get(`http://localhost:3000/api/stocks/by-goods/${goodsId}`)
       this.responseStocks = responseStocks.data
-      //stock_id
     }
 
   }

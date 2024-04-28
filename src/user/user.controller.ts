@@ -135,7 +135,7 @@ async kakaoCallbacks (
 
    const accessToken = this.jwtService.sign(payload, {
     secret: process.env.JWT_SECRET_KEY,
-    expiresIn: 1000 * 60 * 60 * 12,
+    expiresIn: 1000 * 60 * 60 * 36,
   });
 
   const refreshToken = this.jwtService.sign(payload, {
@@ -191,8 +191,9 @@ async kakaoCallbacks (
 
   //회원정보 찾기
   @UseGuards(AuthGuard('jwt'))
-  @Get('find-one/:id')
-  async findOne(@Param('id') id: number) {
+  @Get('find-one')
+  async findOne(@Req() req) {
+    const id =req.user.id
    const data = await this.userService.findOne(id);
     return { 
       message: '회원정보입니다.',

@@ -7,6 +7,7 @@ import PayCashValidationSuccess from '../components/PayCashValidationSuccess';
 import ProductItem from '../components/ProductItem.vue';
 import OrderPage from '../components/OrderPage.vue';
 import StockManagement from '../components/StockManagement.vue';
+import UserProfile from '../components/UserProfile.vue';
 const routes = [
   {
     path: '/',
@@ -51,9 +52,9 @@ const routes = [
     component: OrderPage,
   },
   {
-    path: '/order',
-    name: 'OrderPage',
-    component: OrderPage,
+    path: '/userProfile',
+    name: 'UserProfile',
+    component: UserProfile,
   },
 ];
 
