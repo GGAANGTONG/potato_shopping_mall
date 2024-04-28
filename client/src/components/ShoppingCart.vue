@@ -50,7 +50,7 @@ export default {
       this.cartItems = this.cartItems.filter((it) => it.id !== item.id);
     },
     handleOrder() {
-      console.log('주문하기 버튼 클릭됨!');
+      this.$router.push('/order'); 
     },
   },
   computed: {

@@ -5,6 +5,7 @@ import PayCash from '../components/PayCash.vue';
 import PayCashValidation from '../components/PayCashValidation.vue';
 import PayCashValidationSuccess from '../components/PayCashValidationSuccess';
 import ProductItem from '../components/ProductItem.vue';
+import OrderPage from '../components/OrderPage.vue'; 
 const routes = [
   {
     path: '/',
@@ -36,6 +37,11 @@ const routes = [
     name: 'ProductItem',
     component: ProductItem,
     props: true
+  },
+  {
+    path: '/order',
+    name: 'OrderPage',
+    component: OrderPage
   },
 ];
 
