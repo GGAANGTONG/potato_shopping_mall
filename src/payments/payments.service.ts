@@ -252,21 +252,11 @@ export class PaymentsService {
       .where('details.orders_id = :orders_id', { orders_id: tossPayment.orders_id })
       .getMany();
 
-      // const destination = await this.kakaoGeocoder.getCoordinates(tossPayment.orders.o_addr)
-      // console.log('토스 국밥22222', destination)
-      // const storage = await this.kakaoGeocoder.getClosestStorage(destination)
-      // console.log('토스 국밥2222', storage)
-      const storage = {
-        id: 6,
-        name: 'S Lincoln Street',
-        address: '인천 동구 화수로47번길 4',
-        latitude: 37.4831151516398,
-        longitude: 126.632618208158,
-        postal_code: '02418-9329',
-        contact_name: 'Miranda Kuhn IV',
-        contact_phone: '369.225.3010 x700',
-        is_available: true
-      }
+      const destination = await this.kakaoGeocoder.getCoordinates(tossPayment.orders.o_addr)
+      console.log('토스 국밥22222', destination)
+      const storage = await this.kakaoGeocoder.getClosestStorage(destination)
+      console.log('토스 국밥2222', storage)
+
   for (const detail of details) {
     const goods = queryRunner.manager.createQueryBuilder(Goods, 'goods')
     const stocks = await queryRunner.query(`
