@@ -5,7 +5,9 @@ import PayCash from '../components/PayCash.vue';
 import PayCashValidation from '../components/PayCashValidation.vue';
 import PayCashValidationSuccess from '../components/PayCashValidationSuccess';
 import ProductItem from '../components/ProductItem.vue';
-import OrderPage from '../components/OrderPage.vue'; 
+import OrderPage from '../components/OrderPage.vue';
+import StockManagement from '../components/StockManagement.vue';
+import UserProfile from '../components/UserProfile.vue';
 const routes = [
   {
     path: '/',
@@ -36,12 +38,23 @@ const routes = [
     path: '/good-one/:goodsId',
     name: 'ProductItem',
     component: ProductItem,
-    props: true
+    props: true,
+  },
+  {
+    path: '/manage-goods',
+    name: 'StockManagement',
+    component: StockManagement,
+    props: true,
   },
   {
     path: '/order',
     name: 'OrderPage',
-    component: OrderPage
+    component: OrderPage,
+  },
+  {
+    path: '/userProfile',
+    name: 'UserProfile',
+    component: UserProfile,
   },
 ];
 
