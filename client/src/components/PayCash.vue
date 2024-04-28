@@ -13,7 +13,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      orders_id: 0,
+      orders_id: '',
       message: '',
     };
   },

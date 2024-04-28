@@ -5,6 +5,7 @@ import PayCash from '../components/PayCash.vue';
 import PayCashValidation from '../components/PayCashValidation.vue';
 import PayCashValidationSuccess from '../components/PayCashValidationSuccess';
 import ProductItem from '../components/ProductItem.vue';
+import StockManagement from '../components/StockManagement.vue';
 const routes = [
   {
     path: '/',
@@ -35,7 +36,13 @@ const routes = [
     path: '/good-one/:goodsId',
     name: 'ProductItem',
     component: ProductItem,
-    props: true
+    props: true,
+  },
+  {
+    path: '/manage-goods',
+    name: 'StockManagement',
+    component: StockManagement,
+    props: true,
   },
 ];
 
