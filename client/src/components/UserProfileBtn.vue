@@ -10,7 +10,6 @@
     methods: {
       openUserProfile() {
         console.log('User profile opened');
-        // 실제 구현에서는 사용자 정보 페이지로 라우팅하거나 팝업을 열 수 있습니다.
       }
     }
   }

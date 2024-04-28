@@ -40,14 +40,14 @@ export const handler = async (event) => {
         name: row.g_name,
         price: row.g_price,
         description: row.g_desc,
-        category : row.cate_id,
+        category: row.cate_id,
         image: row.g_img,
         option: row.g_option,
         discountRate: row.discount_rate,
         costPrice: row.cost_price || 0,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        stockStatus: row.stock_status // 재고 상태 추가
+        stockStatus: row.stock_status, // 재고 상태 추가
       };
 
       await esClient.index({
@@ -69,7 +69,7 @@ export const handler = async (event) => {
 async function getLastMigrationTime() {
   const params = {
     Name: 'LastMigrationTime',
-    WithDecryption: false
+    WithDecryption: false,
   };
   const data = await ssm.getParameter(params).promise();
   return data.Parameter ? data.Parameter.Value : '1970-01-01T00:00:00Z';
@@ -80,7 +80,7 @@ async function updateLastMigrationTime(timestamp) {
     Name: 'LastMigrationTime',
     Type: 'String',
     Value: timestamp,
-    Overwrite: true
+    Overwrite: true,
   };
   await ssm.putParameter(params).promise();
 }

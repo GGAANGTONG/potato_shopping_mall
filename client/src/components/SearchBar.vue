@@ -1,22 +1,28 @@
 <template>
     <div class="search-bar">
       <input type="text" v-model="searchQuery" @keyup.enter="search" placeholder="상품 검색...">
-      <button @click="search">검색</button>
+      <button @click="$emit('search', searchQuery)">검색</button>
     </div>
   </template>
   
   <script>
+  import { mapState } from 'vuex';
+  
   export default {
     name: 'SearchBar',
     data() {
       return {
-        searchQuery: ''
-      };
+        searchQuery: '' 
+      }
+    },
+    computed: {
+      ...mapState({
+        searchQuery: state => state.searchQuery
+      }),
     },
     methods: {
       search() {
-        // 검색 로직 실행, 예를 들어 이벤트를 발생시키거나 API 호출
-        console.log('Searching for:', this.searchQuery);
+        this.$emit('search', this.searchQuery); 
       }
     }
   }

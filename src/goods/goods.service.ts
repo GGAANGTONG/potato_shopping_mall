@@ -143,7 +143,7 @@ export class GoodsService {
       if (!body.hits.hits.length) {
         const error = new NotFoundException('데이터를 찾을 수 없습니다.');
         logger.errorLogger(error, `g_name=${g_name}, cate_id=${cate_id}`);
-        throw error;
+        //throw error;
       }
 
       if (_.isNil(cate_id) && _.isNil(g_name)) {

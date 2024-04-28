@@ -1,7 +1,7 @@
 <template>
     <div>
       <nav>
-        <SearchBar/>
+        <button @click="kakaoLogin">카카오 로그인</button>
         <CategoryMenu/>
         <UserProfileBtn/>
         <ShoppingCartBtn/>
@@ -11,7 +11,6 @@
   </template>
   
   <script>
-  import SearchBar from './SearchBar.vue';
   import CategoryMenu from './CategoryMenu.vue';
   import UserProfileBtn from './UserProfileBtn.vue';
   import ShoppingCartBtn from './ShoppingCartBtn.vue';
@@ -20,7 +19,6 @@
   export default {
     name: 'MainHome',
     components: {
-      SearchBar,
       CategoryMenu,
       UserProfileBtn,
       ShoppingCartBtn,
