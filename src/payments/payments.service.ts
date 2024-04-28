@@ -112,14 +112,14 @@ export class PaymentsService {
         const stocks = await queryRunner.manager.createQueryBuilder(Stocks, 'stocks')
         // , 'racks.*', 'storage.*'
         .select(['stocks.*', 'goods.*'])
-        .leftJoin('goods', 'goods', 'stocks.goods_id = goods.id')
-        .leftJoin('racks', 'racks', 'stocks.rack_id = racks.id')
-        .leftJoin('storage', 'storage', 'racks.storage_id = storage.id')
+        .leftJoinAndSelect('goods', 'goods', 'stocks.goods_id = goods.id')
+        .leftJoinAndSelect('racks', 'racks', 'stocks.rack_id = racks.id')
+        .leftJoinAndSelect('storage', 'storage', 'racks.storage_id = storage.id')
         .where('goods.id = :goodsId', { goodsId: detail.goods_id })
         .andWhere('storage.id = :storageId', { storageId: storage.id })
         .getRawOne();
 
-        
+        console.log('위대한 국밥', stocks)
         if (!goods || stocks.count < detail.od_count) {
           const error = new BadRequestException('재고가 없습니다.');
           logger.errorLogger(error, `userId = ${userId}, goodsId = ${detail.goods_id}`);
@@ -252,46 +252,65 @@ export class PaymentsService {
       .where('details.orders_id = :orders_id', { orders_id: tossPayment.orders_id })
       .getMany();
 
-      const destination = await this.kakaoGeocoder.getCoordinates(tossPayment.orders.o_addr)
-      console.log('토스 국밥22222', destination)
-      const storage = await this.kakaoGeocoder.getClosestStorage(destination)
-      console.log('토스 국밥2222', storage)
+      // const destination = await this.kakaoGeocoder.getCoordinates(tossPayment.orders.o_addr)
+      // console.log('토스 국밥22222', destination)
+      // const storage = await this.kakaoGeocoder.getClosestStorage(destination)
+      // console.log('토스 국밥2222', storage)
+      const storage = {
+        id: 6,
+        name: 'S Lincoln Street',
+        address: '인천 동구 화수로47번길 4',
+        latitude: 37.4831151516398,
+        longitude: 126.632618208158,
+        postal_code: '02418-9329',
+        contact_name: 'Miranda Kuhn IV',
+        contact_phone: '369.225.3010 x700',
+        is_available: true
+      }
   for (const detail of details) {
-    console.log('토스 국밥 2-0')
     const goods = queryRunner.manager.createQueryBuilder(Goods, 'goods')
-    console.log('토스 국밥 2-1', goods)
-    const stocks = await queryRunner.manager.createQueryBuilder(Stocks, 'stocks')
-    .select(['stocks.*', 'goods.*' , 'racks.*', 'storage.*'])
-    .leftJoinAndSelect('goods', 'goods', 'stocks.goods_id = goods.id')
-    .leftJoinAndSelect('racks', 'racks', 'stocks.rack_id = racks.id')
-    .leftJoinAndSelect('storage', 'storage', 'racks.storage_id = storage.id')
-    .where('goods.id = :goodsId', { goodsId: detail.goods_id })
-    .andWhere('storage.id = :storageId', { storageId: storage.id })
-    .getOne();
+    const stocks = await queryRunner.query(`
+    SELECT
+    stocks.*,
+    goods.id,
+    racks.id,
+    storage.id
+    FROM
+        stocks
+    LEFT JOIN goods ON stocks.goods_id = goods.id
+    LEFT JOIN racks ON stocks.rack_id = racks.id
+    LEFT JOIN storage ON racks.storage_id = storage.id
+    WHERE
+    goods.id = ${detail.goods_id} AND storage.id = ${storage.id}
+  `);
+    //orders_id = 100622
+    //goods_id = 19616
 
-    if (!goods || stocks.count < detail.od_count) {
+
+    console.log('위대한 국밥', stocks)
+    if (!goods || stocks[0].count < detail.od_count) {
       const error = new BadRequestException('재고가 없습니다.');
       logger.errorLogger(error, `goodsId = ${detail.goods_id}`);
       throw error;
     }
-    console.log('토스 국밥 2-1', stocks.count)
-    console.log('토스 국밥 2-1', detail.od_count)
-    const newStockCount = stocks.count - detail.od_count;
-    console.log('토스 국밥 2-1-1', stocks)
+
+    const newStockCount = stocks[0].count - detail.od_count;
+    console.log('죽음의 국밥', newStockCount)
     await queryRunner.manager.createQueryBuilder()
       .update(Stocks)
+      .where('goods_id = :goodsId', { goodsId: stocks[0].goods_id })
+      .andWhere('rack_id = :rackId', { rackId: stocks[0].rack_id })
       .set({ count: newStockCount })
-      .where('id = :stockId', { stockId: stocks.id })
       .execute();
   }
-  console.log('토스 국밥 2-1-2', tossPayment)
+  
       tossPayment.p_total_price = tossPayment.o_total_price
       tossPayment.p_status = true
-      console.log('토스 국밥2-2', tossPayment)
+
       await queryRunner.manager.save(TossHistory, tossPayment);
-      console.log('토스 국밥2-3', tossPayment)
+
       await queryRunner.manager.update(Orders, { user_id: tossPayment.user_id, id: tossPayment.orders_id }, { p_status: true })
-      console.log('토스 국밥3', tossPayment)
+
     await queryRunner.commitTransaction()
     await queryRunner.release()
 }catch(error) {}
