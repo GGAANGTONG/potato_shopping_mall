@@ -5,6 +5,7 @@ import PayCash from '../components/PayCash.vue';
 import PayCashValidation from '../components/PayCashValidation.vue';
 import PayCashValidationSuccess from '../components/PayCashValidationSuccess';
 import ProductItem from '../components/ProductItem.vue';
+import OrderPage from '../components/OrderPage.vue';
 import StockManagement from '../components/StockManagement.vue';
 const routes = [
   {
@@ -43,6 +44,16 @@ const routes = [
     name: 'StockManagement',
     component: StockManagement,
     props: true,
+  },
+  {
+    path: '/order',
+    name: 'OrderPage',
+    component: OrderPage,
+  },
+  {
+    path: '/order',
+    name: 'OrderPage',
+    component: OrderPage,
   },
 ];
 
