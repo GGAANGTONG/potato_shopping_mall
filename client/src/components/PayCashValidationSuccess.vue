@@ -94,7 +94,7 @@
           window.location.href = `/fail?message=${json.message}&code=${json.code}`;
         }
 
-        const confirm = await fetch('/confirm', {
+        const confirm = await fetch('http://localhost:3000/api/toss/confirm', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
