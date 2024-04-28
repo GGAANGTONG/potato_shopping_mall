@@ -1,7 +1,7 @@
 <template>
     <div>
       <nav>
-        <button @click="kakaoLogin">카카오 로그인</button>
+        <button @click="kakaoLogin()">카카오 로그인</button>
         <CategoryMenu/>
         <UserProfileBtn/>
         <ShoppingCartBtn/>
@@ -23,11 +23,16 @@
       UserProfileBtn,
       ShoppingCartBtn,
       ProductList
+    },
+    methods: {
+      kakaoLogin() { 
+        window.open("http://localhost:3000/api/oauth/kakao/callback");
+      }
     }
   }
   </script>
   
   <style>
-  /* Home specific styles */
+
   </style>
   
