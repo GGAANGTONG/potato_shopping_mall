@@ -1,4 +1,38 @@
 .fix-layout {
-    max-width: 1000px;
-    min-height : 400px;
+  max-width: 1000px;
+  min-height: 400px;
+}
+table,
+th,
+td {
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+}
+table.default {
+  min-width: 500px;
+}
+table.default th {
+  background-color: #d7daff;
+}
+table.default th,
+table.default td {
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+
+/****
+* 메인 버튼
+****/
+.main-btn {
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.kakaobtn{
+  padding: 10px;
+  border: 0px;
+  background: #fff957;
 }

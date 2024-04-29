@@ -25,7 +25,7 @@ created() {
   methods: {
     async fetchCategories() {
       try {
-        const response = await axios.get('http://localhost:3000/api/categories/');
+        const response = await axios.get(process.env.VUE_APP_API_URL+'/api/categories/');
         this.categories = response.data;
       } catch (error) {
         console.error("카테고리 정보를 불러오는 데에서 에러가 발생했습니다 : ", error);
@@ -49,8 +49,9 @@ created() {
 .category-menu button {
   margin: 0 10px;
   padding: 10px 20px;
+  margin: 2px;
   background: none;
-  border: 2px solid #ccc;
+  border: 1px solid #ccc;
   cursor: pointer;
 }
 .category-menu button:hover {

@@ -43,7 +43,7 @@ export default {
   methods: {
     async fetchGood() {
       try {
-        const response = await fetch(`http://localhost:3000/api/goods/get-one/${this.goodsId}`);
+        const response = await fetch(process.env.VUE_APP_API_URL+`/api/goods/get-one/${this.goodsId}`);
         const data = await response.json();
         this.good = data;
       } catch (error) {
@@ -70,28 +70,76 @@ export default {
 </script>
 
 <style scoped>
-.product-item {
-  border: 1px solid #ddd;
-  padding: 10px;
-  margin: 10px;
-  width: 200px;
-  text-align: center;
+/* 상품 상세 페이지 전체 컨테이너 */
+.product-detail {
+    display: flex;
+    flex-direction: row;
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fff;
 }
 
+/* 상품 이미지 스타일 */
 .product-image {
-  width: 100%;
-  max-width: 500px;
-  height: auto;
-  margin-bottom: 10px;
+    width: 300px;
+    height: 300px;
+    margin-right: 20px;
+    border-radius: 5px;
+    object-fit: cover;
 }
 
+/* 상품 정보 영역 */
+.product-info {
+    flex-grow: 1;
+}
+
+/* 상품 이름 */
 .product-info h3 {
-  font-size: 16px;
-  margin: 0;
+    margin-top: 0;
+    color: #333;
+    font-size: 24px;
 }
 
-.product-info p {
-  font-size: 14px;
-  color: #666;
+/* 원가격, 할인가격 스타일 */
+.original-price {
+    text-decoration: line-through;
+    color: #999;
+    margin-right: 10px;
 }
+
+.discounted-price {
+    color: #d32f2f;
+    font-weight: bold;
+}
+
+.discount-rate {
+    color: #388e3c;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+/* 상품 설명 */
+.product-info p {
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* 장바구니 버튼 스타일 */
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
 </style>

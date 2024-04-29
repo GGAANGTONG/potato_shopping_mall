@@ -1,20 +1,160 @@
 <template>
-    <div class="order-page">
-      <h1>주문 확인</h1>
-      <!-- 주문 확인과 관련된 내용을 여기에 추가합니다. -->
+  <div class="order-page">
+    <h1>주문 확인</h1>
+    <div>
+      <h2>주문내역</h2>
+      <table class="default">
+        <tbody>
+          <tr v-if="orderInfo">
+            <th>이름</th>
+            <td>{{ orderInfo.name }}</td>
+          </tr>
+          <tr v-if="orderInfo">
+            <th>이메일</th>
+            <td>{{ orderInfo.email }}</td>
+          </tr>
+          <tr>
+            <th>휴대폰 번호</th>
+            <td>{{ orderInfo.o_tel }}</td>
+          </tr>
+          <tr>
+            <th>배송주소</th>
+            <td>{{ orderInfo.o_detail_addr }}</td>
+          </tr>
+          <tr>
+            <th>총액</th>
+            <td>{{ orderInfo.o_total_price }}원</td>
+          </tr>
+          <tr>
+            <th>주문번호</th>
+            <td>{{ orderInfo.id }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    name: 'OrderPage',
-    // 필요한 데이터, 메서드 등을 여기에 추가합니다.
-  };
-  </script>
-  
-  <style scoped>
-  .order-page {
-    /* 주문 페이지 스타일 */
-  }
-  </style>
-  
+    <div>
+      <h2>주문 상세</h2>
+      <table class="default">
+        <thead>
+          <tr>
+            <th colspan="3">주문 상세</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="order-btn">
+      <button class="button-cash-purchase" v-if="!orderInfo.tossOrderId">
+        주문 취소
+      </button>
+      <button
+        class="button-cash-purchase"
+        v-if="!orderInfo.tossOrderId"
+        @click="handleCashPurchase"
+      >
+        포인트로 구매
+      </button>
+      <button
+        class="button-cash-purchase"
+        v-if="!orderInfo.tossOrderId"
+        @click="handleCashPurchase"
+      >
+        현금 구매
+      </button>
+      <button class="button-cash-purchase" v-if="orderInfo.tossOrderId">
+        결제 취소
+      </button>
+      <button class="button-cash-purchase" v-if="orderInfo.tossOrderId" @click="handleCheckShipping">
+        배송 확인
+      </button>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+export default {
+  name: 'OrderPage',
+  data() {
+    return {
+      orderInfo: {},
+      orderDetails: [],
+    };
+  },
+  created() {
+    this.fetchOrderInfo();
+    // this.fetchOrderDetails();
+  },
+  methods: {
+    async fetchOrderInfo() {
+      try {
+        const orderId = 100622;
+        const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+        const token =
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjk5MzE4LCJpYXQiOjE3MTQyOTkyODgsImV4cCI6MTc1NzQ5OTI4OH0.J31KF96C-EnnIel6p9iX2K7k7ujggDRFvxrephRRK-k';
+        const response = await axios.get(`${apiUrl}/api/orders/${orderId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.data) {
+          this.orderInfo = response.data[0];
+        }
+      } catch (error) {
+        console.error('주문자 정보를 불러오는 데 실패했습니다', error);
+      }
+    },
+    // async fetchOrderDetails() {
+    //   try {
+    //     // 주문 상세 API 호출
+    //     const response = await fetch('/api/order/details');
+    //     const data = await response.json();
+    //     this.orderDetails = data;
+    //   } catch (error) {
+    //     console.error('주문 상세를 불러오는 데 실패했습니다', error);
+    //   }
+    // },
+    handleCashPurchase() {
+      this.$router.push({ name: 'payCash' });
+    },
+    handleCheckShipping(){
+      this.$router.push({name: 'OrderShipping'});
+    }
+  },
+};
+</script>
+
+<style>
+.button-cash-purchase {
+  background-color: #4caf50; /* 녹색 배경 */
+  color: white; /* 흰색 텍스트 */
+  padding: 10px 20px; /* 상하 10px, 좌우 20px 패딩 */
+  border: none; /* 테두리 없음 */
+  border-radius: 5px; /* 모서리 둥글게 */
+  cursor: pointer; /* 마우스 오버 시 커서 변경 */
+  transition: all 0.3s; /* 부드러운 전환 효과 */
+}
+
+.button-cash-purchase:hover {
+  background-color: #45a049; /* 마우스 오버 시 배경색 변경 */
+}
+
+.order-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.order-page>div {
+    margin: 5px 0;
+}
+.order-btn {
+    display: flex;
+}
+.order-btn > button {
+  margin: 0 5px;
+}
+</style>
