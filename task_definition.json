@@ -105,6 +105,18 @@
                 {
                     "name": "KAKAO_REDIRECT_URI_CALLBACK",
                     "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:KAKAO_REDIRECT_URI_CALLBACK::"
+                },
+                {
+                    "name": "OPENSEARCH_ENDPOINT",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:OPENSEARCH_ENDPOINT::"
+                },
+                {
+                    "name": "OPENSEARCH_USERNAME",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:OPENSEARCH_USERNAME::"
+                },
+                {
+                    "name": "OPENSEARCH_PASSWORD",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:OPENSEARCH_PASSWORD::"
                 }
             ],
             "ulimits": [],
