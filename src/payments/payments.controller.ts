@@ -13,16 +13,25 @@ export class PaymentsController {
     //포인트 결제
     @UseGuards(AuthGuard('jwt'))
     @Post()
-    async pay(@Req() req, @Body() createPaymentDto: CreatePaymentDto) {
+    async pay(@Res() res, @Req() req, @Body() createPaymentDto: CreatePaymentDto) {
         const userId = req.user.id;
         logger.traceLogger(`Payments - pay`, `req.user = ${JSON.stringify(req.user)}, createPaymentDto = ${JSON.stringify(createPaymentDto)}`)
-        return await this.paymentsService.pay(userId, createPaymentDto);
+        const data = await this.paymentsService.pay(userId, createPaymentDto);
+        return res.json({data})
     }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('point-confirm-test')
+    async payPointConfirmTest(@Res() res, @Param() param) {
+        const {orders_id} = param
+       const data = await this.paymentsService.payPointConfirmTest(orders_id)
+       return res.json({data})
+    }
+ 
     //토스페이 - 결제 인증 요청
     //check.html로 렌더링
     //렌더링 시 orderName, orderId, amount(o_total_price) 같이 가야 함
     @UseGuards(AuthGuard('jwt'))
-
     @Post('payCash')
    async payCash (@Req() req, @Body() createPaymentDto: CreatePaymentDto, @Res() res) {
     const userId = req.user.id;
@@ -30,13 +39,13 @@ export class PaymentsController {
         // const userId = 1;
     // logger.traceLogger(`Payments - payCash`, `req.user = ${JSON.stringify(req.user)}, createPaymentDto = ${JSON.stringify(createPaymentDto)}`)
     const data = await this.paymentsService.payCash(userId, createPaymentDto)
-    console.log('국밥아가씨', data)
         return res.json({
         orderName: data.message,
         orderId: data.data.toss_orders_id,
         amount: data.data.o_total_price
     })
    }
+
 
    //토스페이 결제 승인 요청
    @Post('payCash-confirm')
