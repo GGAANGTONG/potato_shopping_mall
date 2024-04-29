@@ -146,7 +146,7 @@ async kakaoCallbacks (
   await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken)
   console.log('비빔밥', accessToken)
   res.cookie('accessToken', `Bearer ${accessToken}`)
-  return res.redirect('/health-check')
+  return res.redirect('http://potato-shop.shop/')
   }
 
 
