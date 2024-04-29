@@ -41,8 +41,7 @@
       </div>
       <div class="p-grid" style="margin-top: 30px">
         <button
-          class="button p-grid-col10"
-          onclick="location.href=`${process.env.VUE_APP_API_URL}`"
+          class="button p-grid-col10"  @click="handleOpenLink"
         >
           홈으로
         </button>
@@ -129,6 +128,11 @@ export default {
     orderIdElement.textContent = urlParams.get('orderId');
     amountElement.textContent = urlParams.get('amount') + '원';
     paymentKeyElement.textContent = urlParams.get('paymentKey');
+  },
+  methods: {
+    handleOpenLink() {
+      window.location.href = process.env.VUE_APP_API_URL;
+    },
   },
 };
 </script>
