@@ -50,14 +50,14 @@ export default {
         cate_id: category
       });
       try {
-        const response = await axios.get(`http://localhost:3000/api/goods/?${params.toString()}`);
+        const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000'; 
+        const response = await axios.get(`${apiUrl}/api/goods/?${params.toString()}`);
         if (response.data && Array.isArray(response.data)) {
           this.goods = response.data;
         } else {
           console.error("상품 정보 형식이 잘못되었습니다.");
         }
       } catch (error) {
-        console.log(`http://localhost:3000/api/goods/?${params.toString()}`)
         console.error("상품 정보를 불러오는 데에서 에러가 발생했습니다 : ", error);
       }
     },

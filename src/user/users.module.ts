@@ -16,7 +16,7 @@ import { RedisService } from 'src/redis/redis.service';
     TypeOrmModule.forFeature([Users, Point,Boards,Comments]),
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: '36h' },
         secret: config.get<string>('JWT_SECRET'),
       }),
       inject: [ConfigService],

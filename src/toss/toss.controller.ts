@@ -4,12 +4,15 @@ import { join } from 'path';
 
 @Controller('toss')
 export class TossController {
-  constructor(private readonly tossService: TossService) {}
+  constructor(
+    private readonly tossService: TossService,
+  ) {}
 
   @Post('/confirm')
   async confirmPayment(@Body() body: { paymentKey: string, orderId: string, amount: number }) {
     try {
       const response = await this.tossService.confirmPayment(body);
+
       return response.data; // NestJS will automatically handle 200 OK status.
     } catch (error) {
       throw new HttpException(error.response.data, error.response.status);
