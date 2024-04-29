@@ -9,6 +9,7 @@ import OrderPage from '../components/OrderPage.vue';
 import StockManagement from '../components/StockManagement.vue';
 import UserProfile from '../components/UserProfile.vue';
 import OrderShipping from '../components/OrderShipping.vue';
+import PayPoint from '../components/PayPoint.vue';
 const routes = [
   {
     path: '/',
@@ -61,6 +62,11 @@ const routes = [
     path: '/order-shipping',
     name: 'OrderShipping',
     component: OrderShipping,
+  },
+  {
+    path: '/payPoint',
+    name: 'PayPoint',
+    component: PayPoint,
   },
 ];
 
