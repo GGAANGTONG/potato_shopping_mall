@@ -17,16 +17,26 @@ import dotenv from 'dotenv'
 import { Racks } from '../src/storage/entities/rack.entity'
 import { Storage } from '../src/storage/entities/storage.entity';
 
-
 dotenv.config()
 
 const AppDataSource = new DataSource({
   type: 'mysql',
-  host: process.env.DB_HOST,
-  port: +process.env.DB_PORT,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: 'potato-db.cbyo86kq8krr.ap-northeast-2.rds.amazonaws.com',
+  port: 3306,
+  username: 'root',
+  password: 'potatomaster!',
+  database: 'potato_shop',
+  // type: 'mysql',
+  // host: 'localhost',
+  // port: 3306,
+  // username: 'ggangtong1',
+  // password: '3617',
+  // database: 'potato_shopping_mall',
+  // host: process.env.DB_HOST,
+  // port: +process.env.DB_PORT,
+  // username: process.env.DB_USERNAME,
+  // password: process.env.DB_PASSWORD,
+  // database: process.env.DB_NAME,
   entities: [Users, Point, Payments, Orders, Reviews, OrdersDetails, Orders, Carts, Like, Stocks, Goods, Categories, Comments, Boards, Racks, Storage],
   synchronize: true,
   logging: false,
@@ -38,8 +48,8 @@ function randomFloat(min:number, max:number) {
 
 const count_storage = 10
 const count_rack = 5
-const count_category = 5
-const count_goods = 100
+const count_category = 2
+const count_goods = 250
 const count_stock = 3
 
 async function createDummyData() {
@@ -47,24 +57,28 @@ async function createDummyData() {
   await AppDataSource.initialize()
     .then(
       async() => {
+        let count = 1
         //물류창고
         for(let i = 0; i < count_storage; i++) {
+          console.log(`-------------dummy data #${count} input start------------------`)
           const storage = new Storage()
           storage.name = faker.location.street()
           storage.address = faker.location.city()
           storage.postal_code = faker.location.zipCode()
           storage.contact_name = faker.person.fullName()
-          storage.contact_phone = faker.phone.number('###-####-####')
+          storage.contact_phone = faker.phone.number()
           storage.is_available = true
 
-          // for(let i = 0; i < count_rack; i++) {
-          //   const rack = new Racks()
-          //   rack.name = 
-          //   rack.location_info = 
+          await AppDataSource.manager.save(storage)
 
-          //   rack.storage = storage
-          // }
-        }
+          let counter = 1
+          for(let i = 0; i < count_rack; i++) {
+            const rack = new Racks()
+            rack.name = faker.color.human()
+            rack.location_info = `${faker.color.human()}-${count}`
+            rack.storage = storage
+            counter++
+            await AppDataSource.manager.save(rack)
 
         //카테고리
         for(let i = 0; i < count_category; i++) {
@@ -94,13 +108,21 @@ async function createDummyData() {
         //재고
         for(let i = 0; i < count_stock; i++) {
           const stock = new Stocks()
-          stock.count = +faker.string.numeric()
-          
+          stock.goods_id = goods.id
+          stock.count = +faker.number.int({
+            min: 1,
+            max: 999
+          })
+          stock.rack = rack
           await AppDataSource.manager.save(stock)
         }
       }
     }
   }
+  console.log(`-------------dummy data #${count} input ends------------------`)
+  count ++
+  }
+}
     ).catch(error => console.error(error))
 }
 

@@ -9,9 +9,12 @@ import { Orders } from '../orders/entities/orders.entity';
 import { OrdersDetails } from '../orders/entities/ordersdetails.entity';
 import { Stocks } from '../goods/entities/stocks.entity';
 import { RedisService } from 'src/redis/redis.service';
+import { KakaoGeocoder } from '../common/utils/kakao-geocoder.util';
+import { Storage } from '../storage/entities/storage.entity'
+import { TossHistory } from './entities/tossHistory.entity';
 @Module({
-    imports: [TypeOrmModule.forFeature([Payments, Users, Point, Orders, OrdersDetails, Stocks])],
-    providers: [PaymentsService,RedisService],
+    imports: [TypeOrmModule.forFeature([Payments, Users, Point, Orders, OrdersDetails, Stocks, Storage, TossHistory])],
+    providers: [PaymentsService,RedisService,KakaoGeocoder],
     controllers: [PaymentsController],
     exports: [PaymentsService,RedisService],
 })

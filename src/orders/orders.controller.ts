@@ -29,6 +29,13 @@ export class OrdersController {
     return this.ordersService.purchase(userId, createOrderDto);
   }
 
+  // 배송조회
+  @Post('/delivery')
+  async getDeliveryInqResult(@Request() req, @Body() body) {
+    const { t_invoice } = body;
+    return this.ordersService.getDeliveryInqResult(t_invoice);
+  }
+
   // 유저 주문 목록 전체 조회
   @UseGuards(AuthGuard('jwt'))
   @Get('user')
@@ -53,6 +60,7 @@ export class OrdersController {
     return this.ordersService.findOneOrderbyBoth(id);
   }
 
+
   // 주문 취소
   @UseGuards(AuthGuard('jwt'))
   @Post(':orderId/cancel')
@@ -68,9 +76,12 @@ export class OrdersController {
         throw error;
       } else {
         const fatalError = new NotFoundException('주문을 취소할 수 없습니다.');
-        logger.fatalLogger(fatalError, `orderId = ${orderId}`) 
+        logger.fatalLogger(fatalError, `orderId = ${orderId}`)
         throw fatalError  // 그 외의 오류는 일반적인 오류 메시지를 반환합니다.
       }
     }
   }
+
+
+
 };

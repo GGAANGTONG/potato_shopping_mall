@@ -4,8 +4,6 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-  ManyToMany,
-  JoinTable,
   OneToMany,
 } from 'typeorm';
 import { Storage } from './storage.entity';
@@ -32,7 +30,7 @@ export class Racks {
   location_info: string | null;
 
   @ManyToOne(() => Storage, (storage) => storage.racks)
-  @JoinColumn({ name: 'storage_id' })
+  @JoinColumn({ name: 'storage_id', referencedColumnName: 'id' })
   storage: Storage;
 
   @OneToMany(() => Stocks, (stocks) => stocks.rack)

@@ -56,20 +56,17 @@ export class StocksService {
    * @returns
    */
   async findAll() {
-    const query = this.stocksRepository
-      .createQueryBuilder('stocks')
-      .leftJoinAndSelect('stocks.goods', 'goods')
-      .leftJoinAndSelect('stocks.rack', 'racks')
-      .select([
-        'stocks.id',
-        'stocks.count',
-        'goods.id',
-        'goods.g_price',
-        'goods.g_name',
-        'racks.name',
-      ]);
-
-    return query.getMany();
+    const rawData = await this.stocksRepository.query(`
+        SELECT 
+            stocks.id, stocks.count, goods.id AS goodsId,goods.g_name, racks.name AS rackName
+        FROM 
+            stocks 
+        LEFT JOIN 
+            goods ON stocks.goods_id = goods.id
+        LEFT JOIN 
+            racks ON stocks.rack_id = racks.id
+    `);
+    return rawData;
   }
 
   /**
@@ -77,16 +74,27 @@ export class StocksService {
    * @param id number
    * @returns Promise<Stocks>
    */
-  async findOne(id: number): Promise<Stocks> {
-    const stock = await this.stocksRepository.findOne({
-      where: { id },
-      relations: ['goods', 'rack'],
-    });
-    if (!stock) {
+  async findOne(id: number): Promise<any> {
+    const rawData = await this.stocksRepository.query(`
+        SELECT 
+            stocks.id, stocks.count, goods.id AS goodsId,goods.g_name, racks.name AS rackName
+        FROM 
+            stocks 
+        LEFT JOIN 
+            goods ON stocks.goods_id = goods.id
+        LEFT JOIN 
+            racks ON stocks.rack_id = racks.id
+        WHERE stocks.id = ${+id}
+    `);
+
+    // 데이터가 없으면 빈 배열을 반환
+    if (rawData.length === 0) {
       throw new NotFoundException('해당 상품 재고 정보를 찾을 수 없습니다.');
     }
-    return stock;
+  
+    return rawData;
   }
+  
 
   /**
    * 특정 상품 ID에 대한 재고 정보 조회
@@ -100,17 +108,25 @@ export class StocksService {
       throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
     }
 
-    const stock = await this.stocksRepository.find({
-      where: { goods_id: goodsId },
-      relations: ['goods', 'rack'],
-    });
+    const rawData = await this.stocksRepository.query(`
+        SELECT 
+            stocks.id, stocks.count, goods.id AS goodsId,goods.g_name, racks.name AS rackName
+        FROM 
+            stocks 
+        LEFT JOIN 
+            goods ON stocks.goods_id = goods.id
+        LEFT JOIN 
+            racks ON stocks.rack_id = racks.id
+        WHERE stocks.goods_id = ${+goodsId}
+        GROUP BY racks.id
+    `);
 
-    if (!stock) {
-      throw new NotFoundException(
-        '해당하는 상품의 재고 정보를 찾을 수 없습니다.',
-      );
+    // 데이터가 없으면 빈 배열을 반환
+    if (rawData.length === 0) {
+      throw new NotFoundException('해당 상품 재고 정보를 찾을 수 없습니다.');
     }
-    return stock;
+
+    return rawData;
   }
 
   /**

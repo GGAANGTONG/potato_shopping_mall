@@ -1,8 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="https://static.toss.im/icons/png/4x/icon-toss-logo.png" />
+    <link
+      rel="icon"
+      href="https://static.toss.im/icons/png/4x/icon-toss-logo.png"
+    />
     <link rel="stylesheet" type="text/css" href="./style.css" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,7 +14,10 @@
 
   <body>
     <div class="box_section" style="width: 600px">
-      <img width="100px" src="https://static.toss.im/illusts/check-blue-spot-ending-frame.png" />
+      <img
+        width="100px"
+        src="https://static.toss.im/illusts/check-blue-spot-ending-frame.png"
+      />
       <h2>결제를 완료했어요</h2>
 
       <div class="p-grid typography--p" style="margin-top: 50px">
@@ -24,11 +30,26 @@
       </div>
       <div class="p-grid typography--p" style="margin-top: 10px">
         <div class="p-grid-col text--left"><b>paymentKey</b></div>
-        <div class="p-grid-col text--right" id="paymentKey" style="white-space: initial; width: 250px"></div>
+        <div
+          class="p-grid-col text--right"
+          id="paymentKey"
+          style="white-space: initial; width: 250px"
+        ></div>
       </div>
       <div class="p-grid" style="margin-top: 30px">
-        <button class="button p-grid-col5" onclick="location.href='https://docs.tosspayments.com/guides/payment/integration';">연동 문서</button>
-        <button class="button p-grid-col5" onclick="location.href='https://discord.gg/A4fRFXQhRu';" style="background-color: #e8f3ff; color: #1b64da">실시간 문의</button>
+        <button
+          class="button p-grid-col5"
+          onclick="location.href='https://docs.tosspayments.com/guides/payment/integration';"
+        >
+          연동 문서
+        </button>
+        <button
+          class="button p-grid-col5"
+          onclick="location.href='https://discord.gg/A4fRFXQhRu';"
+          style="background-color: #e8f3ff; color: #1b64da"
+        >
+          실시간 문의
+        </button>
       </div>
     </div>
 
@@ -45,18 +66,21 @@
       // 서버로 결제 승인에 필요한 결제 정보를 보내세요.
       async function confirm() {
         var requestData = {
-          paymentKey: urlParams.get("paymentKey"),
-          orderId: urlParams.get("orderId"),
-          amount: urlParams.get("amount"),
+          paymentKey: urlParams.get('paymentKey'),
+          orderId: urlParams.get('orderId'),
+          amount: urlParams.get('amount'),
         };
 
-        const response = await fetch("/confirm", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetch(
+          'http://localhost:3000/api/payments/payCash-confirm',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
           },
-          body: JSON.stringify(requestData),
-        });
+        );
 
         const json = await response.json();
 
@@ -66,21 +90,32 @@
           window.location.href = `/fail?message=${json.message}&code=${json.code}`;
         }
 
+        const confirm = await fetch('/confirm', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData),
+        });
+
+        const confirmedJson = await confirm.json();
+
         // TODO: 결제 성공 비즈니스 로직을 구현하세요.
         // console.log(json);
-        return json;
+        return confirmedJson;
       }
       confirm().then(function (data) {
-        document.getElementById("response").innerHTML = `<pre>${JSON.stringify(data, null, 4)}</pre>`;
+        document.getElementById('response').innerHTML =
+          `<pre>${JSON.stringify(data, null, 4)}</pre>`;
       });
 
-      const paymentKeyElement = document.getElementById("paymentKey");
-      const orderIdElement = document.getElementById("orderId");
-      const amountElement = document.getElementById("amount");
+      const paymentKeyElement = document.getElementById('paymentKey');
+      const orderIdElement = document.getElementById('orderId');
+      const amountElement = document.getElementById('amount');
 
-      orderIdElement.textContent = urlParams.get("orderId");
-      amountElement.textContent = urlParams.get("amount") + "원";
-      paymentKeyElement.textContent = urlParams.get("paymentKey");
+      orderIdElement.textContent = urlParams.get('orderId');
+      amountElement.textContent = urlParams.get('amount') + '원';
+      paymentKeyElement.textContent = urlParams.get('paymentKey');
     </script>
   </body>
 </html>

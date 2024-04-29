@@ -3,10 +3,33 @@
 #   payload:
 #     path: "fake_data_goods.csv"
 #     fields: 
-
+config:
+  target: 'http://localhost:3000/api'
+  phases:
+    - duration: 20
+      arrivalRate: 30
+      rampTo: 50
+      name: Warm up phase
+    - duration: 20
+      arrivalRate: 50
+      rampTo: 75
+      name: Ramp up load
+    - duration: 20
+      arrivalRate: 80
+      rampTo: 35
+      name: Spike phase
+  # plugins:
+  #     ensure: {}
+  #     apdex: {}
+  #     metrics-by-endpoint: {}
+  apdex:
+    threshold: 100
+  ensure:
+      thresholds:
+        - http.response_time.p99: 100
+        - http.response_time.p95: 75
 scenarios:
   - name: "2-1. [Goods][findAll] - 100,000VUs"
     flow:
-      - loop:
         - get:
             url: "/goods"

@@ -234,45 +234,17 @@
 //     }
 //   }
 
-//   signToken(user: Pick<Users, 'email' | 'id'>, isRefreshToken: boolean){
-//     const payload = {
-//         email: user.email,
-//         sub: user.id,
-//         type: isRefreshToken ? 'refresh' : 'access',
-//     };
-//     return this.jwtService.sign(payload, {
-//       secret: process.env.JWT_REFRESH_TOKEN_SECRET,
-//         expiresIn: isRefreshToken ? 3600: 300,
-//     })
-// }
 
 
-//   extractTokenFromHeader(header: string, isBearer: boolean){
-//     const splitToken = header.split(' ')
-//     const prefix = isBearer ? 'Bearer' : 'Basic';
-//     if(splitToken.length !== 2 || splitToken[0] !== prefix){
-//         throw new UnauthorizedException('잘못된 토큰입니다.')
-//     }
-//     const token = splitToken[1];
-//     return token;
-// }
 
 
-// rotateToken(token: string, isRefreshToken: boolean){
-//   const decoded = this.jwtService.verify(token,{
-//     secret: process.env.JWT_REFRESH_TOKEN_SECRET,
-//   })
-
-//   return this.signToken({
-//       ...decoded,
-//   }, isRefreshToken)
-// }
-// }
 
 
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -280,6 +252,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import * as _ from 'lodash';
 import { Users } from '../user/entities/user.entitiy';
+import { UpdateDto } from './dto/update.dto';
+import { RedisService } from 'src/redis/redis.service';
 
 
 @Injectable()
@@ -290,68 +264,68 @@ import { Users } from '../user/entities/user.entitiy';
     private usersRepository: Repository<Users>,
     private readonly jwtService: JwtService,
     private readonly dataSource: DataSource,
+    private readonly redisService: RedisService
   ) {}
 
+    //회원정보 생성
+    async createUser(email:string, nickName: string) {
+      const user = this.usersRepository.create({
+        email,
+        name: nickName,
+        nickname: nickName
+      })
 
-  async validateUser(email: string) {
-    const user = await this.findByEmail(email);
-    if (!user) {
-      return null;
+      const data = await this.usersRepository.save(user)
+
+      return data
+
     }
-    return user;
-  }
-
-  async createToken(email: string) {
-    const userEmail = await this.findByEmail(email);
-
-    const payload = { sub: userEmail.id };
-
-    const accessToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET_KEY,
-      expiresIn: 1000 * 60 * 60 * 12,
-    });
-
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.REFRESH_SECRET,
-      expiresIn: 1000 * 60 * 60 * 24 * 7,
-    });
-
-
-    return { accessToken,refreshToken };
-  }
-
-
-  async createProviderUser(email: string, nickName: string, provider: string) {
-    try {
-      // Users 엔티티를 저장합니다.
-      const userRepository = this.dataSource.getRepository(Users);
-      const user = await userRepository.save({});
-      
-      // OAuthService를 사용하여 외부 서비스에 사용자 정보를 저장합니다.
-      const oauthUserInfo = await this.usersRepository.save({
-        userId: user.id,
-        email: email,
-        nickName: nickName,
-        provider: provider,
-       
-      });
-  
-      // 저장된 사용자 정보를 반환합니다.
-      return oauthUserInfo;
-    } catch (error) {
-      console.error('Failed to create provider user:', error);
-      throw error;
-    }
-  }
-
-
-
-     async findByEmail(email: string) {
-     const user = await this.usersRepository.findOneBy({ email });
-    return user;
-   }
-
    
+    //회원정보 수정
+    async update(id: number, updateDto: UpdateDto) {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+    });
+
+    const { name, nickname, profile, bank } = updateDto;
+
+    if (_.isNil(user)) {
+      throw new NotFoundException('해당 유저가 없습니다');
+    }
+
+    if (!name && !nickname && !profile && !bank ) {
+      throw new BadRequestException('수정할 값을 입력해주세요.');
+    }
+
+    if (name) user.name = name;
+    if (nickname) user.nickname = nickname;
+    if (profile) user.profile = profile;
+    if (bank) user.bank = bank;
+
+    const data = await this.usersRepository.save(user);
+
+    return data;
+  }
+
+  // 회원정보 삭제
+  async remove(id: number) {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (_.isNil(user)) {
+      throw new NotFoundException('해당 유저가 없습니다');
+    }
+
+    await this.usersRepository.remove(user);
+
+    return user
+  }
+
+  //로그인 시에만 사용함
+  async findByEmail(email: string) {
+    const user = await this.usersRepository.findOneBy({ email });
+    return user;
+  }
+
   async findOne(id: number) {
     const user = await this.usersRepository.findOneBy({
       id,
@@ -362,5 +336,42 @@ import { Users } from '../user/entities/user.entitiy';
     return user;
   }
 
-  
+  //토큰 갱신 과정
+  extractTokenFromHeader(header: string, isBearer: boolean){
+    const splitToken = header.split(' ')
+    const prefix = isBearer ? 'Bearer' : null;
+    if(splitToken.length !== 2 || splitToken[0] !== prefix){
+        throw new UnauthorizedException('잘못된 토큰입니다.')
+    }
+    const token = splitToken[1];
+    return token;
+}
+
+  signToken(user: Pick<Users, 'email' | 'id'>){
+    const payload = {
+        email: user.email,
+        sub: user.id,
+    };
+
+    return this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET,
+        expiresIn: 3600,
+    })
+}
+
+async rotateToken(token: string){
+    const decoded = this.jwtService.verify(token,{
+      secret: process.env.JWT_SECRET,
+    })
+
+    const refreshToken = await this.redisService.getClient().get(`refreshToken for ${decoded.id}`)
+
+    if(_.isNil(refreshToken)) {
+      throw new UnauthorizedException('인증되지 않은 사용자입니다.')
+    }
+
+    return this.signToken({
+        ...decoded,
+    })
+  }
 }
