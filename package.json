@@ -22,9 +22,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "if [ -z \"$CI\" ]; then husky install; fi"
   },
-  
-
   "dependencies": {
+    "@faker-js/faker": "^8.4.1",
     "@nestjs/axios": "^3.0.2",
     "@nestjs/cache-manager": "^2.2.2",
     "@nestjs/common": "^10.0.0",
@@ -76,7 +75,6 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@faker-js/faker": "^8.4.1",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.3.7",
