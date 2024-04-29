@@ -228,6 +228,17 @@ export class PaymentsService {
     }
   }
 
+  //포인트 결제 성공 테스트
+  async payPointConfirmTest(orders_id) {
+     const data =  await this.paymentsRepository.findOneBy({orders_id})
+     await this.paymentsRepository.delete({orders_id})
+     return {
+      message: '결제가 성공적으로 완료되었습니다.',
+      data
+     }
+  }
+
+
   //토스페이 -결제 인증 요청
   async payCash(userId: number, createPaymentDto) {
     await validation(CreatePaymentDto, createPaymentDto);
@@ -271,6 +282,7 @@ export class PaymentsService {
       data,
     };
   }
+
 
   //토스페이 - 결제 승인 요청
   async payCashConfirm(requestData) {
