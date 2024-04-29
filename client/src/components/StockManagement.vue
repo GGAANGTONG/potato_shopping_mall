@@ -37,11 +37,11 @@
       const goodsId = this.goodsId
 
       //상품 정보
-      const responseGoods = await axios.get(`http://localhost:3000/api/goods/get-one/${goodsId}`)
+      const responseGoods = await axios.get(process.env.VUE_APP_API_URL+`/api/goods/get-one/${goodsId}`)
       this.responseGoods = responseGoods.data
 
       //stock_id
-      const responseStocks = await axios.get(`http://localhost:3000/api/stocks/by-goods/${goodsId}`)
+      const responseStocks = await axios.get(process.env.VUE_APP_API_URL+`/api/stocks/by-goods/${goodsId}`)
       this.responseStocks = responseStocks.data
     }
 

@@ -9,7 +9,7 @@
     name: 'UserProfileBtn',
     methods: {
       openUserProfile() {
-        console.log('User profile opened');
+        this.$router.push('/UserProfile'); 
       }
     }
   }

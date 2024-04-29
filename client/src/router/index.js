@@ -8,6 +8,7 @@ import ProductItem from '../components/ProductItem.vue';
 import OrderPage from '../components/OrderPage.vue';
 import StockManagement from '../components/StockManagement.vue';
 import UserProfile from '../components/UserProfile.vue';
+import OrderShipping from '../components/OrderShipping.vue';
 const routes = [
   {
     path: '/',
@@ -55,6 +56,11 @@ const routes = [
     path: '/userProfile',
     name: 'UserProfile',
     component: UserProfile,
+  },
+  {
+    path: '/order-shipping',
+    name: 'OrderShipping',
+    component: OrderShipping,
   },
 ];
 
