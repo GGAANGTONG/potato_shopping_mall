@@ -117,6 +117,10 @@
                 {
                     "name": "OPENSEARCH_PASSWORD",
                     "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:OPENSEARCH_PASSWORD::"
+                },
+                {
+                    "name": "JWT_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:JWT_SECRET::"
                 }
             ],
             "ulimits": [],
