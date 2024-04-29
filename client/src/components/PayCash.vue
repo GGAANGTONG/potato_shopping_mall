@@ -22,12 +22,12 @@ export default {
       const cookie = document.cookie;
       console.log('국밥', cookie);
       const orders_id = this.orders_id;
-      console.log('오더 국밥', orders_id);
-      console.log('구우욱밥', typeof orders_id);
+      const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000'; 
+      console.log(`${apiUrl}/api/payments/payCash`);
       const token =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjk5MzE4LCJpYXQiOjE3MTQyOTkyODgsImV4cCI6MTc1NzQ5OTI4OH0.J31KF96C-EnnIel6p9iX2K7k7ujggDRFvxrephRRK-k';
       const response = await axios.post(
-        '/api/payments/payCash',
+        `${apiUrl}/api/payments/payCash`,
         {
           orders_id: +orders_id,
         },
