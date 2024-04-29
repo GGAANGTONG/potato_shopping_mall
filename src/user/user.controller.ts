@@ -167,7 +167,7 @@ async kakaoCallbacks (
   
   res.cookie('accessToken', `Bearer ${accessToken}`)
   console.log('비빔밥', accessToken)
-  return res.redirect('/health-check')
+  return res.redirect(301, 'http://potato-shop.shop');
 }
 
   //회원정보 수정(으아아아아아아)
