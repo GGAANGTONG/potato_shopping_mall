@@ -89,6 +89,22 @@
                 {
                     "name": "SERVER_PORT",
                     "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:SERVER_PORT::"
+                },
+                {
+                    "name": "KAKAO_REST_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:KAKAO_REST_API_KEY::"
+                },
+                {
+                    "name": "KAKAO_CLIENT_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:KAKAO_CLIENT_SECRET::"
+                },
+                {
+                    "name": "KAKAO_REDIRECT_URI_CODE",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:KAKAO_REDIRECT_URI_CODE::"
+                },
+                {
+                    "name": "KAKAO_REDIRECT_URI_CALLBACK",
+                    "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:KAKAO_REDIRECT_URI_CALLBACK::"
                 }
             ],
             "ulimits": [],
