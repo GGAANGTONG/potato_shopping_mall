@@ -1,0 +1,59 @@
+config:
+  target: 'http://localhost:3000/api'
+  phases:
+    - duration: 20
+      arrivalRate: 30
+      rampTo: 50
+      name: Warm up phase
+    - duration: 20
+      arrivalRate: 50
+      rampTo: 75
+      name: Ramp up load
+    - duration: 20
+      arrivalRate: 80
+      rampTo: 35
+      name: Spike phase
+  # plugins:
+  #     ensure: {}
+  #     apdex: {}
+  #     metrics-by-endpoint: {}
+  apdex:
+    threshold: 100
+  ensure:
+      thresholds:
+        - http.response_time.p99: 100
+        - http.response_time.p95: 75
+  payload:
+   - path: "fake_data_payments.csv"
+     fields: 
+       - "createPaymentDto"
+     order: sequence
+   - path: "fake_data_token.csv"
+     fields:
+       - "accessToken"
+     order: sequence
+
+scenarios:
+  - name: "5-1. [Payments][pay] - 100,000VUs"
+    flow:
+      - log: "{{ accessToken }}, {{ createPaymentDto }}"
+      - post:
+          url: "/payments"
+          cookie:
+            authorization: "{{ accessToken }}"
+          json:
+            orders_id: "{{ createPaymentDto }}"
+
+# scenarios:
+#   - name: "3-1. [Carts][addToCart] - 10,000VUs"
+#     flow:
+#       - log: "국밥 - {{ goodsId }}, {{ createCartDtoCtCount }}, {{ accessToken }}"
+#       - post:
+#           url: "/cart/add/{{ goodsId }}"
+#           cookie:
+#             authorization: "{{ accessToken }}"
+#           json:
+#             ctCount: "{{ createCartDtoCtCount }}"
+
+#     로그인     => 상품 전체조회(메인) => 상품 상세 조회   =>     장바구니 담기   =>    장바구니 조회       =>     상품 주문       =>       주문 전체내역 확인      =>        주문내역 상세조회       =>    결제      
+#[Users][signIn] => [Goods][findAll] => [Goods][findOne] => [Carts][addToCart] => [Carts][getCartItems] => [Orders][purchase] => [Orders][findAllOrderByUser] => [Orders][findOneOrderByBoth] => [Payments][pay]

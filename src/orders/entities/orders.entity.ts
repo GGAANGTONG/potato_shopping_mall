@@ -1,4 +1,4 @@
-import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
@@ -25,12 +25,25 @@ export class Orders {
   @Column({ unsigned: true })
   user_id: number;
 
-
   @IsNumber()
   @IsNotEmpty()
   @Column()
   o_total_price: number;
 
+  @IsString()
+  @IsNotEmpty()
+  @Column({nullable: true })
+  o_tel: string;
+
+  @IsString()
+  @IsOptional()
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  o_addr: string;
+
+  @IsString()
+  @IsOptional()
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  o_detail_addr: string;
 
   //enum으로 바꾸면 좋을 것 같아요
   @IsEnum(Status)
@@ -44,10 +57,10 @@ export class Orders {
   p_status: boolean;
 
   @CreateDateColumn()
-  created_At: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updated_At: Date;
+  updated_at: Date;
 
   @ManyToOne(() => Users, (user) => user.orders, {
     onDelete: 'CASCADE',

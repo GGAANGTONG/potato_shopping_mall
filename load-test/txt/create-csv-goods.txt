@@ -1,0 +1,71 @@
+import fs from 'fs';
+import { faker } from '@faker-js/faker';
+import { Goods } from '../src/goods/entities/goods.entity';
+import { DeepPartial } from 'typeorm';
+import { Categories } from '../src/goods/entities/categories.entity';
+import { Stocks } from '../src/goods/entities/stocks.entity';
+
+function randomFloat(min:number, max:number) {
+  return Math.random() * (max - min + 0.1) + min
+}
+
+//여기서 category, stock 수량 조절
+const count_category = 5
+const count_stock = 3
+
+
+function generateFakeData(numRows: number): DeepPartial<Goods>[] {
+    const data: DeepPartial<Goods>[] = [];
+    for (let i = 0; i < count_category; i++) {
+      const category: Partial<Categories> = {
+        id: i + 1,
+        c_name: faker.commerce.product(),
+        c_desc: faker.commerce.productDescription()
+      }
+    for (let i = 0; i < numRows; i++) {
+        const goods: DeepPartial<Goods> = {
+          id: i + 1,
+          g_name: faker.commerce.productName(),
+          g_desc: faker.commerce.productDescription(),
+          g_img: faker.image.url({
+            width: 400, 
+            height: 400
+          }),
+          g_option: faker.commerce.productMaterial(),
+          discount_rate: +randomFloat(0.1, 1).toFixed(2),
+          cost_price: +faker.commerce.price(),
+          created_at: new Date(),
+          updated_at: new Date(),
+          category,
+        };
+        goods.g_price = goods.cost_price * goods.discount_rate
+        const stocks = []
+        for(let i = 0; i < count_stock; i++) {
+        //   const stock:DeepPartial<Stocks> = {
+        //     id: goods.id * 100 + i,
+        //     count: faker.number.int({
+        //       min: 0,
+        //       max: 999
+        //     })
+        //   }
+        //   stocks.push(stock)
+        // }
+        // goods.stock = stocks
+        data.push(goods);
+    }
+  }
+    return data;
+}
+
+function writeToCSV(filename: string, numRows: number): void {
+    const data = generateFakeData(numRows);
+    const csvData = data.map(goods => `${goods.id},${goods.g_name},${goods.g_desc}, ${goods.g_img}, ${goods.g_option}, ${goods.g_price} ${goods.discount_rate}, ${goods.cost_price}, ${goods.created_at}, ${goods.updated_at}, ${JSON.stringify(goods.category)}, ${goods.stock}`).join('\n');
+    fs.writeFileSync(filename, `id, g_name, g_desc, g_option, g_price, discount_rate, discount_rate, cost_price, created_at, updated_at, goods.category, stocks\n${csvData}`);
+}
+
+const NUM_ROWS = 100;
+const FILENAME = 'fake_data_goods.csv';
+
+writeToCSV(FILENAME, NUM_ROWS);
+}
+

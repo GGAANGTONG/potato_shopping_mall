@@ -13,16 +13,21 @@ import { LikeModule } from './like/like.module';
 import { PointModule } from './point/point.module';
 import { RedisModule } from './redis/redis.module';
 import { BoardsModule } from './boards/boards.module';
-import { CacheModule } from '@nestjs/cache-manager';
 import { StorageModule } from './storage/storage.module';
-
+import { ElasticsearchModule } from './elasticsearch/elasticsearch.module';
+import { TossModule } from './toss/toss.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'client', 'dist'),
+      exclude : ['/api*'],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: configModuleValidationSchema,
     }),
-    CacheModule.register({isGlobal: true}),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     AuthModule,
     UsersModule,
@@ -35,6 +40,8 @@ import { StorageModule } from './storage/storage.module';
     RedisModule,
     BoardsModule,
     StorageModule,
+    ElasticsearchModule,
+    TossModule
   ],
   controllers: [AppController],
   providers: [],

@@ -29,17 +29,6 @@ export class Users {
   @Column({ type: 'varchar' })
   name: string;
 
-  @IsStrongPassword(
-    {},
-    {
-      message:
-        '비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다.',
-    },
-  )
-  @IsNotEmpty()
-  @Column({ type: 'varchar', select: false })
-  password: string;
-
   @IsEmail()
   @IsNotEmpty()
   @Column({ type: 'varchar', unique: true })
@@ -70,6 +59,16 @@ export class Users {
   @IsNumber()
   @Column({ type: 'int', nullable: true })
   bank: number;
+
+  @IsString()
+  @IsOptional()
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  address: string;
+
+  @IsString()
+  @IsOptional()
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  detail_address: string;
 
   @OneToMany(() => Like, (like) => like.user)
   like: Like[];

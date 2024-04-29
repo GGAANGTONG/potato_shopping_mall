@@ -22,14 +22,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
-      secretOrKey: configService.get('JWT_ACCESS_TOKEN_SECRET'),
+      secretOrKey: configService.get('JWT_SECRET'),
     });
   }
   private static extractJWT(req: RequestType): string | null {
-    const { authorization } = req.cookies;
-    console.log(authorization);
-    if (authorization) {
-      const [tokenType, token] = authorization.split(' ');
+    console.log('국밥철도999', req.cookies)
+    // const { authorization } = req.cookies;
+    const {accessToken} = req.cookies;
+        console.log('국밥55', accessToken);
+    if (accessToken) {
+      const [tokenType, token] = accessToken.split(' ');
       if (tokenType !== 'Bearer')
         throw new BadRequestException('토큰 타입이 일치하지 않습니다.');
       if (token) {
@@ -38,11 +40,22 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }
       return null;
     }
+    // console.log('국밥55', authorization);
+    // if (authorization) {
+    //   const [tokenType, token] = authorization.split(' ');
+    //   if (tokenType !== 'Bearer')
+    //     throw new BadRequestException('토큰 타입이 일치하지 않습니다.');
+    //   if (token) {
+    //     console.log(1, token);
+    //     return token;
+    //   }
+    //   return null;
+    // }
   }
 
   async validate(payload: any) {
-    console.log(2, payload.email);
-    const user = await this.userService.findByEmail(payload.email);
+    console.log(2, payload.sub);
+    const user = await this.userService.findOne(payload.sub);
     console.log(user);
     if (_.isNil(user)) {
       throw new NotFoundException('해당하는 사용자를 찾을 수 없습니다.');
@@ -51,3 +64,5 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return user;
   }
 }
+
+//accessToken을 검증하고, accessToken이 만료됐다면 refreshToken을 통해 accessToken을 재발급 하는 로직

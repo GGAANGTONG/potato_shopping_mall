@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -14,6 +13,10 @@ import { Repository } from 'typeorm';
 import { S3FileService } from '../common/utils/s3_fileupload';
 import { Racks } from '../storage/entities/rack.entity';
 import { DataSource } from 'typeorm';
+import logger from 'src/common/log/logger';
+import { RedisService } from '../redis/redis.service';
+import { ElasticsearchService } from '../elasticsearch/elasticsearch.service';
+import * as _ from 'lodash';
 
 @Injectable()
 export class GoodsService {
@@ -28,6 +31,8 @@ export class GoodsService {
     private racksRepository: Repository<Racks>,
     private readonly s3FileService: S3FileService,
     @InjectDataSource() private dataSource: DataSource,
+    private readonly redisService: RedisService,
+    private readonly elasticsearchService: ElasticsearchService,
   ) {}
 
   /**
@@ -82,25 +87,81 @@ export class GoodsService {
    * @returns
    */
   async findAll(g_name?: string, cate_id?: string) {
-    const query = this.goodsRepository
-      .createQueryBuilder('goods')
-      .leftJoinAndSelect('goods.category', 'category')
-      .select([
-        'goods.id',
-        'goods.g_name',
-        'goods.g_price',
-        'goods.g_desc',
-        'category.c_name',
-      ]);
+    if (!_.isNil(cate_id) && _.isNil(g_name)) {
+      const data = await this.redisService
+        .getClient()
+        .get(`cate_id = ${cate_id}`);
+
+      if (!_.isNil(data)) {
+        return data;
+      }
+    } else if (_.isNil(g_name)) {
+      const getCachedData = await this.redisService
+        .getClient()
+        .get('goods-findAll');
+
+      if (!_.isNil(getCachedData)) {
+        return getCachedData;
+      }
+    }
+
+    let searchQuery = {
+      index: 'goods_index', 
+      body: {
+        query: {
+          bool: {
+            must: []
+          }
+        }
+      }
+    };
 
     if (g_name) {
-      query.andWhere('goods.g_name LIKE :g_name', { g_name: `%${g_name}%` });
+      searchQuery.body.query.bool.must.push({
+        wildcard : {
+          name : g_name+'*'
+        }
+      });
     }
 
     if (cate_id) {
-      query.andWhere('goods.cate_id = :cate_id', { cate_id });
+      searchQuery.body.query.bool.must.push({
+        match: {
+          category: cate_id
+        }
+      });
     }
-    return query.getMany();
+
+    if (searchQuery.body.query.bool.must.length === 0) {
+      delete searchQuery.body.query.bool.must; 
+    }
+    try {
+      const { body } = await this.elasticsearchService.search('goods_index', JSON.stringify(searchQuery.body, null, 2));
+
+      //const data = await query.getMany();
+  
+      if (!body.hits.hits.length) {
+        const error = new NotFoundException('데이터를 찾을 수 없습니다.');
+        logger.errorLogger(error, `g_name=${g_name}, cate_id=${cate_id}`);
+        //throw error;
+      }
+
+      if (_.isNil(cate_id) && _.isNil(g_name)) {
+        await this.redisService
+          .getClient()
+          .set('goods-findAll', JSON.stringify(body.hits.hits.map(hit => hit._source)), 'EX', 20);
+      } else if (cate_id) {
+        await this.redisService
+          .getClient()
+          .set(`cate_id = ${cate_id}`, JSON.stringify(body.hits.hits.map(hit => hit._source)), 'EX', 60);
+      }
+
+      return body.hits.hits.map(hit => hit._source);
+    } catch (error) {
+      console.error('오픈 서치 연결 실패:', error.message);
+      throw new InternalServerErrorException('상품 명단 조회에 실패했습니다.');
+    }
+
   }
 
   /**
@@ -109,14 +170,21 @@ export class GoodsService {
    * @returns
    */
   async findOne(id: number): Promise<Goods> {
-    const good = await this.goodsRepository.findOne({
-      where: { id },
-      relations: ['category'],
-    });
-    if (!good) {
+    const query = {
+      query: {
+        match: {
+          _id: id.toString(),
+        },
+      },
+    };
+    const good = await this.elasticsearchService.search('goods_index', query);
+
+    if (!good.body.hits.hits.length) {
       throw new NotFoundException('해당 상품을 찾을 수 없습니다.');
     }
-    return good;
+
+    // return good;
+    return good.body.hits.hits.map((hit) => hit._source);
   }
 
   /**

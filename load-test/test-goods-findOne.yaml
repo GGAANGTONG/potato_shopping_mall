@@ -1,0 +1,45 @@
+config:
+  target: "http://localhost:3000/api"
+  phases:
+    - duration: 20
+      arrivalRate: 30
+      rampTo: 50
+      name: Warm up phase
+    - duration: 20
+      arrivalRate: 50
+      rampTo: 75
+      name: Ramp up load
+    - duration: 20
+      arrivalRate: 80
+      rampTo: 35
+      name: Spike phase
+  # plugins:
+  #     ensure: {}
+  #     apdex: {}
+  #     metrics-by-endpoint: {}
+  apdex:
+    threshold: 100
+  ensure:
+      thresholds:
+        - http.response_time.p99: 100
+        - http.response_time.p95: 75
+  payload:
+      path: "fake_data_goods.csv"
+      fields: 
+        - "goodsId"
+
+scenarios:
+  - name: "2-2. [Goods][findOne] - 10,000VUs"
+    flow:
+      - log: "{{ goodsId }}"
+      - get:
+          url: "/goods/get-one/{{ goodsId }}"
+
+# scenarios:
+#   - name: "4-3. [Orders][findOneOrderByBoth(무슨 뜻이지 + ordersdetails가 전부 연동돼서 나오게 해야 함)] - 100,000VUs" 
+#     flow:
+#       - log: "{{ accessToken }}, {{ orderId }}"
+#       - get:
+#           url: "/orders/{{ orderId }}"
+#           cookie:
+#             authorization: "{{ accessToken }}"

@@ -13,7 +13,13 @@ import {
 import { Categories } from './categories.entity';
 import { Stocks } from './stocks.entity';
 import { OrdersDetails } from '../../orders/entities/ordersdetails.entity';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Carts } from '../../orders/entities/carts.entity';
 import { Racks } from '../../storage/entities/rack.entity';
 
@@ -56,6 +62,10 @@ export class Goods {
   @Column({ type: 'int', nullable: true })
   cost_price: number;
 
+  @IsBoolean()
+  @Column({ type: 'boolean', default: true })
+  g_state: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 
@@ -65,9 +75,6 @@ export class Goods {
   @ManyToOne(() => Categories, (category) => category.goods)
   @JoinColumn({ name: 'cate_id' })
   category: Categories;
-
-  @OneToOne(() => Stocks, (stocks) => stocks.goods)
-  stock: Stocks;
 
   @OneToMany(() => OrdersDetails, (ordersdetails) => ordersdetails.goods)
   ordersdetails: OrdersDetails[];

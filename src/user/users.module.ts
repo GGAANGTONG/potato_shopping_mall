@@ -9,21 +9,21 @@ import { Point } from '../point/entities/point.entity';
 import { Boards } from '../boards/entities/boards.entity';
 import { Comments } from '../boards/entities/comments.entity';
 import { S3FileService } from '../common/utils/s3_fileupload';
-// import { RedisService } from 'src/redis/redis.service';
+import { RedisService } from 'src/redis/redis.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Users, Point,Boards,Comments]),
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
-        signOptions: { expiresIn: '1h' },
-        secret: config.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+        signOptions: { expiresIn: '36h' },
+        secret: config.get<string>('JWT_SECRET'),
       }),
       inject: [ConfigService],
     }),
   ],
   controllers: [UserController],
-  providers: [UserService,S3FileService],
-  exports: [UserService,S3FileService],
+  providers: [UserService,S3FileService,RedisService],
+  exports: [UserService,S3FileService,RedisService],
 })
 export class UsersModule {}

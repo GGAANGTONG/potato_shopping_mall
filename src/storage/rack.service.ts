@@ -56,23 +56,21 @@ export class RackService {
    * @returns
    */
   async findAllByStorage(storageId: number) {
-    const racks = await this.racksRepository
-      .createQueryBuilder('rack')
-      .leftJoinAndSelect('rack.stock', 'stock')
-      .leftJoinAndSelect('stock.goods', 'goods', 'goods.id = stock.goods.id')
-      .select([
-        'rack.id', // 랙 ID
-        'rack.name',
-        'rack.location_info',
-        'stock.id', // 재고 ID
-        'stock.count',
-        'goods.g_name', // 상품 이름
-        'goods.g_desc',
-      ])
-      .where('rack.storage_id = :storageId', { storageId })
-      .getMany();
+    const rawData = await this.stocksRepository.query(`
+      SELECT 
+        racks.id, racks.name, racks.location_info,
+        stocks.id as stockId, stocks.count, goods.g_name,
+        goods.g_desc
+      FROM 
+          racks 
+      INNER JOIN 
+          stocks ON stocks.rack_id = racks.id
+      INNER JOIN 
+          goods ON stocks.goods_id = goods.id
+      WHERE racks.storage_id = ${+storageId}
+    `);
 
-    return racks;
+    return rawData;
   }
 
   /**
@@ -81,15 +79,25 @@ export class RackService {
    * @returns
    */
   async findOne(id: number) {
-    const rack = await this.racksRepository.findOne({
-      where: { id: +id },
-      relations: ['stock', 'stock.goods'],
-    });
 
-    if (!rack) {
+    const rawData = await this.stocksRepository.query(`
+      SELECT 
+        racks.*,
+        stocks.id as stockId, stocks.count, goods.g_name,
+        goods.g_desc
+      FROM 
+          racks 
+      INNER JOIN 
+          stocks ON stocks.rack_id = racks.id
+      INNER JOIN 
+          goods ON stocks.goods_id = goods.id
+      WHERE racks.id = ${+id}
+    `);
+
+    if (rawData.length === 0) {
       throw new NotFoundException('해당 랙 정보를 찾을 수 없습니다.');
     }
-    return rack;
+    return rawData;
   }
 
   /**
@@ -122,7 +130,7 @@ export class RackService {
           // 중복 상품 체크
           const existingGoodsInRack = await entityManager.findOne(Stocks, {
             where: {
-              goods: { id: goods_id },
+              goods_id: goods_id ,
               rack: { id: rack_id },
             },
           });
@@ -137,7 +145,7 @@ export class RackService {
 
           // Stocks 엔티티 생성 및 저장
           const newStock = entityManager.create(Stocks, {
-            goods: goods,
+            goods_id: goods_id,
             rack: rack,
             count: quantity,
           });

@@ -9,6 +9,7 @@ import { UserService } from 'src/user/users.service';
 import { HttpModule } from '@nestjs/axios';
 import { Point } from 'src/point/entities/point.entity';
 import { PointModule } from 'src/point/point.module';
+import { KakaoStrategy } from './kakao.strategy';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { PointModule } from 'src/point/point.module';
     HttpModule,
     PointModule,
   ],
-  providers: [JwtStrategy, UserService, HttpModule],
+  providers: [JwtStrategy, UserService, HttpModule, KakaoStrategy],
   controllers: [],
+  exports: [KakaoStrategy]
 })
 export class AuthModule {}
