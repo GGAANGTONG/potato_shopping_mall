@@ -82,7 +82,7 @@ export default {
         orderId: urlParams.get('orderId'),
         amount: urlParams.get('amount'),
       };
-      console.log('결제 승인 요청 국밥1', requestData);
+      //console.log('결제 승인 요청 국밥1', requestData);
       const response = await fetch(
         process.env.VUE_APP_API_URL+'/api/payments/payCash-confirm',
         {
@@ -131,7 +131,7 @@ export default {
   },
   methods: {
     handleOpenLink() {
-      window.location.href = process.env.VUE_APP_API_URL;
+      window.location.href = process.env.VUE_APP_CLIENT_URL;
     },
   },
 };
