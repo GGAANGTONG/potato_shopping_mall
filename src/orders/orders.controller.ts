@@ -53,11 +53,18 @@ export class OrdersController {
     return this.ordersService.findAllOrderbyAdmin();
   }
 
-  // 주문 정보 상세 조회
+  // 주문 정보 단건 조회
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   async findOneOrderByBoth(@Param('id', ParseIntPipe) id: number) {
     return this.ordersService.findOneOrderbyBoth(id);
+  }
+
+  //주문 정보 상세 조회
+  @UseGuards(AuthGuard('jwt'))
+  @Get('details/:id')
+  async findOrdersDetails(@Param('id', ParseIntPipe) id: number) {
+    return await this.ordersService.findOrdersDetails(id)
   }
 
   // 주문 취소
