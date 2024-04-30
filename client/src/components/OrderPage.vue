@@ -32,19 +32,33 @@
         </tbody>
       </table>
     </div>
-    <div>
-      <h2>주문 상세</h2>
-      <table class="default">
-        <thead>
-          <tr>
-            <th colspan="3">주문 상세</th>
-          </tr>
-        </thead>
+
+<table class ="default">
+<thead>
+  <tr>
+    <th colspan="2">주문 상세</th>
+  </tr>
+</thead>
+  <tr v-for="detail in orderDetails" :key="detail.goods_id">
+    <td>
+
         <tbody>
-          <tr></tr>
-        </tbody>
-      </table>
-    </div>
+        <tr>
+          <th>상품명</th>
+          <td>{{ detail.g_name }}</td>
+        </tr>
+        <tr>
+          <th>상품 번호</th>
+          <td>{{ detail.goods_id }}</td>
+        </tr>
+        <tr>
+          <th>주문 수량</th>
+          <td>{{ detail.od_count }}</td>
+        </tr>
+      </tbody>
+    </td>
+  </tr>
+</table>
 
     <div class="order-btn">
       <button class="button-cash-purchase" v-if="!orderInfo.tossOrderId">
@@ -86,16 +100,14 @@ export default {
   },
   created() {
     this.fetchOrderInfo();
-    // this.fetchOrderDetails();
   },
   methods: {
     async fetchOrderInfo() {
       try {
         const orderId = 100622;
-        const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
         const token =
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjk5MzE4LCJpYXQiOjE3MTQyOTkyODgsImV4cCI6MTc1NzQ5OTI4OH0.J31KF96C-EnnIel6p9iX2K7k7ujggDRFvxrephRRK-k';
-        const response = await axios.get(`${apiUrl}/api/orders/${orderId}`, {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/orders/${orderId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -103,27 +115,31 @@ export default {
         if (response.data) {
           this.orderInfo = response.data[0];
         }
+
+        const responseDetails = await fetch(`${process.env.VUE_APP_API_URL}/api/orders/details/${orderId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await responseDetails.json();
+        console.log('밥국밥', data)
+        if(data) {
+
+        this.orderDetails = data;
+        }
       } catch (error) {
-        console.error('주문자 정보를 불러오는 데 실패했습니다', error);
+        console.error('주문 상세를 불러오는 데 실패했습니다', error);
       }
     },
-    // async fetchOrderDetails() {
-    //   try {
-    //     // 주문 상세 API 호출
-    //     const response = await fetch('/api/order/details');
-    //     const data = await response.json();
-    //     this.orderDetails = data;
-    //   } catch (error) {
-    //     console.error('주문 상세를 불러오는 데 실패했습니다', error);
-    //   }
-    // },
     handleCashPurchase() {
       this.$router.push({ name: 'payCash' });
     },
     handleCheckShipping(){
       this.$router.push({name: 'OrderShipping'});
     }
-  },
+  }
 };
 </script>
 

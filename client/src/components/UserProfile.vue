@@ -33,10 +33,9 @@ export default {
   },
   methods: {
     async fetchUserProfile() {
-      const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
       const token =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjk5MzE4LCJpYXQiOjE3MTQyOTkyODgsImV4cCI6MTc1NzQ5OTI4OH0.J31KF96C-EnnIel6p9iX2K7k7ujggDRFvxrephRRK-k';
-      const response = await axios.get(`${apiUrl}/api/oauth/find-one`, {
+      const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/oauth/find-one`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
