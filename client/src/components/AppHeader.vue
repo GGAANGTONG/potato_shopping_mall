@@ -1,12 +1,17 @@
 <template>
   <header>
-    <h1>감자쇼핑</h1>
+    <h1><a :href="clientUrl">감자쇼핑</a></h1>
   </header>
 </template>
 
 <script>
 export default {
-  name: 'AppHeader'
+  name: 'AppHeader',
+  data() {
+    return {
+      clientUrl: process.env.VUE_APP_CLIENT_URL
+    };
+  }
 }
 </script>
 

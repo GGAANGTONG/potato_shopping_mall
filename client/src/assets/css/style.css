@@ -41,13 +41,13 @@ table.default td {
 /****
 * BTN
 ****/
-button {
+button.blue {
   padding: 10px 20px;
   background-color: #008CBA;
   color: white;
   border: none;
   cursor: pointer;
 }
-button:hover {
+button.blue:hover {
   background-color: #007B9E;
 }

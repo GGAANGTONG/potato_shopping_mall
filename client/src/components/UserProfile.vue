@@ -36,7 +36,7 @@
       </div>
     </div>
   </div>
-  <button v-if="userProfile.data && userProfile.data.role == 1" @click="goToAdminPage">관리자</button>
+  <button class="blue" v-if="userProfile.data && userProfile.data.role == 1" @click="goToAdminPage">관리자</button>
 </template>
 
 <script>
