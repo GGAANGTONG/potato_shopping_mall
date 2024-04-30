@@ -1,8 +1,8 @@
 <template>
     <div class="admin-page">
       <h1>쇼핑몰 관리자 페이지</h1>
-      <button @click="goToInventory">재고 관리</button>
-      <button @click="goToOrders">주문 관리</button>
+      <button class="blue" @click="goToInventory">재고 관리</button>
+      <button class="blue" @click="goToOrders">주문 관리</button>
     </div>
   </template>
   

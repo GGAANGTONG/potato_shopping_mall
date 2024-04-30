@@ -264,7 +264,7 @@ export class OrdersService {
   //주문 정보 상세 조회
   async findOrdersDetails(id: number) {
     const data = await this.ordersDetailsRepository.query(
-      `select o.*, g.g_name from ordersdetails o
+      `select o.*, g.g_name, g.g_price*o.od_count as price from ordersdetails o
       LEFT JOIN goods g
       ON o.goods_id = g.id
       WHERE o.orders_id = ${id}
