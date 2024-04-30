@@ -247,17 +247,8 @@ export class PaymentsService {
       logger.errorLogger(error, `userId = ${userId}`);
       throw error;
     }
-
-    let toss_orders_id;
-    let duplicate;
-    console.log('페이먼츠 국밥');
-    do {
-      toss_orders_id = faker.string.alphanumeric(10);
-      duplicate = await this.tossRepository.findOneBy({ toss_orders_id });
-    } while (!_.isNil(duplicate));
-    console.log('페이먼츠 국밥2');
     const { orders_id } = createPaymentDto;
-    console.log('페이먼츠 국밥3', orders_id);
+
     const order = await this.ordersRepository.findOne({
       relations: ['ordersdetails'],
       where: {
@@ -268,6 +259,28 @@ export class PaymentsService {
     if (_.isNil(order)) {
       throw new NotFoundException('주문 내역을 찾을 수 없습니다.');
     }
+
+    const existingTrial = await this.tossRepository.findOneBy({orders_id})
+    if(existingTrial && existingTrial.p_total_price == 0 && existingTrial.p_status == false) {
+      const data = existingTrial
+      return {
+        message:  `${order.ordersdetails[0].goods_id}번 상품 외 ${order.ordersdetails.length - 1} 건`,
+        data
+      }
+    }
+
+
+    let toss_orders_id;
+    let duplicate;
+    console.log('페이먼츠 국밥');
+    do {
+      toss_orders_id = faker.string.alphanumeric(10);
+      duplicate = await this.tossRepository.findOneBy({ toss_orders_id });
+    } while (!_.isNil(duplicate));
+    console.log('페이먼츠 국밥2');
+
+    console.log('페이먼츠 국밥3', orders_id);
+
 
     const data = this.tossRepository.create({
       user_id: userId,
