@@ -24,6 +24,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'ProductDetail',
   props: {
@@ -53,9 +55,25 @@ export default {
     formatCurrency(value) {
       return `₩${value.toFixed(2)}`;
     },
-    addToCart() {
-      console.log('장바구니 담기 버튼 클릭!');
+    async addToCart() {
+    try {
+      const apiUrl = `${process.env.VUE_APP_API_URL}/api/cart/add/${this.goodsId}`;
+      const token = localStorage.getItem('userToken');
+      const response = await axios.post(apiUrl, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      // 응답 처리
+      if (response.status === 200) {
+        console.log('장바구니에 상품이 추가되었습니다:', response.data);
+      } else {
+        console.error('장바구니에 상품 추가 실패');
+      }
+    } catch (error) {
+      console.error('장바구니에 상품 추가 중 에러 발생:', error);
     }
+  }
   },
   computed: {
     discountedPrice() {
