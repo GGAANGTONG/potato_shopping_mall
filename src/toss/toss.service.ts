@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { Buffer } from 'buffer';
@@ -15,7 +15,10 @@ export class TossService {
 
   async confirmPayment({ paymentKey, orderId, amount }): Promise<any> {
     const encryptedSecretKey = 'Basic ' + Buffer.from(this.secretKey + ':').toString('base64');
-    // await this.tossRepository.delete({toss_orders_id:orderId})
+    const data = await this.tossRepository.findOneBy({toss_orders_id:orderId})
+    if(data.p_status == true) {
+      throw new BadRequestException('이미 결제된 내역입니다.')
+    }
     
     return axios.post(this.baseUrl, {
       orderId: orderId,

@@ -112,6 +112,31 @@ export class PaymentsController {
         }
     }
 
+    // 결제 취소
+    // @UseGuards(AuthGuard('jwt'))
+    // @Post(':toss_orders_id/cancelCash')
+    // async cancelPayCash(@Req() req, @Param('toss_orders_id') toss_orders_id: number) {
+    //     try {
+    //         // 결제 취소 로직을 서비스에서 호출하여 실행.
+    //         const userId = req.user.id
+
+    //         logger.traceLogger(`Payments - cancelPay`, `req.user = ${JSON.stringify(req.user)}, toss_orders_id = ${toss_orders_id}`)
+    //         const cancelledPay = await this.paymentsService.cancelPay(userId, toss_orders_id);
+
+    //         return { message: '결제가 취소되었습니다.', payments: cancelledPayCash };
+    //     } catch (error) {
+    //         console.error(error)
+    //         if (error instanceof NotFoundException) {
+    //             throw error;
+    //         } else {
+    //             const fatalError = new NotFoundException('알 수 없는 에러가 발생하여 결제를 취소할 수 없습니다.');
+    //             logger.fatalLogger(fatalError, `req.user = ${JSON.stringify(req.user)}, paymentsId = ${toss_orders_id}`)
+    //             throw fatalError// 그 외의 오류는 일반적인 오류 메시지를 반환.
+    //         }
+    //     }
+    //     //https://api.tosspayments.com/v1/payments/{paymentKey}/cancel로 렌더링 해야 함
+    // }
+
     @Get('/find-location')
     async findLocation(@Query('address') address: string, @Res() res: Response) {
         if (!address) {
