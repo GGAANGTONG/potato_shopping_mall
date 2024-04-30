@@ -33,32 +33,25 @@
       </table>
     </div>
 
-<table class ="default">
-<thead>
-  <tr>
-    <th colspan="2">주문 상세</th>
-  </tr>
-</thead>
-  <tr v-for="detail in orderDetails" :key="detail.goods_id">
-    <td>
-
-        <tbody>
+    <table class="default">
+      <thead>
         <tr>
-          <th>상품명</th>
+          <th colspan="3">주문 상세</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>상품명</td>
+          <td>주문 수량</td>
+          <td>금액(원)</td>
+        </tr>
+        <tr v-for="detail in orderDetails" :key="detail.goods_id">
           <td>{{ detail.g_name }}</td>
-        </tr>
-        <tr>
-          <th>상품 번호</th>
-          <td>{{ detail.goods_id }}</td>
-        </tr>
-        <tr>
-          <th>주문 수량</th>
           <td>{{ detail.od_count }}</td>
+          <td>{{ detail.price }}</td>
         </tr>
       </tbody>
-    </td>
-  </tr>
-</table>
+    </table>
 
     <div class="order-btn">
       <button class="button-cash-purchase" v-if="!orderInfo.tossOrderId">
@@ -71,16 +64,17 @@
       >
         포인트로 구매
       </button>
-      <button
-        class="button-cash-purchase"
-        @click="handleCashPurchase"
-      >
+      <button class="button-cash-purchase" @click="handleCashPurchase">
         현금 구매
       </button>
       <button class="button-cash-purchase" v-if="orderInfo.tossOrderId">
         결제 취소
       </button>
-      <button class="button-cash-purchase" v-if="orderInfo.tossOrderId" @click="handleCheckShipping">
+      <button
+        class="button-cash-purchase"
+        v-if="orderInfo.tossOrderId"
+        @click="handleCheckShipping"
+      >
         배송 확인
       </button>
     </div>
@@ -106,27 +100,30 @@ export default {
         const orderId = 100622;
         const token =
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjk5MzE4LCJpYXQiOjE3MTQyOTkyODgsImV4cCI6MTc1NzQ5OTI4OH0.J31KF96C-EnnIel6p9iX2K7k7ujggDRFvxrephRRK-k';
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/orders/${orderId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const response = await axios.get(
+          `${process.env.VUE_APP_API_URL}/api/orders/${orderId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
         if (response.data) {
           this.orderInfo = response.data[0];
         }
 
-        const responseDetails = await fetch(`${process.env.VUE_APP_API_URL}/api/orders/details/${orderId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const responseDetails = await fetch(
+          `${process.env.VUE_APP_API_URL}/api/orders/details/${orderId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
 
         const data = await responseDetails.json();
-        console.log('밥국밥', data)
-        if(data) {
-
-        this.orderDetails = data;
+        if (data) {
+          this.orderDetails = data;
         }
       } catch (error) {
         console.error('주문 상세를 불러오는 데 실패했습니다', error);
@@ -135,10 +132,10 @@ export default {
     handleCashPurchase() {
       this.$router.push({ name: 'payCash' });
     },
-    handleCheckShipping(){
-      this.$router.push({name: 'OrderShipping'});
-    }
-  }
+    handleCheckShipping() {
+      this.$router.push({ name: 'OrderShipping' });
+    },
+  },
 };
 </script>
 
@@ -163,11 +160,11 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.order-page>div {
-    margin: 5px 0;
+.order-page > div {
+  margin: 5px 0;
 }
 .order-btn {
-    display: flex;
+  display: flex;
 }
 .order-btn > button {
   margin: 0 5px;
