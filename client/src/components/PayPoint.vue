@@ -25,7 +25,7 @@ export default {
       const token =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjk5MzE4LCJpYXQiOjE3MTQyOTkyODgsImV4cCI6MTc1NzQ5OTI4OH0.J31KF96C-EnnIel6p9iX2K7k7ujggDRFvxrephRRK-k';
 
-          await axios.post(`http://localhost:3000/api/payments`, {
+          await axios.post(`${process.env.VUE_APP_API_URL}/api/payments`, {
             orders_id: +orders_id
           }, 
           {
@@ -36,7 +36,7 @@ export default {
           withCredentials: true,
         });
    await this.$router.push({
-     path: `http://localhost:3000/api/payments/point-confirm-test`,
+     path: `${process.env.VUE_APP_CLIENT_URL}/payments/point-confirm-test`,
      query: {
        orders_id: orders_id,
      },

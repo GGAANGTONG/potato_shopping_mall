@@ -10,12 +10,12 @@ export class TossService {
   constructor(
     @InjectRepository(TossHistory) private readonly tossRepository:Repository<TossHistory>
   ) {}
-  private readonly secretKey = 'test_sk_kYG57Eba3G2JA0YzDoyk8pWDOxmA';
+  private readonly secretKey = 'test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6';
   private readonly baseUrl = 'https://api.tosspayments.com/v1/payments/confirm';
 
   async confirmPayment({ paymentKey, orderId, amount }): Promise<any> {
     const encryptedSecretKey = 'Basic ' + Buffer.from(this.secretKey + ':').toString('base64');
-    await this.tossRepository.delete({toss_orders_id:orderId})
+    // await this.tossRepository.delete({toss_orders_id:orderId})
     
     return axios.post(this.baseUrl, {
       orderId: orderId,
