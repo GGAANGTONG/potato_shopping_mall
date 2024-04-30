@@ -85,9 +85,8 @@ export default {
       var orderName = urlParams.get('orderName');
       var amount = urlParams.get('amount');
 
-      const clientKey = 'test_ck_DpexMgkW36wy75dojXq4VGbR5ozO';
+      const clientKey = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
       const customerKey = generateRandomString();
-
       const paymentWidget = await loadPaymentWidget(clientKey, customerKey);
 
       // ------  결제 UI 렌더링 ------
@@ -126,8 +125,8 @@ export default {
         await paymentWidget.requestPayment({
           orderId: `${orderId}`,
           orderName: `${orderName}`,
-          successUrl: process.env.VUE_APP_API_URL+'/payments/payCashValidationSuccess',
-          failUrl: process.env.VUE_APP_API_URL+'/api/fail',
+          successUrl: 'http://potato-shop.shop/payments/payCashValidationSuccess',
+          failUrl: 'http://potato-shop.shop/api/fail',
         });
       });
     },
