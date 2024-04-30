@@ -73,7 +73,6 @@
       </button>
       <button
         class="button-cash-purchase"
-        v-if="!orderInfo.tossOrderId"
         @click="handleCashPurchase"
       >
         현금 구매
