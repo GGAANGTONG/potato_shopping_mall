@@ -230,6 +230,35 @@ export class GoodsService {
   }
 
   /**
+   * 특가 상품 찾기
+   * @returns 
+   */
+  async findHighestDiscountedProduct(): Promise<Goods> {
+    const query = {
+      "size": 1, 
+      "sort": [
+        { "discountRate": { "order": "asc" } }
+      ],
+      "query": {
+        "range": {
+          "discountRate": {
+            "gte": 0
+          }
+        }
+      }
+    };
+  
+    const result = await this.elasticsearchService.search('goods_index', query);
+  
+    if (!result.body.hits.hits.length) {
+      throw new NotFoundException('할인 상품을 찾을 수 없습니다.');
+    }
+  
+    return result.body.hits.hits[0]._source; 
+  }
+  
+
+  /**
    * 상품 정보 수정
    * @param id
    * @param updateGoodDto
