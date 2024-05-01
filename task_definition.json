@@ -121,6 +121,10 @@
                 {
                     "name": "JWT_SECRET",
                     "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:381492189993:secret:potato-king-secret-zlu5fY:JWT_SECRET::"
+                },
+                {
+                    "name": "CLIENT_HOST",
+                    "value": "potato-shop.shop"
                 }
             ],
             "ulimits": [],
