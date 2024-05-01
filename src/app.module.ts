@@ -18,6 +18,7 @@ import { ElasticsearchModule } from './elasticsearch/elasticsearch.module';
 import { TossModule } from './toss/toss.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { MangementModule } from './mangement/mangement.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -41,7 +42,8 @@ import { join } from 'path';
     BoardsModule,
     StorageModule,
     ElasticsearchModule,
-    TossModule
+    TossModule,
+    MangementModule
   ],
   controllers: [AppController],
   providers: [],

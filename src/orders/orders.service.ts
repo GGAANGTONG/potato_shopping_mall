@@ -3,9 +3,10 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Orders } from './entities/orders.entity';
-import { DataSource, In, Repository } from 'typeorm';
+import { Between, DataSource, FindOptionsWhere, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Users } from '../user/entities/user.entitiy';
@@ -356,5 +357,29 @@ export class OrdersService {
   async getDeliveryInqResult(t_invoice: string): Promise<any> {
     const result = getDeliveryInqResult(t_invoice);
     return result;
+  }
+
+  /**
+   * 주문 건수 조회
+   */
+  async getTodayOrdersCount(userId: number): Promise<number> {
+    // 사용자의 role 확인
+    const user = await this.usersRepository.findOneBy({id :  +userId});
+    if (!user || user.role !== 1) {
+      throw new UnauthorizedException('관리자만 접근할 수 있습니다.');
+    }
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+    
+    const count = await this.ordersRepository.count({
+      where: {
+        created_at : Between(todayStart, todayEnd)
+      }
+    });
+    return count;
   }
 }

@@ -9,7 +9,6 @@
 
 <script>
 import axios from 'axios';
-
 export default {
   name: 'PayPoint',
   data() {
@@ -31,7 +30,7 @@ export default {
           {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `BPearer ${token}`, 
+            Authorization: `Bearer ${token}`, 
           },
           withCredentials: true,
         });

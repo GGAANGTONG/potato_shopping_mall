@@ -48,8 +48,10 @@ export class GoodsController {
   findAll(
     @Query('g_name') g_name?: string,
     @Query('cate_id') cate_id?: string,
+    @Query('page') page: number = 1,
+    @Query('pageSize') pageSize: number = 10
   ) {
-    return this.goodsService.findAll(g_name, cate_id);
+    return this.goodsService.findAll(g_name, cate_id,page,pageSize);
   }
 
   /**
