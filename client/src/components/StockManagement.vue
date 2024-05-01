@@ -70,7 +70,7 @@
         </thead>
         <tbody>
           <tr >
-            <td>{{ completedMovements.g_name }}</td>
+            <td v-if="completedMovements.g_name">{{ completedMovements.g_name }}</td>
             <td>{{ completedMovements.racks_id }}</td>
             <td>{{ completedMovements.stock_id }}</td>
             <td>{{ completedMovements.count }}</td>
@@ -92,10 +92,10 @@
         </thead>
         <tbody>
           <tr>
-            <td>{{ afterMovements.g_name }}</td>
-            <td>{{ afterMovements.racks_id }}</td>
-            <td>{{ afterMovements.stock_id }}</td>
-            <td>{{ afterMovements.count }}</td>
+            <td v-if="afterMovements && afterMovements.g_name">{{ afterMovements.g_name }}</td>
+            <td v-if="afterMovements && afterMovements.racks_id">{{ afterMovements.racks_id }}</td>
+            <td v-if="afterMovements && afterMovements.stock_id">{{ afterMovements.stock_id }}</td>
+            <td v-if="afterMovements && afterMovements.count">{{ afterMovements.count }}</td>
           </tr>
         </tbody>
       </table>
