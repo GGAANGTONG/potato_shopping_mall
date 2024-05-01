@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { Buffer } from 'buffer';
@@ -10,12 +10,17 @@ export class TossService {
   constructor(
     @InjectRepository(TossHistory) private readonly tossRepository:Repository<TossHistory>
   ) {}
-  private readonly secretKey = 'test_sk_kYG57Eba3G2JA0YzDoyk8pWDOxmA';
+  private readonly secretKey = 'test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6';
   private readonly baseUrl = 'https://api.tosspayments.com/v1/payments/confirm';
 
   async confirmPayment({ paymentKey, orderId, amount }): Promise<any> {
     const encryptedSecretKey = 'Basic ' + Buffer.from(this.secretKey + ':').toString('base64');
-    await this.tossRepository.delete({toss_orders_id:orderId})
+    const data = await this.tossRepository.findOneBy({toss_orders_id:orderId})
+    console.log('토스국밥', data)
+    if(data.p_status) {
+      throw new BadRequestException('이미 결제된 내역입니다.')
+    }
+    await this.tossRepository.update({toss_orders_id: orderId}, {p_status: true, toss_payment_key: paymentKey})
     
     return axios.post(this.baseUrl, {
       orderId: orderId,

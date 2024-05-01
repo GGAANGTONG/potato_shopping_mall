@@ -10,6 +10,8 @@ import StockManagement from '../components/StockManagement.vue';
 import UserProfile from '../components/UserProfile.vue';
 import OrderShipping from '../components/OrderShipping.vue';
 import PayPoint from '../components/PayPoint.vue';
+import AdminPage from '../components/AdminPage.vue';
+
 const routes = [
   {
     path: '/',
@@ -57,6 +59,11 @@ const routes = [
     path: '/userProfile',
     name: 'UserProfile',
     component: UserProfile,
+  },
+  {
+    path: '/admin',
+    name: 'AdminPage',
+    component: AdminPage,
   },
   {
     path: '/order-shipping',

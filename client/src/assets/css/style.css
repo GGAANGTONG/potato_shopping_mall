@@ -36,3 +36,18 @@ table.default td {
   border: 0px;
   background: #fff957;
 }
+
+
+/****
+* BTN
+****/
+button.blue {
+  padding: 10px 20px;
+  background-color: #008CBA;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+button.blue:hover {
+  background-color: #007B9E;
+}

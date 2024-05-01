@@ -22,6 +22,7 @@ import { RedisService } from '../redis/redis.service';
 import { KakaoGeocoder } from '../common/utils/kakao-geocoder.util';
 import { TossHistory } from './entities/tossHistory.entity';
 import { faker } from '@faker-js/faker';
+import axios from 'axios';
 
 @Injectable()
 export class PaymentsService {
@@ -247,17 +248,8 @@ export class PaymentsService {
       logger.errorLogger(error, `userId = ${userId}`);
       throw error;
     }
-
-    let toss_orders_id;
-    let duplicate;
-    console.log('페이먼츠 국밥');
-    do {
-      toss_orders_id = faker.string.alphanumeric(10);
-      duplicate = await this.tossRepository.findOneBy({ toss_orders_id });
-    } while (!_.isNil(duplicate));
-    console.log('페이먼츠 국밥2');
     const { orders_id } = createPaymentDto;
-    console.log('페이먼츠 국밥3', orders_id);
+
     const order = await this.ordersRepository.findOne({
       relations: ['ordersdetails'],
       where: {
@@ -268,6 +260,33 @@ export class PaymentsService {
     if (_.isNil(order)) {
       throw new NotFoundException('주문 내역을 찾을 수 없습니다.');
     }
+
+    const existingTrial = await this.tossRepository.findOneBy({orders_id})
+    console.log('토스 1', existingTrial)
+    if(existingTrial && existingTrial.p_total_price == 0 && existingTrial.p_status == false) {
+      const data = existingTrial
+
+      console.log('토스 2', existingTrial)
+      return {
+        message:  `${order.ordersdetails[0].goods_id}번 상품 외 ${order.ordersdetails.length - 1} 건`,
+        data
+      }
+    }
+
+    if(existingTrial && existingTrial.toss_transaction_key && existingTrial.p_total_price !== 0 && existingTrial.p_status) {
+
+      console.log('토스 3', existingTrial)
+      throw new BadRequestException('이미 결제된 내역입니다.')
+    }
+
+
+    let toss_orders_id;
+    let duplicate;
+    console.log('페이먼츠 국밥');
+    do {
+      toss_orders_id = faker.string.alphanumeric(10);
+      duplicate = await this.tossRepository.findOneBy({ toss_orders_id });
+    } while (!_.isNil(duplicate));
 
     const data = this.tossRepository.create({
       user_id: userId,
@@ -309,7 +328,6 @@ export class PaymentsService {
       .leftJoinAndSelect('toss.orders', 'orders')
       .where('toss.toss_orders_id = :orderId', { orderId })
       .getOne();
-    console.log('토스 국밥1', tossPayment);
     if (!tossPayment) {
       const error = new BadRequestException('존재하지 않는 주문입니다.');
       logger.errorLogger(error, `requestData = ${JSON.stringify(requestData)}`);
@@ -375,7 +393,6 @@ export class PaymentsService {
         }
 
         tossPayment.p_total_price = tossPayment.o_total_price;
-        tossPayment.p_status = true;
 
         await queryRunner.manager.save(TossHistory, tossPayment);
 
@@ -406,6 +423,31 @@ export class PaymentsService {
       }
     }
   }
+
+   //토스페이 결제 마지막 마무리
+   async payCashWrapUp(transactionData) {
+    console.log('구웃밥2', transactionData)
+    const {orderId, lastTransactionKey} = transactionData
+    const data = await this.tossRepository.findOne({
+      where: {
+        toss_orders_id: orderId
+      }
+    })
+    if(_.isNil(data) || !data.p_status || !data.toss_payment_key) {
+      const fatalError = new InternalServerErrorException('PG 결제 과정에서 알 수 없는 오류가 발생하였습니다.')
+      logger.fatalLogger(fatalError, `data = ${JSON.stringify(data)}, transactionData = ${JSON.stringify(transactionData)}`)
+      throw fatalError
+    }
+    
+
+    const result = await this.tossRepository.update({toss_orders_id: orderId}, {toss_transaction_key: lastTransactionKey})
+
+    return {
+        message: '토스로부터 결제 정보를 수신받았습니다.',
+        data: result
+    }
+   }
+
 
   // 유저별 결제 목록 전체 조회
   async findAllOrderbyUser(userId: number): Promise<Payments[]> {
@@ -598,6 +640,57 @@ export class PaymentsService {
       throw fatalError;
     }
   }
+
+
+   //토스 결제 취소
+   async cancelPayCash(userId, orders_id) {
+       try {
+           // 결제 취소 로직을 서비스에서 호출하여 실행.
+           const {orders_id: number} = orders_id
+          console.log('토스 결제 취소2')
+           const transaction = await this.tossRepository.findOne({
+            where: {
+              user_id: userId,
+              orders_id: number
+            }
+           });
+           console.log('토스 결제 취소2-1', transaction)
+           const cancelReason = {cancelReason: "고객이 취소를 원함"}
+           const secretKey = 'test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6';
+           const encryptedSecretKey = 'Basic ' + Buffer.from(secretKey + ':').toString('base64');
+          const data = await axios.post(`https://api.tosspayments.com/v1/payments/${transaction.toss_payment_key}/cancel`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': encryptedSecretKey
+            },
+            data: JSON.stringify(cancelReason),
+           })
+           const response = data.data
+           const result = await this.tossRepository.insert({
+            user_id: transaction.user_id,
+            orders_id: transaction.orders_id,
+            toss_orders_id: transaction.toss_orders_id,
+            toss_transaction_key: response.toss_transaction_key,
+            toss_payment_key: transaction.toss_payment_key,
+            o_total_price: transaction.o_total_price,
+            p_total_price: -transaction.p_total_price,
+            p_status: true,
+           }) 
+           console.log('토스 결제 취소3', response)
+           return { message: '결제가 취소되었습니다.', data: result };
+       } catch (error) {
+           console.error(error)
+           if (error instanceof NotFoundException) {
+               throw error;
+           } else {
+               const fatalError = new NotFoundException('알 수 없는 에러가 발생하여 결제를 취소할 수 없습니다.');
+               logger.fatalLogger(fatalError, `req.user = ${userId}, orders_id = ${orders_id}`)
+               throw fatalError// 그 외의 오류는 일반적인 오류 메시지를 반환.
+           }
+       }
+   }
+
 
   /**
    * 주소로 좌표찾기

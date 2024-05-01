@@ -144,9 +144,9 @@ async kakaoCallbacks (
   }); 
 
   await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken)
-  console.log('비빔밥', accessToken)
+  console.log('토큰 발급', accessToken)
   res.cookie('accessToken', `Bearer ${accessToken}`)
-  return res.redirect('/health-check')
+  return res.redirect('http://potato-shop.shop/')
   }
 
 
@@ -162,12 +162,17 @@ async kakaoCallbacks (
   });
 
 
-  await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken)
-  
-  
-  res.cookie('accessToken', `Bearer ${accessToken}`)
-  console.log('비빔밥', accessToken)
-  return res.redirect(301, 'http://potato-shop.shop');
+  await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken);
+  res.cookie('accessToken', `Bearer ${accessToken}`, {
+    domain: "potato-shop.shop",
+    path: '/',
+    maxAge: 1000 * 60 * 10, 
+   // httpOnly: true, 
+    secure: true
+  })
+  console.log('카카오 로그인', accessToken);
+  console.log('도메인: '+process.env.CLIENT_HOST);
+  return res.redirect(301, `http://${process.env.CLIENT_HOST}`);
 }
 
   //회원정보 수정(으아아아아아아)

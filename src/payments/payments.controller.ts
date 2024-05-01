@@ -62,6 +62,14 @@ export class PaymentsController {
         message: '결제 준비가 완료되었습니다.' 
     })
    }
+   //토스페이 결제 마지막 마무리
+   @Post('payCash-wrapUp')
+   async payCashWrapUp(@Body() transactionData) {
+    console.log('구웃밥1', transactionData)
+    const data = await this.paymentsService.payCashWrapUp(transactionData)
+
+    return data
+   }
 
     // 유저 결제 목록 전체 조회
     @UseGuards(AuthGuard('jwt'))
@@ -111,6 +119,33 @@ export class PaymentsController {
             }
         }
     }
+
+    //토스 결제 취소
+    @UseGuards(AuthGuard('jwt'))
+    @Get(':orders_id/cancelCash')
+    async cancelPayCash(@Req() req, @Param() orders_id: string) {
+        try {
+            // 결제 취소 로직을 서비스에서 호출하여 실행.
+
+            const userId = req.user.id
+            console.log('토스 결제 취소1', userId, orders_id)
+
+            logger.traceLogger(`Payments - cancelPay`, `req.user = ${JSON.stringify(req.user)}, orders_id = ${orders_id}`)
+            const data = await this.paymentsService.cancelPayCash(userId, orders_id);
+
+            return { message: '결제가 취소되었습니다.', data };
+        } catch (error) {
+            console.error(error)
+            if (error instanceof NotFoundException) {
+                throw error;
+            } else {
+                const fatalError = new NotFoundException('알 수 없는 에러가 발생하여 결제를 취소할 수 없습니다.');
+                logger.fatalLogger(fatalError, `req.user = ${JSON.stringify(req.user)}, orders_id = ${orders_id}`)
+                throw fatalError// 그 외의 오류는 일반적인 오류 메시지를 반환.
+            }
+        }
+    }
+
 
     @Get('/find-location')
     async findLocation(@Query('address') address: string, @Res() res: Response) {

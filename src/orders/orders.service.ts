@@ -3,9 +3,10 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Orders } from './entities/orders.entity';
-import { DataSource, In, Repository } from 'typeorm';
+import { Between, DataSource, FindOptionsWhere, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Users } from '../user/entities/user.entitiy';
@@ -26,6 +27,8 @@ export class OrdersService {
   constructor(
     @InjectRepository(Orders)
     private ordersRepository: Repository<Orders>,
+    @InjectRepository(OrdersDetails)
+    private ordersDetailsRepository: Repository<OrdersDetails>,
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
     @InjectRepository(Point)
@@ -226,7 +229,7 @@ export class OrdersService {
     }
   }
 
-  // 상세 주문 정보 확인
+  // 주문 정보 단건 확인
   async findOneOrderbyBoth(orderId: number): Promise<Orders> {
     try {
       if (_.isNil(orderId) || orderId == 0) {
@@ -237,13 +240,13 @@ export class OrdersService {
 
       // 쿼리 빌더를 사용하여 주문 데이터 조회
       const order = await this.ordersRepository
-        .query(`select o.*, u.*, t.orders_id as tossOrderId from orders o 
+        .query(`select o.*, u.name, u.email, t.orders_id as tossOrderId from orders o 
               LEFT JOIN users u 
               ON o.user_id = u.id 
               Left join tosshistory t
               on t.orders_id  = o.id
               WHERE o.id = ${+orderId}`);
-
+      console.log('구웃밥', order)
       if (!order) {
         const error = new NotFoundException('주문 정보가 없습니다.');
         logger.errorLogger(error, `orderId = ${orderId}, order = ${order}`);
@@ -258,6 +261,20 @@ export class OrdersService {
       throw fatalError;
     }
   }
+
+  //주문 정보 상세 조회
+  async findOrdersDetails(id: number) {
+    const data = await this.ordersDetailsRepository.query(
+      `select o.*, g.g_name, g.g_price*o.od_count as price from ordersdetails o
+      LEFT JOIN goods g
+      ON o.goods_id = g.id
+      WHERE o.orders_id = ${id}
+      `
+    )
+    console.log('구욱바압', data)
+    return data
+  }
+
 
   // 주문 취소
   async cancelOrder(userId: number, orderId: number): Promise<Orders> {
@@ -340,5 +357,29 @@ export class OrdersService {
   async getDeliveryInqResult(t_invoice: string): Promise<any> {
     const result = getDeliveryInqResult(t_invoice);
     return result;
+  }
+
+  /**
+   * 주문 건수 조회
+   */
+  async getTodayOrdersCount(userId: number): Promise<number> {
+    // 사용자의 role 확인
+    const user = await this.usersRepository.findOneBy({id :  +userId});
+    if (!user || user.role !== 1) {
+      throw new UnauthorizedException('관리자만 접근할 수 있습니다.');
+    }
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+    
+    const count = await this.ordersRepository.count({
+      where: {
+        created_at : Between(todayStart, todayEnd)
+      }
+    });
+    return count;
   }
 }

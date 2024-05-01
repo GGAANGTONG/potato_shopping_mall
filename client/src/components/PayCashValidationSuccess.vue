@@ -82,7 +82,7 @@ export default {
         orderId: urlParams.get('orderId'),
         amount: urlParams.get('amount'),
       };
-      console.log('결제 승인 요청 국밥1', requestData);
+      //console.log('결제 승인 요청 국밥1', requestData);
       const response = await fetch(
         process.env.VUE_APP_API_URL+'/api/payments/payCash-confirm',
         {
@@ -112,6 +112,23 @@ export default {
 
       const confirmedJson = await confirm.json();
 
+      if(confirmedJson) {
+        const lastTransactionKey = confirmedJson.lastTransactionKey
+        const orderId = confirmedJson.orderId
+        const transactionData = {
+          lastTransactionKey,
+          orderId
+        }
+
+       await fetch(process.env.VUE_APP_API_URL+'/api/payments/payCash-wrapUp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transactionData),
+      });
+      }
+
       // TODO: 결제 성공 비즈니스 로직을 구현하세요.
       // console.log(json);
       return confirmedJson;
@@ -120,6 +137,24 @@ export default {
       document.getElementById('response').innerHTML =
         `<pre>${JSON.stringify(data, null, 4)}</pre>`;
     });
+
+    // PayCashValidationSuccess().then(function(data) {
+    //   const confirmedJson = JSON.stringify(data)
+    //     const lastTransactionKey = confirmedJson.lastTransactionKey
+    //     const orderId = confirmedJson.orderId
+    //     const transactionData = {
+    //       lastTransactionKey,
+    //       orderId
+    //     }
+
+    //    fetch(process.env.VUE_APP_API_URL+'/api/payments/payCash-wrap', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify(transactionData),
+    //   });      
+    // })
 
     const paymentKeyElement = document.getElementById('paymentKey');
     const orderIdElement = document.getElementById('orderId');
@@ -131,7 +166,7 @@ export default {
   },
   methods: {
     handleOpenLink() {
-      window.location.href = process.env.VUE_APP_API_URL;
+      window.location.href = process.env.VUE_APP_CLIENT_URL;
     },
   },
 };

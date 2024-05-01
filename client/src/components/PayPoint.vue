@@ -8,3 +8,42 @@
 </template>
 
 
+<<<<<<< HEAD
+=======
+export default {
+  name: 'PayPoint',
+  data() {
+    return {
+      orders_id_pint: '',
+      message: '',
+    };
+  },
+  methods: {
+    async PayPoint() {
+      // const apiUrl = process.env.VUE_APP_API_URL;
+      const orders_id = this.orders_id_point
+      const token =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjk5MzE4LCJpYXQiOjE3MTQyOTkyODgsImV4cCI6MTc1NzQ5OTI4OH0.J31KF96C-EnnIel6p9iX2K7k7ujggDRFvxrephRRK-k';
+
+          await axios.post(`${process.env.VUE_APP_API_URL}/api/payments`, {
+            orders_id: +orders_id
+          }, 
+          {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `BPearer ${token}`, 
+          },
+          withCredentials: true,
+        });
+   await this.$router.push({
+     path: `${process.env.VUE_APP_CLIENT_URL}/payments/point-confirm-test`,
+     query: {
+       orders_id: orders_id,
+     },
+   });
+
+    },
+  }
+};
+</script>
+>>>>>>> bab92eecb717ca3312d44ba9a0d00b13c0a071ed
