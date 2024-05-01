@@ -164,7 +164,7 @@ async kakaoCallbacks (
 
   await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken);
   res.cookie('accessToken', `Bearer ${accessToken}`, {
-    domain: process.env.CLIENT_HOST,
+    domain: "potato-shop.shop",
     path: '/',
     maxAge: 1000 * 60 * 10, 
    // httpOnly: true, 
@@ -172,7 +172,7 @@ async kakaoCallbacks (
   })
   console.log('카카오 로그인', accessToken);
   console.log('도메인: '+process.env.CLIENT_HOST);
-  return res.redirect(301, 'http://'+process.env.CLIENT_HOST);
+  return res.redirect(301, `http://${process.env.CLIENT_HOST}`);
 }
 
   //회원정보 수정(으아아아아아아)

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Carts } from './entities/carts.entity';
@@ -24,72 +28,91 @@ export class CartService {
     private readonly ordersRepository: Repository<Orders>,
     @InjectRepository(Stocks)
     private stocksRepository: Repository<Stocks>,
-
-
-  ) { }
+  ) {}
 
   // 장바구니 추가
-  async addToCart(userId: number, goodsId: number, createCartDto: CreateCartDto) {
+  async addToCart(
+    userId: number,
+    goodsId: number,
+    createCartDto: CreateCartDto,
+  ) {
     await validation(CreateCartDto, createCartDto);
-  
+
     if (!userId || userId === 0 || !goodsId || goodsId === 0) {
       const error = new BadRequestException('잘못된 요청입니다!');
-      logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}`);
+      logger.errorLogger(
+        error,
+        `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}`,
+      );
       throw error;
     }
-  
+
     const { ctCount } = createCartDto;
-  
+
     // const goods = await this.goodsRepository.createQueryBuilder("goods")
     //   .leftJoinAndSelect("goods", "stocks")
     //   .where("goods.id = :goodsId", { goodsId })
     //   .getOne();
-      const goods = await this.goodsRepository.createQueryBuilder("goods")
-      .leftJoinAndSelect("stocks", "stocks", "stocks.goods_id = goods.id") // "stocks" 테이블과 조인합니다.
-      .where("goods.id = :goodsId", { goodsId })
+    const goods = await this.goodsRepository
+      .createQueryBuilder('goods')
+      .leftJoinAndSelect('stocks', 'stocks', 'stocks.goods_id = goods.id') // "stocks" 테이블과 조인합니다.
+      .where('goods.id = :goodsId', { goodsId })
       .getOne();
-  
+
     if (!goods) {
       const error = new BadRequestException('존재하지 않는 상품입니다.');
-      logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}, goods = ${goods}`);
+      logger.errorLogger(
+        error,
+        `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}, goods = ${goods}`,
+      );
       throw error;
-    } 
-  
-    const stocks = await this.stocksRepository.createQueryBuilder("stocks")
-      .where("stocks.goods_id = :goodsId", { goodsId })
+    }
+
+    const stocks = await this.stocksRepository
+      .createQueryBuilder('stocks')
+      .where('stocks.goods_id = :goodsId', { goodsId })
       .getOne();
-  
+
     const newStockCount = stocks.count - ctCount;
     if (newStockCount < 0) {
       const error = new BadRequestException('재고가 없습니다.');
-      logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}`);
+      logger.errorLogger(
+        error,
+        `userId = ${userId}, goodsId = ${goodsId}, createCartDto = ${JSON.stringify(createCartDto)}`,
+      );
       throw error;
     }
-  
-    const existingCartItem = await this.cartsRepository.createQueryBuilder("cart")
-      .where("cart.user_id = :userId AND cart.goods_id = :goodsId", { userId, goodsId })
+
+    const existingCartItem = await this.cartsRepository
+      .createQueryBuilder('cart')
+      .where('cart.user_id = :userId AND cart.goods_id = :goodsId', {
+        userId,
+        goodsId,
+      })
       .getOne();
-  
+
     if (existingCartItem) {
       const updateCount = existingCartItem.ct_count + ctCount;
-      await this.cartsRepository.createQueryBuilder()
+      await this.cartsRepository
+        .createQueryBuilder()
         .update(Carts)
         .set({ ct_count: updateCount })
-        .where("id = :id", { id: existingCartItem.id })
+        .where('id = :id', { id: existingCartItem.id })
         .execute();
-      return await this.cartsRepository.findOne({ where: { id: existingCartItem.id } });
+      return await this.cartsRepository.findOne({
+        where: { id: existingCartItem.id },
+      });
     }
-  
+
     const newCartItem = this.cartsRepository.create({
       user_id: userId,
       goods_id: goodsId,
       ct_count: ctCount,
       ct_price: goods.g_price,
     });
-  
+
     return await this.cartsRepository.save(newCartItem);
   }
-  
 
   // 장바구니 특정 상품 삭제(cartId를 goodsId로 바꾸는게 나을 거 같은데<-완료)
   async removeFromCart(userId: number, goodsId: number) {
@@ -98,72 +121,103 @@ export class CartService {
       logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}`);
       throw error;
     }
-  
-    const cartInfo = await this.cartsRepository.createQueryBuilder("cart")
-      .where("cart.goods_id = :goodsId AND cart.user_id = :userId", { goodsId, userId })
+
+    const cartInfo = await this.cartsRepository
+      .createQueryBuilder('cart')
+      .where('cart.goods_id = :goodsId AND cart.user_id = :userId', {
+        goodsId,
+        userId,
+      })
       .getOne();
-  
+
     if (!cartInfo) {
-      const error = new NotFoundException('장바구니에 해당 상품이 존재하지 않습니다.');
-      logger.errorLogger(error, `userId = ${userId}, goodsId = ${goodsId}, cartInfo = ${cartInfo}`);
+      const error = new NotFoundException(
+        '장바구니에 해당 상품이 존재하지 않습니다.',
+      );
+      logger.errorLogger(
+        error,
+        `userId = ${userId}, goodsId = ${goodsId}, cartInfo = ${cartInfo}`,
+      );
       throw error;
     }
-  
-    await this.cartsRepository.createQueryBuilder()
+
+    await this.cartsRepository
+      .createQueryBuilder()
       .delete()
       .from(Carts)
-      .where("goods_id = :goodsId AND user_id = :userId", { goodsId, userId })
+      .where('goods_id = :goodsId AND user_id = :userId', { goodsId, userId })
       .execute();
-  
+
     return {
       message: '상품이 장바구니에서 삭제되었습니다.',
-      data: cartInfo
-    }
+      data: cartInfo,
+    };
   }
-  
 
   // 장바구니 특정 상품 수량 변경
-  async updateQuantity(userId: number, cartId: number, ctCounts: number): Promise<Carts> {
-    if (!userId || userId === 0 || !cartId || cartId === 0 || !ctCounts || ctCounts <= 0) {
+  async updateQuantity(
+    userId: number,
+    cartId: number,
+    ctCounts: number,
+  ): Promise<Carts> {
+    if (
+      !userId ||
+      userId === 0 ||
+      !cartId ||
+      cartId === 0 ||
+      !ctCounts ||
+      ctCounts <= 0
+    ) {
       const error = new BadRequestException('잘못된 요청입니다!');
-      logger.errorLogger(error, `userId = ${userId}, cartId = ${cartId}, ctCounts = ${ctCounts}`);
+      logger.errorLogger(
+        error,
+        `userId = ${userId}, cartId = ${cartId}, ctCounts = ${ctCounts}`,
+      );
       throw error;
     }
-  
-    const cartItem = await this.cartsRepository.createQueryBuilder("cart")
-      .where("cart.id = :cartId AND cart.user_id = :userId", { cartId, userId })
+
+    const cartItem = await this.cartsRepository
+      .createQueryBuilder('cart')
+      .where('cart.id = :cartId AND cart.user_id = :userId', { cartId, userId })
       .getOne();
-  
+
     if (!cartItem) {
-      const error = new NotFoundException('장바구니에 상품을 찾을 수 없습니다.');
+      const error = new NotFoundException(
+        '장바구니에 상품을 찾을 수 없습니다.',
+      );
       logger.errorLogger(error, `userId = ${userId}, cartId = ${cartId}`);
       throw error;
     }
-  
-    const goods = await this.goodsRepository.createQueryBuilder("goods")
-      .where("goods.id = :goodsId", { goodsId: cartItem.goods_id })
+
+    const goods = await this.goodsRepository
+      .createQueryBuilder('goods')
+      .where('goods.id = :goodsId', { goodsId: cartItem.goods_id })
       .getOne();
-  
+
     if (!goods) {
       const error = new NotFoundException('해당 상품을 찾을 수 없습니다.');
-      logger.errorLogger(error, `userId = ${userId}, cartId = ${cartId}, goodsId = ${cartItem.goods_id}`);
+      logger.errorLogger(
+        error,
+        `userId = ${userId}, cartId = ${cartId}, goodsId = ${cartItem.goods_id}`,
+      );
       throw error;
     }
-  
-    await this.cartsRepository.createQueryBuilder()
+
+    await this.cartsRepository
+      .createQueryBuilder()
       .update(Carts)
       .set({
         ct_count: ctCounts,
-        ct_price: ctCounts * goods.g_price
+        ct_price: ctCounts * goods.g_price,
       })
-      .where("id = :cartId AND user_id = :userId", { cartId, userId })
+      .where('id = :cartId AND user_id = :userId', { cartId, userId })
       .execute();
-  
-    return this.cartsRepository.createQueryBuilder("cart")
-      .where("cart.id = :cartId", { cartId })
+
+    return this.cartsRepository
+      .createQueryBuilder('cart')
+      .where('cart.id = :cartId', { cartId })
       .getOne();
   }
-  
 
   //소비자 장바구니의 모든 상품 조회
   async getCartItems(userId: number): Promise<Carts[]> {
@@ -172,15 +226,24 @@ export class CartService {
       logger.errorLogger(error, `userId = ${userId}`);
       throw error;
     }
-  
-    const carts = await this.cartsRepository.createQueryBuilder("cart")
-      .where("cart.user_id = :userId", { userId })
+
+    const carts = await this.cartsRepository
+      .createQueryBuilder('cart')
+      .leftJoinAndSelect('cart.goods', 'goods')
+      .where('cart.user_id = :userId', { userId })
+      .select([
+        'cart.id', // 카트 ID
+        'cart.user_id',
+        'cart.ct_count', 
+        'cart.ct_price', 
+        'goods.g_name',
+        'goods.g_price', 
+        'goods.id', // 상품 ID
+      ])
       .getMany();
-  
+
     return carts;
   }
-  
-
 
   //장바구니 비우기
   async clearCart(userId: number): Promise<void> {
@@ -190,11 +253,11 @@ export class CartService {
       throw error;
     }
 
-    await this.cartsRepository.createQueryBuilder()
+    await this.cartsRepository
+      .createQueryBuilder()
       .delete()
       .from(Carts)
-      .where("user_id = :userId", { userId })
+      .where('user_id = :userId', { userId })
       .execute();
   }
 }
-  
