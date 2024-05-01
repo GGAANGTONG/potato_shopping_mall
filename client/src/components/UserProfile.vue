@@ -25,9 +25,15 @@
             >{{ userProfile.data.nickname }}</span
           >
         </p>
-        <p v-if="userProfile.data && userProfile.data.email">이메일: {{ userProfile.data.email }}</p>
-        <p v-if="userProfile.data && userProfile.data.points">포인트: {{ userProfile.data.points }} 포인트</p>
-        <p v-if="userProfile.data && userProfile.data.grade">등급: {{ userProfile.data.grade }} 등급</p>
+        <p v-if="userProfile.data && userProfile.data.email">
+          이메일: {{ userProfile.data.email }}
+        </p>
+        <p v-if="userProfile.data && userProfile.data.points">
+          포인트: {{ userProfile.data.points }} 포인트
+        </p>
+        <p v-if="userProfile.data && userProfile.data.grade">
+          등급: {{ userProfile.data.grade }} 등급
+        </p>
         <p v-if="userProfile.data && userProfile.data.address">
           주소:
           {{ userProfile.data.address }}
@@ -36,7 +42,13 @@
       </div>
     </div>
   </div>
-  <button class="blue" v-if="userProfile.data && userProfile.data.role == 1" @click="goToAdminPage">관리자</button>
+  <button
+    class="blue"
+    v-if="userProfile.data && userProfile.data.role == 1"
+    @click="goToAdminPage"
+  >
+    관리자
+  </button>
 </template>
 
 <script>
@@ -51,28 +63,28 @@ export default {
   methods: {
     async fetchUserProfile() {
       try {
-        let token = document.cookie
+        let encodedToken = document.cookie
           .split('; ')
           .find((row) => row.startsWith('accessToken='))
           .split('=')[1];
+        let token = decodeURIComponent(encodedToken);
 
         const response = await axios.get(
           `${process.env.VUE_APP_API_URL}/api/oauth/find-one`,
           {
             headers: {
-              Authorization: `${token}`,
+              Authorization: `${token}`, 
             },
           },
         );
         this.userProfile = response.data;
       } catch (error) {
         console.error('Error fetching user profile:', error);
-        // 오류 처리를 추가할 수 있습니다.
       }
     },
     goToAdminPage() {
-      this.$router.push('/admin'); 
-    }
+      this.$router.push('/admin');
+    },
   },
   created() {
     this.fetchUserProfile();
