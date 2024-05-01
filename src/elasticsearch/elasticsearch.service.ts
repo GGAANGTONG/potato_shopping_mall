@@ -19,10 +19,13 @@ export class ElasticsearchService {
     });
   }
 
-  async search(index: string, query: any) {
+  async search(index: string, query: any, size=10, from=0) {
+    console.log(query);
     return this.client.search({
       index,
       body: query,
+      size: size,
+      from : from
     });
   }
 
