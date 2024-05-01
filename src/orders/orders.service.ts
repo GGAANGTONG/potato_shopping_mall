@@ -211,15 +211,20 @@ export class OrdersService {
   async findAllOrderbyAdmin(
     page: number = 1,
     pageSize: number = 10,
-  ): Promise<Orders[]> {
+  ): Promise<[Orders[], number]> {
     const skip = (page - 1) * pageSize; // 현재 페이지의 첫 번째 항목의 인덱스 계산
 
     try {
-      const [orders, total] = await this.ordersRepository
+      const ordersWithTotal = await this.ordersRepository
         .createQueryBuilder('order')
-        .skip(skip) // 몇 개의 항목을 건너뛸지 지정
-        .take(pageSize) // 반환할 최대 항목 수
+        .leftJoin('order.user', 'users') // 주문 테이블과 주문 상세 테이블을 조인
+        .select(['order', 'users.name', 'users.email']) // 필요한 필드만 선택
+        .orderBy('order.created_at', 'DESC') // 주문일자를 내림차순으로 정렬
+        .skip(skip)
+        .take(pageSize)
         .getManyAndCount();
+
+      const [orders, total] = ordersWithTotal;
 
       if (!orders.length) {
         const error = new NotFoundException('주문 정보가 없습니다.');
@@ -233,10 +238,10 @@ export class OrdersService {
       console.log(
         `Total orders: ${total}, Page: ${page}, Returned: ${orders.length}`,
       );
-      return orders;
+      return ordersWithTotal;
     } catch (error) {
       const fatalError = new InternalServerErrorException(
-        '알 수 없는 에러가 발생했습니다.',
+        '알 수 없는 에러가 발생했습니다.' + error,
       );
       logger.fatalLogger(fatalError, `Page: ${page}, PageSize: ${pageSize}`);
       throw fatalError;
