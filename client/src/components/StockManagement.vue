@@ -69,11 +69,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(completed, index) in completedMovements" :key="index">
-            <td>{{ completed.productName }}</td>
-            <td>{{ completed.rackId }}</td>
-            <td>{{ completed.stockId }}</td>
-            <td>{{ completed.quantity }}</td>
+          <tr >
+            <td>{{ completedMovements.g_name }}</td>
+            <td>{{ completedMovements.racks_id }}</td>
+            <td>{{ completedMovements.stock_id }}</td>
+            <td>{{ completedMovements.count }}</td>
           </tr>
         </tbody>
       </table>
@@ -91,11 +91,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(after, index) in afterMovements" :key="index">
-            <td>{{ after.productName }}</td>
-            <td>{{ after.rackId }}</td>
-            <td>{{ after.stockId }}</td>
-            <td>{{ after.quantity }}</td>
+          <tr>
+            <td>{{ afterMovements.g_name }}</td>
+            <td>{{ afterMovements.racks_id }}</td>
+            <td>{{ afterMovements.stock_id }}</td>
+            <td>{{ afterMovements.count }}</td>
           </tr>
         </tbody>
       </table>
@@ -116,6 +116,7 @@ export default {
       sourceStorageId: '',
       destinationStorageId: '',
       transferCount: '',
+      completedMovements : [],
     };
   },
   methods: {
@@ -144,7 +145,7 @@ export default {
       });
       this.completedMovements = response.data.source;
       this.afterMovements=response.data.destination;
-      console.log(11,response.data.destination)
+      console.log(11,response.data.source)
       alert('상품 이동이 성공적으로 처리되었습니다.');
       console.log('Transfer response:', response.data);
     } catch (error) {

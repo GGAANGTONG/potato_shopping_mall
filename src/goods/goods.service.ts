@@ -86,7 +86,8 @@ export class GoodsService {
    * @param cate_id
    * @returns
    */
-  async findAll(g_name?: string, cate_id?: string) {
+  async findAll(g_name?: string, cate_id?: string, page = 1, pageSize = 10) {
+    let from = (page - 1) * pageSize;
     if (!_.isNil(cate_id) && _.isNil(g_name)) {
       const data = await this.redisService
         .getClient()
@@ -105,41 +106,70 @@ export class GoodsService {
       }
     }
 
+    if (!_.isNil(cate_id) && _.isNil(g_name)) {
+      // 카테고리 ID와 페이지 번호를 포함하는 캐시 키 사용
+      const cacheKey = `cate_id=${cate_id}_page=${page}_size=${pageSize}`;
+      const data = await this.redisService.getClient().get(cacheKey);
+
+      if (!_.isNil(data)) {
+        try {
+          return JSON.parse(data);
+        } catch (parseError) {
+          console.error('Error parsing cached data:', parseError);
+          // 캐시 데이터 파싱 실패 시 로직 처리 필요
+        }
+      }
+    } else if (_.isNil(g_name) && _.isNil(cate_id)) {
+      const cacheKey = `goods-findAll_page=${page}`;
+      const getCachedData = await this.redisService.getClient().get(cacheKey);
+
+      if (!_.isNil(getCachedData)) {
+        return JSON.parse(getCachedData);
+      }
+    }
+
     let searchQuery = {
-      index: 'goods_index', 
+      index: 'goods_index',
+      size: pageSize,
+      from: from,
       body: {
         query: {
           bool: {
-            must: []
-          }
-        }
-      }
+            must: [],
+          },
+        },
+      },
     };
+
+    console.log(searchQuery);
 
     if (g_name) {
       searchQuery.body.query.bool.must.push({
-        wildcard : {
-          name : g_name+'*'
-        }
+        wildcard: {
+          name: g_name + '*',
+        },
       });
     }
 
     if (cate_id) {
       searchQuery.body.query.bool.must.push({
         match: {
-          category: cate_id
-        }
+          category: cate_id,
+        },
       });
     }
 
     if (searchQuery.body.query.bool.must.length === 0) {
-      delete searchQuery.body.query.bool.must; 
+      delete searchQuery.body.query.bool.must;
     }
     try {
-      const { body } = await this.elasticsearchService.search('goods_index', JSON.stringify(searchQuery.body, null, 2));
+      const { body } = await this.elasticsearchService.search(
+        'goods_index',
+        JSON.stringify(searchQuery.body, null, 2),
+      );
 
       //const data = await query.getMany();
-  
+
       if (!body.hits.hits.length) {
         const error = new NotFoundException('데이터를 찾을 수 없습니다.');
         logger.errorLogger(error, `g_name=${g_name}, cate_id=${cate_id}`);
@@ -149,19 +179,33 @@ export class GoodsService {
       if (_.isNil(cate_id) && _.isNil(g_name)) {
         await this.redisService
           .getClient()
-          .set('goods-findAll', JSON.stringify(body.hits.hits.map(hit => hit._source)), 'EX', 20);
+          .set(
+            'goods-findAll',
+            JSON.stringify(body.hits.hits.map((hit) => hit._source)),
+            'EX',
+            20,
+          );
       } else if (cate_id) {
         await this.redisService
           .getClient()
-          .set(`cate_id = ${cate_id}`, JSON.stringify(body.hits.hits.map(hit => hit._source)), 'EX', 60);
+          .set(
+            `cate_id = ${cate_id}`,
+            JSON.stringify(body.hits.hits.map((hit) => hit._source)),
+            'EX',
+            60,
+          );
       }
 
-      return body.hits.hits.map(hit => hit._source);
+      return {
+        total: body.hits.total.value, // 총 문서 수
+        results: body.hits.hits.map((hit) => hit._source), // 페이지에 해당하는 문서들
+        page,
+        pageSize,
+      };
     } catch (error) {
       console.error('오픈 서치 연결 실패:', error.message);
       throw new InternalServerErrorException('상품 명단 조회에 실패했습니다.');
     }
-
   }
 
   /**

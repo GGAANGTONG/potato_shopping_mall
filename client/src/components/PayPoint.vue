@@ -7,9 +7,8 @@
   </div>
 </template>
 
-
-<<<<<<< HEAD
-=======
+<script>
+import axios from 'axios';
 export default {
   name: 'PayPoint',
   data() {
@@ -31,7 +30,7 @@ export default {
           {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `BPearer ${token}`, 
+            Authorization: `Bearer ${token}`, 
           },
           withCredentials: true,
         });
@@ -46,4 +45,3 @@ export default {
   }
 };
 </script>
->>>>>>> bab92eecb717ca3312d44ba9a0d00b13c0a071ed
