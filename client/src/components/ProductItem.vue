@@ -74,19 +74,10 @@ export default {
     },
     async addToCart() {
       try {
-        let token = document.cookie
-          .split('; ')
-          .find((row) => row.startsWith('accessToken='))
-          .split('=')[1];
         const apiUrl = `${process.env.VUE_APP_API_URL}/api/cart/add/${this.goodsId}`;
         const response = await axios.post(
           apiUrl,
           { ctCount: this.ctCount },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
         );
         // 응답 처리
         if (response.status === 201) {
