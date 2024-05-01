@@ -11,6 +11,7 @@ import UserProfile from '../components/UserProfile.vue';
 import OrderShipping from '../components/OrderShipping.vue';
 import PayPoint from '../components/PayPoint.vue';
 import AdminPage from '../components/AdminPage.vue';
+import OrderManagement from '../components/OrderManagement.vue';
 
 const routes = [
   {
@@ -69,6 +70,11 @@ const routes = [
     path: '/order-shipping',
     name: 'OrderShipping',
     component: OrderShipping,
+  },
+  {
+    path: '/admin/orders',
+    name: 'OrderManagement',
+    component: OrderManagement,
   },
   {
     path: '/payPoint',

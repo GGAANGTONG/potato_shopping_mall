@@ -1,6 +1,6 @@
 <template>
   <div class="user-profile">
-    <h1>유저 프로필</h1>
+    <h1 class="f-Gugi">유저 프로필</h1>
     <div class="profile-info">
       <div class="profile-image">
         <img
