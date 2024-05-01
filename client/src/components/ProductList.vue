@@ -1,17 +1,17 @@
 <template>
   <SearchBar @search="handleSearch"></SearchBar>
   <div class="fix-layout">
-    <h1>상품 목록</h1>
+    <h1 class="f-Gugi">상품 목록</h1>
     <ul class="product-list">
       <li v-for="good in goods" :key="good.id" @click="goToProductDetail(good.id)">
         <img :src="`${good.image}`" :alt="good.name">
         <!-- <img :src="`https://d3cfe6mqokky5s.cloudfront.net/${good.image}`" :alt="good.name"> -->
         <p class="g_name">{{ good.name }}</p>
         <p class="g_price">
-          <span class="g_discount_rate"> {{ good.discountRate }}%</span>
-          <span>{{ good.price }}</span>
+          <span class="g_discount_rate">{{ Math.floor((1-good.discountRate) * 100) }}%</span>
+          <span>{{ good.costPrice }}$</span>
         </p>
-        <p class="g_cost_price">{{ good.costPrice }}원</p>
+        <p class="g_discounted_price">{{ good.price }}$</p>
       </li>
       <template v-if="goods.length === 0">
         <p class="no-products-message">검색된 상품이 없습니다.</p>
@@ -128,7 +128,7 @@ export default {
 .product-list .g_discount_rate {
   margin-right: 10px;
 }
-.product-list .g_cost_price {
+.product-list .g_discounted_price {
   color: #af4646;
   font-size: 24px;
   font-weight: bold;

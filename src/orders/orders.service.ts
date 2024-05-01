@@ -208,23 +208,37 @@ export class OrdersService {
   }
 
   // 전체 주문 정보 확인
-  async findAllOrderbyAdmin(): Promise<Orders[]> {
-    try {
-      const orders = await this.ordersRepository
-        .createQueryBuilder('order')
-        .getMany();
+  async findAllOrderbyAdmin(
+    page: number = 1,
+    pageSize: number = 10,
+  ): Promise<Orders[]> {
+    const skip = (page - 1) * pageSize; // 현재 페이지의 첫 번째 항목의 인덱스 계산
 
-      if (!orders || orders.length === 0) {
+    try {
+      const [orders, total] = await this.ordersRepository
+        .createQueryBuilder('order')
+        .skip(skip) // 몇 개의 항목을 건너뛸지 지정
+        .take(pageSize) // 반환할 최대 항목 수
+        .getManyAndCount();
+
+      if (!orders.length) {
         const error = new NotFoundException('주문 정보가 없습니다.');
-        logger.errorLogger(error, `orders = ${orders}`);
+        logger.errorLogger(
+          error,
+          `Page: ${page}, PageSize: ${pageSize}, Orders: ${orders}`,
+        );
         throw error;
       }
+
+      console.log(
+        `Total orders: ${total}, Page: ${page}, Returned: ${orders.length}`,
+      );
       return orders;
     } catch (error) {
       const fatalError = new InternalServerErrorException(
         '알 수 없는 에러가 발생했습니다.',
       );
-      logger.fatalLogger(fatalError, `parameter = none`);
+      logger.fatalLogger(fatalError, `Page: ${page}, PageSize: ${pageSize}`);
       throw fatalError;
     }
   }
@@ -246,7 +260,7 @@ export class OrdersService {
               Left join tosshistory t
               on t.orders_id  = o.id
               WHERE o.id = ${+orderId}`);
-      console.log('구웃밥', order)
+      console.log('구웃밥', order);
       if (!order) {
         const error = new NotFoundException('주문 정보가 없습니다.');
         logger.errorLogger(error, `orderId = ${orderId}, order = ${order}`);
@@ -269,12 +283,11 @@ export class OrdersService {
       LEFT JOIN goods g
       ON o.goods_id = g.id
       WHERE o.orders_id = ${id}
-      `
-    )
-    console.log('구욱바압', data)
-    return data
+      `,
+    );
+    console.log('구욱바압', data);
+    return data;
   }
-
 
   // 주문 취소
   async cancelOrder(userId: number, orderId: number): Promise<Orders> {
@@ -364,7 +377,7 @@ export class OrdersService {
    */
   async getTodayOrdersCount(userId: number): Promise<number> {
     // 사용자의 role 확인
-    const user = await this.usersRepository.findOneBy({id :  +userId});
+    const user = await this.usersRepository.findOneBy({ id: +userId });
     if (!user || user.role !== 1) {
       throw new UnauthorizedException('관리자만 접근할 수 있습니다.');
     }
@@ -374,11 +387,11 @@ export class OrdersService {
 
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
-    
+
     const count = await this.ordersRepository.count({
       where: {
-        created_at : Between(todayStart, todayEnd)
-      }
+        created_at: Between(todayStart, todayEnd),
+      },
     });
     return count;
   }

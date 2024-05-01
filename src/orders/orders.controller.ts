@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   Req,
   Request,
   UseGuards,
@@ -53,9 +54,12 @@ export class OrdersController {
   // 주문 정보 전체 조회
   @UseGuards(AuthGuard('jwt'))
   @Get('admin')
-  async findAllOrderByAdmin() {
+  async findAllOrderByAdmin(
+    @Query('page') page: number = 1, 
+    @Query('pageSize') pageSize: number = 10
+  ) {
     logger.traceLogger('Orders - findAllOrderByUser', `parameter = none`);
-    return this.ordersService.findAllOrderbyAdmin();
+    return this.ordersService.findAllOrderbyAdmin(page, pageSize);
   }
 
   @UseGuards(AuthGuard('jwt'))
