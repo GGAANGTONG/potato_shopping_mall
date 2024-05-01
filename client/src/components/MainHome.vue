@@ -1,13 +1,7 @@
 <template>
-  <div>
+  <div class="main-layout">
     <nav>
-      
       <CategoryMenu />
-      <div class="main-btn">
-        <button class="kakaobtn" @click="kakaoLogin()">카카오 로그인</button>
-        <UserProfileBtn />
-        <ShoppingCartBtn />
-      </div>
     </nav>
     <ProductList />
   </div>
@@ -15,16 +9,12 @@
 
 <script>
 import CategoryMenu from './CategoryMenu.vue';
-import UserProfileBtn from './UserProfileBtn.vue';
-import ShoppingCartBtn from './ShoppingCartBtn.vue';
 import ProductList from './ProductList.vue';
 
 export default {
   name: 'MainHome',
   components: {
     CategoryMenu,
-    UserProfileBtn,
-    ShoppingCartBtn,
     ProductList,
   },
   methods: {

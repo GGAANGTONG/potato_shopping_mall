@@ -1,6 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Gugi&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gugi&family=Noto+Sans+KR:wght@100..900&display=swap');
+
+* {
+  transition: .1s all ease-in-out;
+}
 .fix-layout {
   max-width: 1000px;
   min-height: 400px;
+}
+.main-layout { 
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 table,
 th,
@@ -19,23 +32,24 @@ table.default td {
   padding: 10px;
   box-sizing: border-box;
 }
+a {
+  text-decoration: none;
+  color: #333;
+}
 
+/*
+* 폰트
+*/
+* {
+  font-family: "Noto Sans KR", sans-serif;
+}
+.f-Gugi {
+  font-family: "Gugi", sans-serif !important;
+}
 
 /****
 * 메인 버튼
 ****/
-.main-btn {
-  padding: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.kakaobtn{
-  padding: 10px;
-  border: 0px;
-  background: #fff957;
-}
 
 
 /****
@@ -50,4 +64,13 @@ button.blue {
 }
 button.blue:hover {
   background-color: #007B9E;
+}
+
+.pagination {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  margin: 0 5px;
 }
