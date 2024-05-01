@@ -1,7 +1,8 @@
 <template>
   <div class="product-detail" v-if="good.length > 0">
+    <!-- :src="`https://d3cfe6mqokky5s.cloudfront.net/${good[0].image}`" -->
     <img
-      :src="`https://d3cfe6mqokky5s.cloudfront.net/${good[0].image}`"
+    :src="`${good[0].image}`"
       :alt="good[0].name"
       class="product-image"
     />
@@ -9,11 +10,11 @@
       <h3>{{ good[0].name }}</h3>
       <p v-if="good[0].discountRate">
         <span class="original-price">{{ good[0].costPrice }}</span>
-        <span class="discounted-price">{{ discountedPrice }}</span>
-        <span class="discount-rate">({{ good[0].discountRate }}% 할인)</span>
+        <span class="discounted-price">{{ good[0].price }}</span>
+        <span class="discount-rate">({{ Math.floor( (1- good[0].discountRate) * 100) }}% 할인)</span>
       </p>
       <p v-else>
-        {{ good[0].price }}
+        {{ good[0].price }} $
       </p>
       <p>{{ good[0].description }}</p>
       <p>{{ good[0].option }}</p>

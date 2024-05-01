@@ -74,3 +74,19 @@ button.blue:hover {
 .pagination button {
   margin: 0 5px;
 }
+
+/********
+* INPUT
+*********/
+input {
+  color: #333;
+  border-width: 0;
+  border-bottom:1px solid #ccc ;
+}
+input:focus {
+  outline: none;
+}
+
+button {
+  border: 1px solid #ccc;
+}
