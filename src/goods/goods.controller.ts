@@ -63,6 +63,14 @@ export class GoodsController {
   findOne(@Param('id') id: number) {
     return this.goodsService.findOne(+id);
   }
+  /**
+   * 특가상품 조회
+   * @returns
+   */
+  @Get('get-highest-discount')
+  findHighestDiscountedProduct() {
+    return this.goodsService.findHighestDiscountedProduct();
+  }
 
   @Get('get-one-stocks/:id')
   findOneWithTotalStock(@Param('id') id: number) {
