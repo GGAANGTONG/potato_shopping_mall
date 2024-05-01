@@ -8,7 +8,7 @@ export class TossController {
     private readonly tossService: TossService,
   ) {}
 
-  @Post('confirm')
+  @Post('/confirm')
   async confirmPayment(@Body() body: { paymentKey: string, orderId: string, amount: number }) {
     try {
       const response = await this.tossService.confirmPayment(body);
@@ -34,7 +34,14 @@ export class TossController {
   //   return {title: 'Success Page'}
   // }
 
-  @Get('fail')
+  // @Get('success')
+  // @Render('success')
+  // sendSuccessPage() {
+
+  //   return {title: 'Success Page'}
+  // }
+
+  @Get('/fail')
   sendFailPage(@Res() res: Response) {
     return { url: join(process.cwd(), 'fail.html') };
   }

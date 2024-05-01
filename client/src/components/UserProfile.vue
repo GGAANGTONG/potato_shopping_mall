@@ -39,6 +39,7 @@
           {{ userProfile.data.address }}
           {{ userProfile.data.detail_address }}
         </p>
+        <button @click="stockManagementBtn">재고 관리 페이지</button>
       </div>
     </div>
   </div>
@@ -85,6 +86,9 @@ export default {
     goToAdminPage() {
       this.$router.push('/admin');
     },
+    stockManagementBtn() {
+      this.$router.push('/manage-goods');
+    }
   },
   created() {
     this.fetchUserProfile();

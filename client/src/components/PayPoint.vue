@@ -7,9 +7,9 @@
   </div>
 </template>
 
-<script>
-import axios from 'axios';
 
+<<<<<<< HEAD
+=======
 export default {
   name: 'PayPoint',
   data() {
@@ -46,3 +46,4 @@ export default {
   }
 };
 </script>
+>>>>>>> bab92eecb717ca3312d44ba9a0d00b13c0a071ed
