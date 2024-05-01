@@ -125,8 +125,8 @@ export default {
         await paymentWidget.requestPayment({
           orderId: `${orderId}`,
           orderName: `${orderName}`,
-          successUrl: 'http://potato-shop.shop/payments/payCashValidationSuccess',
-          failUrl: 'http://potato-shop.shop/api/fail',
+          successUrl: `${process.env.VUE_APP_CLIENT_URL}/payments/payCashValidationSuccess`,
+          failUrl: `${process.env.VUE_APP_API_URL}/api/fail`,
         });
       });
     },

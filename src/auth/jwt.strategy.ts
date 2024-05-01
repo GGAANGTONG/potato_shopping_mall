@@ -26,10 +26,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
   private static extractJWT(req: RequestType): string | null {
-    console.log('국밥철도999', req.cookies)
     // const { authorization } = req.cookies;
     const {accessToken} = req.cookies;
-        console.log('국밥55', accessToken);
     if (accessToken) {
       const [tokenType, token] = accessToken.split(' ');
       if (tokenType !== 'Bearer')

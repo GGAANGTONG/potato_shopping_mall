@@ -1,5 +1,5 @@
 import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { PayMethod } from "../types/payments.type";
 import { Orders } from "../../orders/entities/orders.entity";
 import { UpdateCommentDto } from "src/boards/dto/update-comment.dto";
@@ -18,9 +18,17 @@ export class TossHistory {
     @Column({ unsigned: true })
     orders_id: number;
 
-    @IsNumber()
+    @IsString()
     @Column()
     toss_orders_id: string;
+
+    @IsString()
+    @Column({nullable: true})
+    toss_transaction_key: string;
+
+    @IsString()
+    @Column({nullable: true})
+    toss_payment_key: string;
 
     @IsNumber()
     @IsNotEmpty()
@@ -44,7 +52,7 @@ export class TossHistory {
     @UpdateDateColumn()
     updated_at: Date;
 
-    @OneToOne(() => Orders, (orders) => orders.payments)
+    @ManyToOne(() => Orders, (orders) => orders.payments)
     @JoinColumn({ name: 'orders_id', referencedColumnName: 'id' })
     orders: Orders;
 
