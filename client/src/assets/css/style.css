@@ -73,6 +73,8 @@ button.blue:hover {
 
 .pagination button {
   margin: 0 5px;
+  background: transparent;
+  border: 1px solid #ccc;
 }
 
 /********
