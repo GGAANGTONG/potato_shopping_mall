@@ -74,10 +74,20 @@ export default {
     },
     async addToCart() {
       try {
+        let encodedToken = document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('accessToken='))
+          .split('=')[1];
+        let token = decodeURIComponent(encodedToken);
         const apiUrl = `${process.env.VUE_APP_API_URL}/api/cart/add/${this.goodsId}`;
         const response = await axios.post(
           apiUrl,
           { ctCount: this.ctCount },
+          {
+            headers: {
+              Authorization: `${token}`,
+            },
+          },
         );
         // 응답 처리
         if (response.status === 201) {
