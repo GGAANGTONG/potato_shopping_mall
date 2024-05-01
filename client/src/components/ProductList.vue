@@ -41,7 +41,9 @@ export default {
       goods: [],
       currentPage: 1,
       pageSize: 10,
-      total: 0
+      total: 0,
+      category : '',
+      g_name : '',
     };
   },
   created() {
@@ -53,18 +55,19 @@ export default {
   methods: {
     handleSearch(searchQuery) {
       console.log("검색어 수신:", searchQuery);
-      this.fetchGoods(1, searchQuery, this.selectedCategory ? this.selectedCategory.id : '');
+      this.g_name = searchQuery;
+      this.fetchGoods(1, searchQuery || this.g_name, this.selectedCategory ? this.selectedCategory.id : '');
     },
     async fetchGoods(page = this.currentPage, g_name = '', category = '') {
       const params = new URLSearchParams({
         page,
         pageSize: this.pageSize,
-        g_name: g_name || '',
-        cate_id: category || '',
+        g_name: g_name || this.g_name,
+        cate_id: category || this.category,
       });
       try {
+
         const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-        console.log(`${apiUrl}/api/goods/?${params.toString()}`);
         const response = await axios.get(`${apiUrl}/api/goods/?${params.toString()}`);
         if (response.data && response.data.results) {
           this.goods = response.data.results;
@@ -96,6 +99,7 @@ export default {
   watch: {
     selectedCategory(newVal) {
       this.fetchGoods(1, '', newVal ? newVal.id : '');
+      this.category = newVal.id;
     },
   },
 };

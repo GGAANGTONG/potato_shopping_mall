@@ -106,32 +106,10 @@ export class GoodsService {
       }
     }
 
-    if (!_.isNil(cate_id) && _.isNil(g_name)) {
-      // 카테고리 ID와 페이지 번호를 포함하는 캐시 키 사용
-      const cacheKey = `cate_id=${cate_id}_page=${page}_size=${pageSize}`;
-      const data = await this.redisService.getClient().get(cacheKey);
-
-      if (!_.isNil(data)) {
-        try {
-          return JSON.parse(data);
-        } catch (parseError) {
-          console.error('Error parsing cached data:', parseError);
-          // 캐시 데이터 파싱 실패 시 로직 처리 필요
-        }
-      }
-    } else if (_.isNil(g_name) && _.isNil(cate_id)) {
-      const cacheKey = `goods-findAll_page=${page}`;
-      const getCachedData = await this.redisService.getClient().get(cacheKey);
-
-      if (!_.isNil(getCachedData)) {
-        return JSON.parse(getCachedData);
-      }
-    }
-
     let searchQuery = {
       index: 'goods_index',
       size: pageSize,
-      from: from,
+      from: (page - 1) * pageSize, 
       body: {
         query: {
           bool: {
@@ -140,8 +118,6 @@ export class GoodsService {
         },
       },
     };
-
-    console.log(searchQuery);
 
     if (g_name) {
       searchQuery.body.query.bool.must.push({
@@ -166,7 +142,10 @@ export class GoodsService {
       const { body } = await this.elasticsearchService.search(
         'goods_index',
         JSON.stringify(searchQuery.body, null, 2),
+        searchQuery.size,
+        searchQuery.from
       );
+      console.log(JSON.stringify(searchQuery.size))
 
       //const data = await query.getMany();
 
@@ -198,7 +177,7 @@ export class GoodsService {
 
       return {
         total: body.hits.total.value, // 총 문서 수
-        results: body.hits.hits.map((hit) => hit._source), // 페이지에 해당하는 문서들
+        results: body.hits.hits.map((hit) => hit._source),
         page,
         pageSize,
       };
