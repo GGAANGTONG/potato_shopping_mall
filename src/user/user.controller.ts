@@ -164,8 +164,7 @@ async kakaoCallbacks (
 
   await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken);
   res.cookie('accessToken', `Bearer ${accessToken}`, {
-    domain: process.env.CLIENT_HOST,
-    path: '/',
+    domain: 'potato-shop.shop',
   })
   console.log('카카오 로그인', accessToken);
   console.log('도메인: '+process.env.CLIENT_HOST);
