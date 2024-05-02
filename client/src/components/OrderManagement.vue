@@ -58,7 +58,7 @@ export default {
         let token = decodeURIComponent(encodedToken);
         const apiUrl = `${process.env.VUE_APP_API_URL}/api/orders/admin?page=${this.currentPage}&pageSize=${this.pageSize}`;
         const response = await axios.get(apiUrl, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `${token}` },
         });
         this.orders = response.data[0];
         this.totalOrders = response.data[1];
