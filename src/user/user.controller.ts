@@ -163,8 +163,7 @@ export class UserController {
 
       res.cookie('accessToken', `Bearer ${accessToken}`,{
         path: '/',
-        secure: false,  // HTTP 환경에서는 false로 설정
-        httpOnly: true,  // 클라이언트 측 스크립트에서 쿠키를 읽을 수 없음
+        secure: false,  
         sameSite: 'Lax'
       });
       return res.redirect('http://localhost:3000/');
@@ -186,6 +185,8 @@ export class UserController {
       .set(`refreshToken for ${user.id}`, refreshToken);
     res.cookie('accessToken', `Bearer ${accessToken}`,{
       path: '/',
+      secure: false,  
+      sameSite: 'Lax'
     });
     console.log('카카오 로그인', accessToken);
     console.log('도메인: ' + process.env.CLIENT_HOST);
