@@ -99,7 +99,7 @@ export default {
       try {
         const orderId = 100622;
         const token =
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjk5MzE4LCJpYXQiOjE3MTQyOTkyODgsImV4cCI6MTc1NzQ5OTI4OH0.J31KF96C-EnnIel6p9iX2K7k7ujggDRFvxrephRRK-k';
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjk5MzE4LCJpYXQiOjE3MTQ1NzQwNDksImV4cCI6MTc1Nzc3NDA0OX0.nRyzu2UQg1o-NkNCEeep4-5T5eomUITOZ4kbC1J1W78';
         const response = await axios.get(
           `${process.env.VUE_APP_API_URL}/api/orders/${orderId}`,
           {

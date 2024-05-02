@@ -23,16 +23,18 @@ export default {
       console.log('국밥', cookie);
       const orders_id = this.orders_id;
       const token =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjk5MzE4LCJpYXQiOjE3MTQyOTkyODgsImV4cCI6MTc1NzQ5OTI4OH0.J31KF96C-EnnIel6p9iX2K7k7ujggDRFvxrephRRK-k';
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjk5MzE4LCJpYXQiOjE3MTQ1NzQwNDksImV4cCI6MTc1Nzc3NDA0OX0.nRyzu2UQg1o-NkNCEeep4-5T5eomUITOZ4kbC1J1W78';
+      const decodedToken = (decodeURIComponent(`Bearer ${token}`));
       const response = await axios.post(
         `${process.env.VUE_APP_API_URL}/api/payments/payCash`,
         {
           orders_id: +orders_id,
+          PayMethod : "Cash"
         },
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`, 
+            Authorization: decodedToken,
           },
           withCredentials: true,
         },
