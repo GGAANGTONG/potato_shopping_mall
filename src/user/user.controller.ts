@@ -161,7 +161,12 @@ export class UserController {
         .set(`refreshToken for ${user.id}`, refreshToken);
       console.log('토큰 발급', accessToken);
 
-      res.cookie('accessToken', `Bearer ${accessToken}`);
+      res.cookie('accessToken', `Bearer ${accessToken}`,{
+        path: '/',
+        secure: false,  // HTTP 환경에서는 false로 설정
+        httpOnly: true,  // 클라이언트 측 스크립트에서 쿠키를 읽을 수 없음
+        sameSite: 'Lax'
+      });
       return res.redirect('http://localhost:3000/');
     }
 
@@ -179,7 +184,9 @@ export class UserController {
     await this.redisService
       .getClient()
       .set(`refreshToken for ${user.id}`, refreshToken);
-    res.cookie('accessToken', `Bearer ${accessToken}`);
+    res.cookie('accessToken', `Bearer ${accessToken}`,{
+      path: '/',
+    });
     console.log('카카오 로그인', accessToken);
     console.log('도메인: ' + process.env.CLIENT_HOST);
     return res.redirect(301, `http://${process.env.CLIENT_HOST}`);
