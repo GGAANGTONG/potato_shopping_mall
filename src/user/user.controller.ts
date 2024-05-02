@@ -145,7 +145,12 @@ async kakaoCallbacks (
 
   await this.redisService.getClient().set(`refreshToken for ${user.id}`, refreshToken)
   console.log('토큰 발급', accessToken)
-  res.cookie('accessToken', `Bearer ${accessToken}`)
+  res.cookie('accessToken', `Bearer ${accessToken}`, {
+    domain: 'potato-shop.shop',
+    path: '/',
+    secure: false,
+    sameSite : 'None'
+  })
   return res.redirect('http://potato-shop.shop/')
   }
 
@@ -211,7 +216,12 @@ async kakaoCallbacks (
   const token = this.userService.extractTokenFromHeader(rawToken, true);
   const newAccessToken = this.userService.rotateToken(token);
 
-  res.cookie('accessToken', newAccessToken)
+  res.cookie('accessToken', `newAccessToken`, {
+    domain: 'potato-shop.shop',
+    path: '/',
+    secure: false,
+    sameSite : 'None'
+  })
   return {
     message: '토큰이 재발급 되었습니다.',
     accessToken: newAccessToken,
