@@ -1,1 +1,7 @@
-[제목 없는 디자인.pdf](https://github.com/GGAANGTONG/potato_shopping_mall/files/15302129/default.pdf)
+![1](https://github.com/GGAANGTONG/potato_shopping_mall/assets/152866085/eb4d70a4-5b46-4ea0-9fc5-cc97063480c1)
+![2](https://github.com/GGAANGTONG/potato_shopping_mall/assets/152866085/218f2b31-23b8-4745-a782-dd638dcef850)
+![3](https://github.com/GGAANGTONG/potato_shopping_mall/assets/152866085/94c7ce4a-90a0-482a-8f48-bf020d1d0bf4)
+![4](https://github.com/GGAANGTONG/potato_shopping_mall/assets/152866085/189f13b0-23b6-4bdb-8f6b-eba8640a4efc)
+![5](https://github.com/GGAANGTONG/potato_shopping_mall/assets/152866085/64fd1726-25ec-4673-b268-6b1036b877f9)
+![6](https://github.com/GGAANGTONG/potato_shopping_mall/assets/152866085/d6ca0285-b523-403e-b665-6bd371b742de)
+![7](https://github.com/GGAANGTONG/potato_shopping_mall/assets/152866085/f75c2930-ce68-4d8e-97b6-5c996000259b)
